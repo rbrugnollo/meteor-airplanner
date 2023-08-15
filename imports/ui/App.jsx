@@ -1,6 +1,7 @@
 import React from "react";
 import MainLayout from "./layouts/main/MainLayout";
-import { ChakraProvider, extendTheme, Heading } from "@chakra-ui/react";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import LoginForm from "./login/LoginForm";
 
 const theme = extendTheme({});
 
@@ -9,7 +10,7 @@ export const App = () => {
     <>
       <ChakraProvider theme={theme}>
         <MainLayout>
-          <Heading as="h1">Welcome to Meteor!</Heading>
+          <LoginForm />
         </MainLayout>
       </ChakraProvider>
     </>
