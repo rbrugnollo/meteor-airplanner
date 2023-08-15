@@ -1,16 +1,17 @@
-import React from 'react';
+import React from "react";
 import Header from "./header/Header";
 import Sidebar from "./sidebar/Sidebar";
 import { Box, Drawer, DrawerContent, useDisclosure } from "@chakra-ui/react";
 
-export default function Layout({ children }) {
+interface MainLayoutProps {
+  children?: React.ReactNode;
+}
+
+const MainLayout = ({ children }: MainLayoutProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <Box minH="100vh" bg="gray.100">
-      <Sidebar
-        onClose={() => onClose}
-        display={{ base: "none", md: "block" }}
-      />
+      <Sidebar onClose={onClose} display={{ base: "none", md: "block" }} />
       <Drawer
         autoFocus={false}
         isOpen={isOpen}
@@ -32,4 +33,6 @@ export default function Layout({ children }) {
       </Box>
     </Box>
   );
-}
+};
+
+export default MainLayout;
