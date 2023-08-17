@@ -12,12 +12,14 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface LoginFormData {
   email: string;
   password: string;
 }
+
+import React from "react";
 
 const LoginForm = () => {
   const {

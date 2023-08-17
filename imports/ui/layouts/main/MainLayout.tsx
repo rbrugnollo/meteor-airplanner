@@ -2,12 +2,9 @@ import React from "react";
 import Header from "./header/Header";
 import Sidebar from "./sidebar/Sidebar";
 import { Box, Drawer, DrawerContent, useDisclosure } from "@chakra-ui/react";
+import { Outlet } from "react-router-dom";
 
-interface MainLayoutProps {
-  children?: React.ReactNode;
-}
-
-const MainLayout = ({ children }: MainLayoutProps) => {
+const MainLayout = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <Box minH="100vh" bg="gray.100">
@@ -29,7 +26,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Header */}
       <Header onOpen={onOpen} />
       <Box ml={{ base: 0, md: 60 }} p="4">
-        {children}
+        <Outlet />
       </Box>
     </Box>
   );

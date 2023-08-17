@@ -1,7 +1,7 @@
 import React from "react";
 import MainLayout from "./layouts/main/MainLayout";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import LoginForm from "./login/LoginForm";
+import { Outlet } from "react-router-dom";
 
 const theme = extendTheme({});
 
@@ -9,9 +9,7 @@ export const App = () => {
   return (
     <>
       <ChakraProvider theme={theme}>
-        <MainLayout>
-          <LoginForm />
-        </MainLayout>
+          <Outlet />
       </ChakraProvider>
     </>
   );
