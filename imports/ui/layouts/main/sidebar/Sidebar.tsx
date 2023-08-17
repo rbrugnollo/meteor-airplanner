@@ -2,21 +2,23 @@ import React, { useEffect } from "react";
 import { Property } from "csstype";
 import { Box, CloseButton, Flex, Text } from "@chakra-ui/react";
 import {
-  FiHome,
-  FiTrendingUp,
-  FiCompass,
-  FiStar,
-  FiSettings,
-} from "react-icons/fi";
+  FaHouse,
+  FaPlane,
+  FaUsers,
+  FaUserTie,
+  FaCalendarDays,
+  FaGear,
+} from "react-icons/fa6";
 import NavLink, { Link } from "./NavLink";
 import { Token } from "@chakra-ui/styled-system/dist/declarations/src/utils";
 
 const LinkItems: Link[] = [
-  { label: "Home", icon: FiHome, href: "/" },
-  { label: "Trending", icon: FiTrendingUp, href: "/" },
-  { label: "Explore", icon: FiCompass, href: "/" },
-  { label: "Favourites", icon: FiStar, href: "/" },
-  { label: "Settings", icon: FiSettings, href: "/" },
+  { label: "Home", icon: FaHouse, href: "/app" },
+  { label: "Schedule", icon: FaCalendarDays, href: "schedule" },
+  { label: "Airplanes", icon: FaPlane, href: "airplanes" },
+  { label: "Pilots", icon: FaUserTie, href: "pilots" },
+  { label: "Passengers", icon: FaUsers, href: "passengers" },
+  { label: "Settings", icon: FaGear, href: "settings" },
 ];
 
 interface SidebarProps {

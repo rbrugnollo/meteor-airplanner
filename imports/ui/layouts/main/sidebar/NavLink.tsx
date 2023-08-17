@@ -1,6 +1,7 @@
 import React from "react";
 import { Flex, Icon, Text } from "@chakra-ui/react";
 import { IconType } from "react-icons";
+import { Link } from "react-router-dom";
 
 export interface Link {
   label: string;
@@ -13,7 +14,7 @@ export interface NavLinkProps {
 }
 
 const NavLink = ({ link }: NavLinkProps) => (
-  <a>
+  <Link to={link.href}>
     <Flex
       align="center"
       p="4"
@@ -38,7 +39,7 @@ const NavLink = ({ link }: NavLinkProps) => (
       )}
       <Text fontSize="1.2rem">{link.label}</Text>
     </Flex>
-  </a>
+  </Link>
 );
 
 export default NavLink;
