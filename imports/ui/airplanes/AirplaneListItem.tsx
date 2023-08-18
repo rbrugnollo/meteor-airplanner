@@ -3,6 +3,7 @@ import { Tr, Td, ButtonGroup, useToast } from "@chakra-ui/react";
 import AirplaneForm from "./AirplaneForm";
 import DeleteBtn from "../shared/deleteBtn/DeleteBtn";
 import EditBtn from "../shared/editBtn/EditBtn";
+import { Meteor } from "meteor/meteor";
 
 interface AirplaneViewModel {
   readonly _id: string;
@@ -17,6 +18,17 @@ interface AirplaneListItemProps {
 const AirplaneListItem = ({ airplane }: AirplaneListItemProps) => {
   const toast = useToast();
 
+  const handleRemove = () => {
+    Meteor.call("airplanes.remove", airplane._id, (error: any) => {
+      if (!error) {
+        toast({
+          description: `Airplane ${airplane.name} successfully deleted.`,
+          status: "success",
+        });
+      }
+    });
+  };
+
   return (
     <Tr>
       <Td>{airplane.name}</Td>
@@ -24,16 +36,12 @@ const AirplaneListItem = ({ airplane }: AirplaneListItemProps) => {
       <Td isNumeric>
         <ButtonGroup gap="2">
           <AirplaneForm
+            airplaneId={airplane._id}
             ActionButton={({ onOpen }) => <EditBtn onClick={onOpen} />}
           />
           <DeleteBtn
             title={`Delete Airplane ${airplane.name}`}
-            onConfirm={() => {
-              toast({
-                description: `Airplane ${airplane.name} successfully deleted.`,
-                status: "success",
-              });
-            }}
+            onConfirm={handleRemove}
           />
         </ButtonGroup>
       </Td>

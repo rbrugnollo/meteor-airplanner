@@ -13,9 +13,11 @@ import {
   DrawerBody,
   DrawerFooter,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { Meteor } from "meteor/meteor";
+import { AirplaneType } from "/imports/api/AirplanesCollection";
 
 interface AirplaneFormData {
   name: string;
@@ -31,27 +33,78 @@ interface AirplaneFormProps {
   readonly ActionButton: React.JSXElementConstructor<AirplaneFormActionButtonProps>;
 }
 
-const AirplaneForm = ({ ActionButton }: AirplaneFormProps) => {
+const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    reset,
+    setValue,
+    formState: { errors },
   } = useForm<AirplaneFormData>();
 
+  const toast = useToast();
+
   const handleFormSubmit = async (data: AirplaneFormData) => {
-    Meteor.call("airplanes.insert", data);
+    if (airplaneId) {
+      Meteor.call(
+        "airplanes.update",
+        { _id: airplaneId, ...data },
+        (error: any) => {
+          if (!error) {
+            toast({
+              description: `Airplane successfully updated.`,
+              status: "success",
+            });
+            handleClose();
+          }
+        }
+      );
+    } else {
+      Meteor.call("airplanes.insert", data, (error: any) => {
+        if (!error) {
+          toast({
+            description: `Airplane successfully saved.`,
+            status: "success",
+          });
+          handleClose();
+        }
+      });
+    }
   };
+
+  const handleOpen = () => {
+    onOpen();
+    if (airplaneId) {
+      Meteor.call(
+        "airplanes.getOne",
+        airplaneId,
+        (error: any, result: AirplaneType) => {
+          if (!error) {
+            setValue("name", result.name);
+            setValue("tailNumber", result.tailNumber);
+          }
+        }
+      );
+    }
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
+  const headerText = airplaneId ? "Edit Airplane" : "Add new Airplane";
 
   return (
     <>
-      <ActionButton onOpen={onOpen} />
-      <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
+      <ActionButton onOpen={handleOpen} />
+      <Drawer isOpen={isOpen} placement="right" onClose={handleClose} size="md">
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Add New Airplane</DrawerHeader>
+          <DrawerHeader>{headerText}</DrawerHeader>
           <DrawerBody>
             <form
               id="airplane-form"
@@ -87,7 +140,7 @@ const AirplaneForm = ({ ActionButton }: AirplaneFormProps) => {
             </form>
           </DrawerBody>
           <DrawerFooter>
-            <Button variant="outline" mr={3} onClick={onClose}>
+            <Button variant="outline" mr={3} onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" form="airplane-form" colorScheme="blue">
