@@ -30,6 +30,7 @@ const DeleteBtn = ({ title, message, onConfirm }: DeleteBtnProps) => {
     <>
       <Tooltip label="Delete">
         <IconButton
+          size={{ base: "sm", md: "md" }}
           aria-label="Delete"
           icon={<FaTrashCan />}
           colorScheme="red"

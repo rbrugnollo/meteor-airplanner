@@ -34,9 +34,8 @@ const AirplaneList = () => {
   return (
     <Flex width="full" align="center" justifyContent="center">
       <Box
-        p={8}
+        p={{ base: 4, md: 8 }}
         width="full"
-        height="full"
         borderWidth={1}
         borderRadius={8}
         bgColor="white"
@@ -62,8 +61,8 @@ const AirplaneList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer>
-          <Table variant="striped" colorScheme="teal">
+        <TableContainer whiteSpace="normal">
+          <Table size="sm" variant="striped" colorScheme="teal">
             <Thead>
               <Tr>
                 <Th>Name</Th>

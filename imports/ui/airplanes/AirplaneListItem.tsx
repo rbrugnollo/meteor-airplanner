@@ -34,13 +34,13 @@ const AirplaneListItem = ({ airplane }: AirplaneListItemProps) => {
       <Td>{airplane.name}</Td>
       <Td>{airplane.tailNumber}</Td>
       <Td isNumeric>
-        <ButtonGroup gap="2">
+        <ButtonGroup gap={{ base: 0, md: 1 }}>
           <AirplaneForm
             airplaneId={airplane._id}
             ActionButton={({ onOpen }) => <EditBtn onClick={onOpen} />}
           />
           <DeleteBtn
-            title={`Delete Airplane ${airplane.name}`}
+            title={`Delete Airplane ${airplane.name}?`}
             onConfirm={handleRemove}
           />
         </ButtonGroup>

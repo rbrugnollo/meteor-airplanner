@@ -9,6 +9,7 @@ interface EditBtnProps {
 const EditBtn = ({ onClick }: EditBtnProps) => (
   <Tooltip label="Edit">
     <IconButton
+      size={{ base: "sm", md: "md" }}
       aria-label="Edit"
       icon={<FaPenToSquare />}
       colorScheme="teal"
