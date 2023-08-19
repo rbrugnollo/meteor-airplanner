@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Property } from "csstype";
 import { Box, CloseButton, Flex, Text } from "@chakra-ui/react";
 import {

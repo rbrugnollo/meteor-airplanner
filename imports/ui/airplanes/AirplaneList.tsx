@@ -12,6 +12,7 @@ import {
   Spacer,
   ButtonGroup,
   Button,
+  Spinner,
 } from "@chakra-ui/react";
 import { AirplanesCollection } from "../../api/AirplanesCollection";
 import { useFind, useSubscribe } from "meteor/react-meteor-data";
@@ -31,11 +32,26 @@ const AirplaneList = () => {
     AirplanesCollection.find({})
   );
 
+  if (isLoading())
+    return (
+      <Spinner
+        thickness="4px"
+        speed="0.65s"
+        emptyColor="gray.200"
+        color="blue.500"
+        size="xl"
+      />
+    );
+
   return (
     <Flex width="full" align="center" justifyContent="center">
       <Box
         p={{ base: 4, md: 8 }}
         width="full"
+        minH={{
+          base: "calc(100vh - 6rem)",
+          md: "calc(100vh - 7rem)",
+        }}
         borderWidth={1}
         borderRadius={8}
         bgColor="white"
@@ -61,7 +77,7 @@ const AirplaneList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer whiteSpace="normal">
+        <TableContainer minH="full" whiteSpace="normal">
           <Table size="sm" variant="striped" colorScheme="teal">
             <Thead>
               <Tr>

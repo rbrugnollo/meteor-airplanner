@@ -40,54 +40,36 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
     register,
     handleSubmit,
     reset,
-    setValue,
-    formState: { errors },
-  } = useForm<AirplaneFormData>();
+    formState: { errors, isSubmitting, isLoading },
+  } = useForm<AirplaneFormData>({
+    defaultValues: async () => {
+      if (airplaneId) {
+        return await Meteor.callAsync("airplanes.getOne", airplaneId);
+      }
+      return {};
+    },
+  });
 
   const toast = useToast();
 
   const handleFormSubmit = async (data: AirplaneFormData) => {
     if (airplaneId) {
-      Meteor.call(
-        "airplanes.update",
-        { _id: airplaneId, ...data },
-        (error: any) => {
-          if (!error) {
-            toast({
-              description: `Airplane successfully updated.`,
-              status: "success",
-            });
-            handleClose();
-          }
-        }
-      );
+      await Meteor.callAsync("airplanes.update", {
+        _id: airplaneId,
+        ...data,
+      });
+      toast({
+        description: `Airplane successfully updated.`,
+        status: "success",
+      });
     } else {
-      Meteor.call("airplanes.insert", data, (error: any) => {
-        if (!error) {
-          toast({
-            description: `Airplane successfully saved.`,
-            status: "success",
-          });
-          handleClose();
-        }
+      await Meteor.call("airplanes.insert", data);
+      toast({
+        description: `Airplane successfully saved.`,
+        status: "success",
       });
     }
-  };
-
-  const handleOpen = () => {
-    onOpen();
-    if (airplaneId) {
-      Meteor.call(
-        "airplanes.getOne",
-        airplaneId,
-        (error: any, result: AirplaneType) => {
-          if (!error) {
-            setValue("name", result.name);
-            setValue("tailNumber", result.tailNumber);
-          }
-        }
-      );
-    }
+    handleClose();
   };
 
   const handleClose = () => {
@@ -99,7 +81,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
 
   return (
     <>
-      <ActionButton onOpen={handleOpen} />
+      <ActionButton onOpen={onOpen} />
       <Drawer isOpen={isOpen} placement="right" onClose={handleClose} size="md">
         <DrawerOverlay />
         <DrawerContent>
@@ -143,7 +125,12 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
             <Button variant="outline" mr={3} onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" form="airplane-form" colorScheme="blue">
+            <Button
+              isLoading={isLoading || isSubmitting}
+              type="submit"
+              form="airplane-form"
+              colorScheme="blue"
+            >
               Save
             </Button>
           </DrawerFooter>
