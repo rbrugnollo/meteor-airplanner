@@ -1,3 +1,5 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -10,7 +12,10 @@ import {
   InputGroup,
   InputRightElement,
   Icon,
+  useToast,
 } from "@chakra-ui/react";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { Meteor } from "meteor/meteor";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 
@@ -19,23 +24,29 @@ interface LoginFormData {
   password: string;
 }
 
-import React from "react";
-
 const LoginForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>();
-  const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const handlePasswordVisibility = () => setShowPassword(!showPassword);
-
   const handleFormSubmit = (data: LoginFormData) => {
-    console.log(data);
-    setIsLoading(true);
     setShowPassword(false);
-    setIsLoading(false);
+    Meteor.loginWithPassword(data.email, data.password, (error) => {
+      if (error) {
+        toast({
+          status: "error",
+          description: error.message,
+        });
+      } else {
+        navigate("/app");
+      }
+    });
   };
 
   return (
@@ -47,6 +58,7 @@ const LoginForm = () => {
         borderRadius={8}
         boxShadow="lg"
         bgColor="white"
+        mt={8}
       >
         <Box textAlign="center">
           <Heading>Login</Heading>
@@ -85,9 +97,9 @@ const LoginForm = () => {
                     onClick={handlePasswordVisibility}
                   >
                     {showPassword ? (
-                      <Icon name="view-off" />
+                      <Icon as={AiOutlineEye} />
                     ) : (
-                      <Icon name="view" />
+                      <Icon as={AiOutlineEyeInvisible} />
                     )}
                   </Button>
                 </InputRightElement>

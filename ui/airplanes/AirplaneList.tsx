@@ -19,12 +19,15 @@ import { useFind, useSubscribe } from "meteor/react-meteor-data";
 import AirplaneListItem from "./AirplaneListItem";
 import AirplaneForm from "./AirplaneForm";
 import { FaPlus } from "react-icons/fa6";
+import { RoleNames } from "/api/users/RoleNames";
 
 interface AirplaneViewModel {
   _id: string;
   name: string;
   tailNumber: string;
 }
+
+export const AirplaneListRoles = [RoleNames.ADMIN];
 
 const AirplaneList = () => {
   const isLoading = useSubscribe("airplanes.list");

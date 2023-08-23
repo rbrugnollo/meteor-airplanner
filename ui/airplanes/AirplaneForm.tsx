@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { Meteor } from "meteor/meteor";
-import { AirplaneType } from "/imports/api/AirplanesCollection";
+import { AirplaneType } from "../../api/AirplanesCollection";
 
 interface AirplaneFormData {
   name: string;

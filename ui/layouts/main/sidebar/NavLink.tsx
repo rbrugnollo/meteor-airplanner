@@ -7,6 +7,7 @@ export interface Link {
   label: string;
   href: string;
   icon: IconType;
+  roles?: string[];
 }
 
 export interface NavLinkProps {
