@@ -6,24 +6,17 @@ import { App } from "/ui/App";
 import LoginForm from "/ui/login/LoginForm";
 import UserList, { UserListRoles } from "/ui/users/UserList";
 import { Meteor } from "meteor/meteor";
-import { Roles } from "meteor/alanning:roles";
 import PasswordResetForm from "/ui/login/PasswordResetForm";
 import ForgotPasswordForm from "/ui/login/ForgotPasswordForm";
+import Authorized from "./Authorized";
 
-const loggedInOnly =
-  (inRoles: string[] = []) =>
-  () => {
-    const loggedUserId = Meteor.userId();
-    if (!loggedUserId) {
-      throw redirect("/login");
-    }
-    if (inRoles.length) {
-      if (!Roles.userIsInRole(loggedUserId, inRoles)) {
-        throw redirect("/app");
-      }
-    }
-    return null;
-  };
+const loggedInOnly = () => {
+  const loggedUserId = Meteor.userId();
+  if (!loggedUserId) {
+    throw redirect("/login");
+  }
+  return null;
+};
 
 const notLoggedInOnly = () => {
   const loggedUser = Meteor.userId();
@@ -56,17 +49,17 @@ const Router = createBrowserRouter([
       {
         path: "app",
         element: <MainLayout />,
-        loader: loggedInOnly(),
+        loader: loggedInOnly,
         children: [
           {
             path: "airplanes",
-            element: <AirplaneList />,
-            loader: loggedInOnly(AirplaneListRoles),
+            element: (
+              <Authorized Component={AirplaneList} roles={AirplaneListRoles} />
+            ),
           },
           {
             path: "users",
-            element: <UserList />,
-            loader: loggedInOnly(UserListRoles),
+            element: <Authorized Component={UserList} roles={UserListRoles} />,
           },
         ],
       },
