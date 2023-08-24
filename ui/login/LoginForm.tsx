@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link as ReactRouterLink, useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -13,6 +13,7 @@ import {
   InputRightElement,
   Icon,
   useToast,
+  Link as ChakraLink,
 } from "@chakra-ui/react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { Meteor } from "meteor/meteor";
@@ -117,6 +118,9 @@ const LoginForm = () => {
             >
               Sign In
             </Button>
+            <ChakraLink as={ReactRouterLink} to="/forgot">
+              Forgot Password?
+            </ChakraLink>
           </form>
         </Box>
       </Box>

@@ -7,6 +7,8 @@ import LoginForm from "/ui/login/LoginForm";
 import UserList, { UserListRoles } from "/ui/users/UserList";
 import { Meteor } from "meteor/meteor";
 import { Roles } from "meteor/alanning:roles";
+import PasswordResetForm from "/ui/login/PasswordResetForm";
+import ForgotPasswordForm from "/ui/login/ForgotPasswordForm";
 
 const loggedInOnly =
   (inRoles: string[] = []) =>
@@ -39,6 +41,16 @@ const Router = createBrowserRouter([
       {
         path: "login",
         element: <LoginForm />,
+        loader: notLoggedInOnly,
+      },
+      {
+        path: "forgot",
+        element: <ForgotPasswordForm />,
+        loader: notLoggedInOnly,
+      },
+      {
+        path: "password/:action/:token",
+        element: <PasswordResetForm />,
         loader: notLoggedInOnly,
       },
       {

@@ -20,8 +20,9 @@ Meteor.methods({
     const userId = await Accounts.createUserAsync({
       username: data.email,
       email: data.email,
-      profile: { name: data.name },
+      profile: { name: data.name, roles: data.roles },
     });
+    Roles.setUserRoles(userId, data.roles);
     Accounts.sendEnrollmentEmail(userId);
   },
   "users.update"(data: UpdateUserVm) {

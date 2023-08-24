@@ -54,9 +54,9 @@ const UserProfile = () => {
                 spacing="1px"
                 ml="2"
               >
-                <Text fontSize="lg">{loggedUser?.username}</Text>
+                <Text fontSize="lg">{loggedUser?.profile?.name}</Text>
                 <Text fontSize="md" color="gray.600">
-                  Admin, Secretary, Captain
+                  {loggedUser?.username}
                 </Text>
               </VStack>
               <Box display={{ base: "none", md: "flex" }}>
