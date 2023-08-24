@@ -33,7 +33,7 @@ Meteor.methods({
         name: updateData.name,
         roles: updateData.roles,
       },
-      "emails.$.address": updateData.email,
+      "emails.0.address": updateData.email,
     };
 
     Meteor.users.update({ _id: _id }, { $set: userProps });

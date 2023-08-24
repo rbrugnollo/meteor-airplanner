@@ -15,13 +15,19 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Meteor } from "meteor/meteor";
-import { AirplaneType } from "../../api/AirplanesCollection";
+import { useFind, useSubscribe } from "meteor/react-meteor-data";
+import { RoleNames } from "/api/users/RoleNames";
+import { Select } from "chakra-react-select";
 
 interface AirplaneFormData {
   name: string;
   tailNumber: string;
+  active: string;
+  captain: string;
+  firstOfficer: string;
+  manager: string;
 }
 
 interface AirplaneFormActionButtonProps {
@@ -35,11 +41,16 @@ interface AirplaneFormProps {
 
 const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const roles = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
+  const isSubLoading = useSubscribe("users.select", { roles });
+  const users: any[] = useFind(() =>
+    Meteor.users.find({ "profile.roles": { $in: roles } }, {})
+  );
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<AirplaneFormData>({
     defaultValues: async () => {
@@ -51,6 +62,10 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   });
 
   const toast = useToast();
+
+  if (!isSubLoading()) {
+    console.log(users);
+  }
 
   const handleFormSubmit = async (data: AirplaneFormData) => {
     if (airplaneId) {
@@ -119,6 +134,84 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                   {errors.tailNumber && errors.tailNumber.message}
                 </FormErrorMessage>
               </FormControl>
+              <Controller
+                control={control}
+                name="captain"
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6}>
+                    <FormLabel htmlFor="captain">Captain</FormLabel>
+                    <Select
+                      name={name}
+                      ref={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      options={
+                        users
+                          ?.filter((f) =>
+                            f.profile.roles?.includes(RoleNames.CAPTAIN)
+                          )
+                          .map((m) => ({
+                            label: m.profile.name,
+                            value: m.username,
+                          })) ?? []
+                      }
+                      placeholder="Captain"
+                      closeMenuOnSelect
+                    />
+                  </FormControl>
+                )}
+              />
+              <Controller
+                control={control}
+                name="firstOfficer"
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6}>
+                    <FormLabel htmlFor="firstOfficer">First Officer</FormLabel>
+                    <Select
+                      name={name}
+                      ref={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      options={
+                        users
+                          ?.filter((f) =>
+                            f.profile.roles?.includes(RoleNames.FIRST_OFFICER)
+                          )
+                          .map((m) => ({ label: m.profile.name, value: m })) ??
+                        []
+                      }
+                      placeholder="First Officer"
+                      closeMenuOnSelect
+                    />
+                  </FormControl>
+                )}
+              />
+              <Controller
+                control={control}
+                name="manager"
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6}>
+                    <FormLabel htmlFor="manager">Manager</FormLabel>
+                    <Select
+                      name={name}
+                      ref={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      options={
+                        users?.map((m) => ({
+                          label: m.profile.name,
+                          value: m,
+                        })) ?? []
+                      }
+                      placeholder="Manager"
+                      closeMenuOnSelect
+                    />
+                  </FormControl>
+                )}
+              />
             </form>
           </DrawerBody>
           <DrawerFooter>
