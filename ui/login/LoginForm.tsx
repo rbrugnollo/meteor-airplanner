@@ -118,9 +118,11 @@ const LoginForm = () => {
             >
               Sign In
             </Button>
-            <ChakraLink as={ReactRouterLink} to="/forgot">
-              Forgot Password?
-            </ChakraLink>
+            <Box textAlign="center" mt={1} fontSize="sm">
+              <ChakraLink as={ReactRouterLink} to="/forgot">
+                Forgot Password?
+              </ChakraLink>
+            </Box>
           </form>
         </Box>
       </Box>
