@@ -27,5 +27,3 @@ export type AirplaneType = {
 export const AirplanesCollection = new Mongo.Collection<AirplaneType>(
   COLLECTION_NAME
 );
-
-AirplanesCollection.attachSchema(AirplanesSchema);

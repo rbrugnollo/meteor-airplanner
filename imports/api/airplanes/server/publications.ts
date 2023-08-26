@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { AirplanesCollection } from "./AirplanesCollection";
+import { AirplanesCollection } from "../collection";
 
 Meteor.publish("airplanes.list", () => {
   return AirplanesCollection.find();

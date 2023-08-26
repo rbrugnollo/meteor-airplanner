@@ -14,12 +14,12 @@ import {
   Button,
   Spinner,
 } from "@chakra-ui/react";
-import { AirplanesCollection } from "../../api/airplanes/AirplanesCollection";
+import { AirplanesCollection } from "/imports/api/airplanes/collection";
 import { useFind, useSubscribe } from "meteor/react-meteor-data";
 import AirplaneListItem from "./AirplaneListItem";
 import AirplaneForm from "./AirplaneForm";
 import { FaPlus } from "react-icons/fa6";
-import { RoleNames } from "/api/users/RoleNames";
+import { RoleNames } from "/imports/api/users/collection";
 
 interface AirplaneViewModel {
   _id: string;

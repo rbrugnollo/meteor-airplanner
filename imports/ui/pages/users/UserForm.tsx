@@ -18,7 +18,7 @@ import {
 import { Select } from "chakra-react-select";
 import { useForm, Controller } from "react-hook-form";
 import { Meteor } from "meteor/meteor";
-import { RoleNames } from "/api/users/RoleNames";
+import { RoleNames } from "/imports/api/users/collection";
 
 interface UserFormData {
   name: string;

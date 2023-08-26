@@ -1,5 +1,5 @@
 import { Meteor } from "meteor/meteor";
-import { AirplanesCollection } from "./AirplanesCollection";
+import { AirplanesCollection } from "./collection";
 
 interface InsertAirplaneVm {
   readonly name: string;

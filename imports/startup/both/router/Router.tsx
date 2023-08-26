@@ -1,14 +1,16 @@
 import React from "react";
 import { createBrowserRouter, redirect } from "react-router-dom";
-import AirplaneList, { AirplaneListRoles } from "/ui/airplanes/AirplaneList";
-import MainLayout from "/ui/layouts/main/MainLayout";
-import { App } from "/ui/App";
-import LoginForm from "/ui/login/LoginForm";
-import UserList, { UserListRoles } from "/ui/users/UserList";
+import MainLayout from "/imports/ui/layouts/main/MainLayout";
+import { App } from "/imports/ui/App";
+import LoginForm from "/imports/ui/pages/login/LoginForm";
 import { Meteor } from "meteor/meteor";
-import PasswordResetForm from "/ui/login/PasswordResetForm";
-import ForgotPasswordForm from "/ui/login/ForgotPasswordForm";
+import PasswordResetForm from "/imports/ui/pages/login/PasswordResetForm";
+import ForgotPasswordForm from "/imports/ui/pages/login/ForgotPasswordForm";
 import Authorized from "./Authorized";
+import AirplaneList, {
+  AirplaneListRoles,
+} from "/imports/ui/pages/airplanes/AirplaneList";
+import UserList, { UserListRoles } from "/imports/ui/pages/users/UserList";
 
 const loggedInOnly = () => {
   const loggedUserId = Meteor.userId();

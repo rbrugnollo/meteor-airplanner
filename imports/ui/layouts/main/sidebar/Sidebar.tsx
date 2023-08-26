@@ -11,9 +11,9 @@ import {
 import { useLoggedUser } from "meteor/quave:logged-user-react";
 import NavLink, { Link } from "./NavLink";
 import { ResponsiveValue } from "@chakra-ui/styled-system/dist";
-import { UserListRoles } from "/ui/users/UserList";
-import { AirplaneListRoles } from "/ui/airplanes/AirplaneList";
 import { Roles } from "meteor/alanning:roles";
+import { AirplaneListRoles } from "/imports/ui/pages/airplanes/AirplaneList";
+import { UserListRoles } from "/imports/ui/pages/users/UserList";
 
 const LinkItems: Link[] = [
   { label: "Home", icon: FaHouse, href: "/app" },

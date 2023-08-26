@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { Tr, Td, ButtonGroup } from "@chakra-ui/react";
 import UserForm from "./UserForm";
-import EditBtn from "../shared/editBtn/EditBtn";
+import EditBtn from "../../shared/editBtn/EditBtn";
 
 interface UserViewModel {
   _id: string;

@@ -1,7 +1,7 @@
 import { Accounts } from "meteor/accounts-base";
 import { Roles } from "meteor/alanning:roles";
 import { Meteor } from "meteor/meteor";
-import { RoleNames } from "/api/users/RoleNames";
+import { RoleNames } from "/imports/api/users/collection";
 
 const DefaultAdmin = {
   username: "admin@admin.com",
@@ -11,11 +11,6 @@ const DefaultAdmin = {
     name: "Default Admin",
     roles: [RoleNames.ADMIN],
   },
-};
-
-export const RolesStartup = async () => {
-  CreateRoles();
-  await AddDefaultAdmin();
 };
 
 const CreateRoles = () => {
@@ -39,3 +34,8 @@ const AddDefaultAdmin = async () => {
     Roles.addUsersToRoles(userId, RoleNames.ADMIN);
   }
 };
+
+Meteor.startup(async () => {
+  CreateRoles();
+  await AddDefaultAdmin();
+});

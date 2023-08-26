@@ -18,8 +18,8 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { Meteor } from "meteor/meteor";
 import { useFind, useSubscribe } from "meteor/react-meteor-data";
-import { RoleNames } from "/api/users/RoleNames";
 import { Select } from "chakra-react-select";
+import { RoleNames } from "/imports/api/users/collection";
 
 interface AirplaneFormData {
   name: string;

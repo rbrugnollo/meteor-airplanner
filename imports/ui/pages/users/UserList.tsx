@@ -19,7 +19,7 @@ import UserListItem from "./UserListItem";
 import UserForm from "./UserForm";
 import { FaPlus } from "react-icons/fa6";
 import { Meteor } from "meteor/meteor";
-import { RoleNames } from "/api/users/RoleNames";
+import { RoleNames } from "/imports/api/users/collection";
 
 interface UserViewModel {
   _id: string;

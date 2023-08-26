@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { Tr, Td, ButtonGroup } from "@chakra-ui/react";
 import AirplaneForm from "./AirplaneForm";
-import EditBtn from "../shared/editBtn/EditBtn";
+import EditBtn from "../../shared/editBtn/EditBtn";
 
 interface AirplaneViewModel {
   readonly _id: string;

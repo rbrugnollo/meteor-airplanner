@@ -11,3 +11,11 @@ interface UsersSelectProps {
 Meteor.publish("users.select", ({ roles }: UsersSelectProps) => {
   return Meteor.users.find({ "profile.roles": { $in: roles } }, {});
 });
+
+Meteor.publish("roles.user", function () {
+  if (this.userId) {
+    return Meteor.roleAssignment.find({ "user._id": this.userId });
+  } else {
+    this.ready();
+  }
+});
