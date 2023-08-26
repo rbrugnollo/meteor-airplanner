@@ -1,6 +1,6 @@
 import { Meteor } from "meteor/meteor";
 import "./email";
-import "../api/AirplanesCollection";
+import "../api/airplanes/AirplanesCollection";
 import "../api/AirplanesMethods";
 import "../api/AirplanesPublications";
 import "../api/users/UsersMethods";

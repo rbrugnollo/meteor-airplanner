@@ -14,7 +14,7 @@ import {
   Button,
   Spinner,
 } from "@chakra-ui/react";
-import { AirplanesCollection } from "../../api/AirplanesCollection";
+import { AirplanesCollection } from "../../api/airplanes/AirplanesCollection";
 import { useFind, useSubscribe } from "meteor/react-meteor-data";
 import AirplaneListItem from "./AirplaneListItem";
 import AirplaneForm from "./AirplaneForm";
