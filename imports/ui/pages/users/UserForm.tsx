@@ -19,6 +19,9 @@ import { Select } from 'chakra-react-select';
 import { useForm, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
 import { RoleNames } from '/imports/api/users/collection';
+import { insert } from '/imports/api/users/methods/insert';
+import { update } from '/imports/api/users/methods/update';
+import { getOne } from '/imports/api/users/methods/getOne';
 
 interface UserFormData {
   name: string;
@@ -43,41 +46,15 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting, isLoading },
-  } = useForm<UserFormData>({
-    defaultValues: async () => {
-      if (userId) {
-        const user = await Meteor.callAsync('users.getOne', userId);
-        return {
-          name: user.profile.name,
-          email: user.emails[0].address,
-          roles: user.profile.roles?.map((m: string) => ({ label: m, value: m })) ?? [],
-        };
-      }
-      return {
-        name: '',
-        email: '',
-        roles: [],
-      };
-    },
-  });
+  } = useForm<UserFormData>();
 
   const toast = useToast();
 
-  const handleFormSubmit = async (data: UserFormData) => {
-    if (userId) {
-      console.log(data);
-      await Meteor.callAsync('users.update', {
-        _id: userId,
-        ...data,
-        roles: data.roles.map((m) => m.value),
-      });
-      toast({
-        description: 'User successfully updated.',
-        status: 'success',
-      });
-    } else {
-      await Meteor.callAsync('users.insert', {
+  const handleInsert = async (data: UserFormData) => {
+    try {
+      await insert({
         ...data,
         roles: data.roles.map((m) => m.value),
       });
@@ -85,8 +62,62 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
         description: 'User successfully created.',
         status: 'success',
       });
+      handleClose();
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Meteor.Error) {
+        toast({
+          description: e.message,
+          status: 'error',
+        });
+      }
     }
-    handleClose();
+  };
+
+  const handleUpdate = async (data: UserFormData) => {
+    try {
+      await update({
+        _id: userId!,
+        ...data,
+        roles: data.roles.map((m) => m.value),
+      });
+      toast({
+        description: 'User successfully updated.',
+        status: 'success',
+      });
+      handleClose();
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Meteor.Error) {
+        toast({
+          description: e.message,
+          status: 'error',
+        });
+      }
+    }
+  };
+
+  const handleFormSubmit = async (data: UserFormData) => {
+    if (userId) {
+      await handleUpdate(data);
+    } else {
+      await handleInsert(data);
+    }
+  };
+
+  const handleOpen = async () => {
+    setValue('name', '');
+    setValue('email', '');
+    setValue('roles', []);
+
+    onOpen();
+
+    if (userId) {
+      const user = await getOne({ _id: userId });
+      setValue('name', user?.profile?.name);
+      setValue('email', user?.emails?.[0].address || '');
+      setValue('roles', user?.profile?.roles?.map((m: string) => ({ label: m, value: m })) ?? []);
+    }
   };
 
   const handleClose = () => {
@@ -98,7 +129,7 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
 
   return (
     <>
-      <ActionButton onOpen={onOpen} />
+      <ActionButton onOpen={handleOpen} />
       <Drawer isOpen={isOpen} placement="right" onClose={handleClose} size="md">
         <DrawerOverlay />
         <DrawerContent>

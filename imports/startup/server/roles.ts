@@ -3,7 +3,7 @@ import { Roles } from 'meteor/alanning:roles';
 import { Meteor } from 'meteor/meteor';
 import { RoleNames } from '/imports/api/users/collection';
 
-const DefaultAdmin = {
+export const DefaultAdmin = {
   username: 'admin@admin.com',
   email: 'admin@admin.com',
   password: 'admin123$change',
