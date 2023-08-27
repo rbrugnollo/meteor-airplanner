@@ -17,17 +17,20 @@ import {
 } from '@chakra-ui/react';
 import { useForm, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
-import { useFind, useSubscribe } from 'meteor/react-meteor-data';
 import { Select } from 'chakra-react-select';
 import { RoleNames } from '/imports/api/users/collection';
+import { insert } from '/imports/api/airplanes/methods/insert';
+import { update } from '/imports/api/airplanes/methods/update';
+import { getOne } from '/imports/api/airplanes/methods/getOne';
+import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
+import { selectByRoles } from '/imports/api/users/publications/selectByRoles';
 
 interface AirplaneFormData {
   name: string;
   tailNumber: string;
-  active: string;
-  captain: string;
-  firstOfficer: string;
-  manager: string;
+  captain?: string;
+  firstOfficer?: string;
+  manager?: string;
 }
 
 interface AirplaneFormActionButtonProps {
@@ -42,22 +45,18 @@ interface AirplaneFormProps {
 const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const roles = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
-  const isSubLoading = useSubscribe('users.select', { roles });
-  const users: any[] = useFind(() => Meteor.users.find({ 'profile.roles': { $in: roles } }, {}));
+  const isSubLoading = useSubscribe(() => selectByRoles({ roles }));
+  const users: Meteor.User[] = useFind(() =>
+    Meteor.users.find({ 'profile.roles': { $in: roles } }, {}),
+  );
   const {
     register,
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors, isSubmitting, isLoading },
-  } = useForm<AirplaneFormData>({
-    defaultValues: async () => {
-      if (airplaneId) {
-        return await Meteor.callAsync('airplanes.getOne', airplaneId);
-      }
-      return {};
-    },
-  });
+  } = useForm<AirplaneFormData>();
 
   const toast = useToast();
 
@@ -65,24 +64,69 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
     console.log(users);
   }
 
-  const handleFormSubmit = async (data: AirplaneFormData) => {
-    if (airplaneId) {
-      await Meteor.callAsync('airplanes.update', {
-        _id: airplaneId,
+  const handleInsert = async (data: AirplaneFormData) => {
+    try {
+      await insert(data);
+      toast({
+        description: 'Airplane successfully created.',
+        status: 'success',
+      });
+      handleClose();
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Meteor.Error) {
+        toast({
+          description: e.message,
+          status: 'error',
+        });
+      }
+    }
+  };
+
+  const handleUpdate = async (data: AirplaneFormData) => {
+    try {
+      await update({
+        _id: airplaneId!,
         ...data,
       });
       toast({
         description: 'Airplane successfully updated.',
         status: 'success',
       });
-    } else {
-      await Meteor.call('airplanes.insert', data);
-      toast({
-        description: 'Airplane successfully saved.',
-        status: 'success',
-      });
+      handleClose();
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Meteor.Error) {
+        toast({
+          description: e.message,
+          status: 'error',
+        });
+      }
     }
-    handleClose();
+  };
+
+  const handleFormSubmit = async (data: AirplaneFormData) => {
+    if (airplaneId) {
+      await handleUpdate(data);
+    } else {
+      await handleInsert(data);
+    }
+  };
+
+  const handleOpen = async () => {
+    setValue('name', '');
+    setValue('tailNumber', '');
+    setValue('manager', undefined);
+    setValue('captain', undefined);
+    setValue('firstOfficer', undefined);
+
+    onOpen();
+
+    if (airplaneId) {
+      const airplane = await getOne({ _id: airplaneId });
+      setValue('name', airplane?.name || '');
+      setValue('tailNumber', airplane?.tailNumber || '');
+    }
   };
 
   const handleClose = () => {
@@ -94,7 +138,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
 
   return (
     <>
-      <ActionButton onOpen={onOpen} />
+      <ActionButton onOpen={handleOpen} />
       <Drawer isOpen={isOpen} placement="right" onClose={handleClose} size="md">
         <DrawerOverlay />
         <DrawerContent>

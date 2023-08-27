@@ -14,12 +14,13 @@ import {
   Button,
   Spinner,
 } from '@chakra-ui/react';
-import { useFind, useSubscribe } from 'meteor/react-meteor-data';
 import UserListItem from './UserListItem';
 import UserForm from './UserForm';
 import { FaPlus } from 'react-icons/fa6';
 import { Meteor } from 'meteor/meteor';
 import { RoleNames } from '/imports/api/users/collection';
+import { list } from '/imports/api/users/publications/list';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 
 interface UserViewModel {
   _id: string;
@@ -33,7 +34,7 @@ interface UserViewModel {
 export const UserListRoles = [RoleNames.ADMIN];
 
 const UserList = () => {
-  const isLoading = useSubscribe('users.list');
+  const isLoading = useSubscribe(list);
   const users: UserViewModel[] = useFind(() => Meteor.users.find());
 
   console.log(users);

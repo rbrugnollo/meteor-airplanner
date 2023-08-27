@@ -1,7 +1,7 @@
 // Users
 import '../../api/users/methods';
-import '../../api/users/server/publications';
+import '../../api/users/publications';
 
 // Airplanes
 import '../../api/airplanes/methods';
-import '../../api/airplanes/server/publications';
+import '../../api/airplanes/publications';

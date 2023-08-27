@@ -15,11 +15,12 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { AirplanesCollection } from '/imports/api/airplanes/collection';
-import { useFind, useSubscribe } from 'meteor/react-meteor-data';
 import AirplaneListItem from './AirplaneListItem';
 import AirplaneForm from './AirplaneForm';
 import { FaPlus } from 'react-icons/fa6';
 import { RoleNames } from '/imports/api/users/collection';
+import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
+import { list } from '/imports/api/airplanes/publications/list';
 
 interface AirplaneViewModel {
   _id: string;
@@ -30,7 +31,7 @@ interface AirplaneViewModel {
 export const AirplaneListRoles = [RoleNames.ADMIN];
 
 const AirplaneList = () => {
-  const isLoading = useSubscribe('airplanes.list');
+  const isLoading = useSubscribe(list);
   const airplanes: AirplaneViewModel[] = useFind(() => AirplanesCollection.find({}));
 
   if (isLoading())
