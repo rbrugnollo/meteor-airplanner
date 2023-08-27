@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import Header from './header/Header';
 import Sidebar from './sidebar/Sidebar';
-import { Box, Drawer, DrawerContent, useDisclosure } from '@chakra-ui/react';
+import { useSubscribe } from 'meteor/react-meteor-data';
+import { Box, Drawer, DrawerContent, Spinner, useDisclosure } from '@chakra-ui/react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 const MainLayout = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const isLoading = useSubscribe('roles.user');
 
   // Automatically closes when location changes
   const location = useLocation();
@@ -13,6 +15,7 @@ const MainLayout = () => {
     onClose();
   }, [location]);
 
+  if (isLoading()) return <Spinner />;
   return (
     <Box minH="100vh" bg="gray.100">
       <Sidebar onClose={onClose} display={{ base: 'none', md: 'block' }} />
