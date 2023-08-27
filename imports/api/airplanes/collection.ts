@@ -1,27 +1,17 @@
 import { Mongo } from 'meteor/mongo';
-// import SimpleSchema from 'simpl-schema';
-
-// const AirplanesSchema = new SimpleSchema({
-//   _id: {
-//     type: String,
-//     optional: true,
-//   },
-//   name: {
-//     type: String,
-//     min: 1,
-//   },
-//   tailNumber: {
-//     type: String,
-//     min: 1,
-//   },
-// });
+import { Meteor } from 'meteor/meteor';
+import { AuditLogsCollection } from '../auditLogs/collection';
+import { BaseCollection } from '../common/BaseCollection';
 
 export const COLLECTION_NAME = 'airplanes';
 
-export type AirplaneType = {
-  _id?: string;
-  name: string;
-  tailNumber: string;
-};
+export interface Airplane extends BaseCollection {
+  readonly name: string;
+  readonly tailNumber: string;
+}
 
-export const AirplanesCollection = new Mongo.Collection<AirplaneType>(COLLECTION_NAME);
+export const AirplanesCollection = new Mongo.Collection<Airplane>(COLLECTION_NAME);
+
+if (Meteor.isServer) {
+  AuditLogsCollection.addLogger(AirplanesCollection);
+}

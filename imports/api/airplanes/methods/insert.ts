@@ -9,6 +9,12 @@ export const insert = createMethod({
     tailNumber: z.string(),
   }),
   async run(airplane) {
-    return AirplanesCollection.insertAsync(airplane);
+    return AirplanesCollection.insertAsync({
+      ...airplane,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: this.userId!,
+      updatedBy: this.userId!,
+    });
   },
 });

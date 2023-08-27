@@ -11,6 +11,15 @@ export const update = createMethod({
   }),
   async run(airplane) {
     const { _id, ...data } = airplane;
-    return AirplanesCollection.updateAsync({ _id }, { $set: data });
+    return AirplanesCollection.updateAsync(
+      { _id },
+      {
+        $set: {
+          ...data,
+          updatedAt: new Date(),
+          updatedBy: this.userId!,
+        },
+      },
+    );
   },
 });

@@ -211,7 +211,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       options={
                         users
                           ?.filter((f) => f.profile.roles?.includes(RoleNames.FIRST_OFFICER))
-                          .map((m) => ({ label: m.profile.name, value: m })) ?? []
+                          .map((m) => ({ label: m.profile.name, value: m.username })) ?? []
                       }
                       placeholder="First Officer"
                       closeMenuOnSelect
@@ -234,7 +234,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       options={
                         users?.map((m) => ({
                           label: m.profile.name,
-                          value: m,
+                          value: m.username,
                         })) ?? []
                       }
                       placeholder="Manager"
