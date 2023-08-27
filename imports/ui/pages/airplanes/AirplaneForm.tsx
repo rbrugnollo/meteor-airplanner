@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Drawer,
   Button,
@@ -14,12 +14,12 @@ import {
   DrawerFooter,
   useDisclosure,
   useToast,
-} from "@chakra-ui/react";
-import { useForm, Controller } from "react-hook-form";
-import { Meteor } from "meteor/meteor";
-import { useFind, useSubscribe } from "meteor/react-meteor-data";
-import { Select } from "chakra-react-select";
-import { RoleNames } from "/imports/api/users/collection";
+} from '@chakra-ui/react';
+import { useForm, Controller } from 'react-hook-form';
+import { Meteor } from 'meteor/meteor';
+import { useFind, useSubscribe } from 'meteor/react-meteor-data';
+import { Select } from 'chakra-react-select';
+import { RoleNames } from '/imports/api/users/collection';
 
 interface AirplaneFormData {
   name: string;
@@ -42,10 +42,8 @@ interface AirplaneFormProps {
 const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const roles = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
-  const isSubLoading = useSubscribe("users.select", { roles });
-  const users: any[] = useFind(() =>
-    Meteor.users.find({ "profile.roles": { $in: roles } }, {})
-  );
+  const isSubLoading = useSubscribe('users.select', { roles });
+  const users: any[] = useFind(() => Meteor.users.find({ 'profile.roles': { $in: roles } }, {}));
   const {
     register,
     handleSubmit,
@@ -55,7 +53,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   } = useForm<AirplaneFormData>({
     defaultValues: async () => {
       if (airplaneId) {
-        return await Meteor.callAsync("airplanes.getOne", airplaneId);
+        return await Meteor.callAsync('airplanes.getOne', airplaneId);
       }
       return {};
     },
@@ -69,19 +67,19 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
 
   const handleFormSubmit = async (data: AirplaneFormData) => {
     if (airplaneId) {
-      await Meteor.callAsync("airplanes.update", {
+      await Meteor.callAsync('airplanes.update', {
         _id: airplaneId,
         ...data,
       });
       toast({
-        description: `Airplane successfully updated.`,
-        status: "success",
+        description: 'Airplane successfully updated.',
+        status: 'success',
       });
     } else {
-      await Meteor.call("airplanes.insert", data);
+      await Meteor.call('airplanes.insert', data);
       toast({
-        description: `Airplane successfully saved.`,
-        status: "success",
+        description: 'Airplane successfully saved.',
+        status: 'success',
       });
     }
     handleClose();
@@ -92,7 +90,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
     onClose();
   };
 
-  const headerText = airplaneId ? "Edit Airplane" : "Add new Airplane";
+  const headerText = airplaneId ? 'Edit Airplane' : 'Add new Airplane';
 
   return (
     <>
@@ -103,31 +101,25 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
           <DrawerCloseButton />
           <DrawerHeader>{headerText}</DrawerHeader>
           <DrawerBody>
-            <form
-              id="airplane-form"
-              noValidate
-              onSubmit={handleSubmit(handleFormSubmit)}
-            >
+            <form id="airplane-form" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
               <FormControl isRequired isInvalid={!!errors.name}>
                 <FormLabel htmlFor="name">Name</FormLabel>
                 <Input
                   type="text"
-                  {...register("name", {
-                    required: "Please enter Name",
+                  {...register('name', {
+                    required: 'Please enter Name',
                     minLength: 3,
                     maxLength: 300,
                   })}
                 />
-                <FormErrorMessage>
-                  {errors.name && errors.name.message}
-                </FormErrorMessage>
+                <FormErrorMessage>{errors.name && errors.name.message}</FormErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={!!errors.tailNumber} mt={6}>
                 <FormLabel htmlFor="tailNumber">Tail Number</FormLabel>
                 <Input
                   type="text"
-                  {...register("tailNumber", {
-                    required: "Please enter Tail Number",
+                  {...register('tailNumber', {
+                    required: 'Please enter Tail Number',
                   })}
                 />
                 <FormErrorMessage>
@@ -148,9 +140,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       value={value}
                       options={
                         users
-                          ?.filter((f) =>
-                            f.profile.roles?.includes(RoleNames.CAPTAIN)
-                          )
+                          ?.filter((f) => f.profile.roles?.includes(RoleNames.CAPTAIN))
                           .map((m) => ({
                             label: m.profile.name,
                             value: m.username,
@@ -176,11 +166,8 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       value={value}
                       options={
                         users
-                          ?.filter((f) =>
-                            f.profile.roles?.includes(RoleNames.FIRST_OFFICER)
-                          )
-                          .map((m) => ({ label: m.profile.name, value: m })) ??
-                        []
+                          ?.filter((f) => f.profile.roles?.includes(RoleNames.FIRST_OFFICER))
+                          .map((m) => ({ label: m.profile.name, value: m })) ?? []
                       }
                       placeholder="First Officer"
                       closeMenuOnSelect

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   IconButton,
   Box,
@@ -12,11 +12,11 @@ import {
   MenuItem,
   MenuList,
   Spinner,
-} from "@chakra-ui/react";
-import { useLoggedUser } from "meteor/quave:logged-user-react";
-import { FiChevronDown, FiBell, FiLogOut } from "react-icons/fi";
-import { Meteor } from "meteor/meteor";
-import { useNavigate } from "react-router";
+} from '@chakra-ui/react';
+import { useLoggedUser } from 'meteor/quave:logged-user-react';
+import { FiChevronDown, FiBell, FiLogOut } from 'react-icons/fi';
+import { Meteor } from 'meteor/meteor';
+import { useNavigate } from 'react-router';
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const UserProfile = () => {
 
   const logOut = () => {
     Meteor.logout(() => {
-      navigate("/login");
+      navigate('/login');
     });
   };
 
@@ -33,23 +33,14 @@ const UserProfile = () => {
   }
 
   return (
-    <HStack spacing={{ base: "0", md: "6" }}>
-      <IconButton
-        size="lg"
-        variant="ghost"
-        aria-label="open menu"
-        icon={<FiBell />}
-      />
+    <HStack spacing={{ base: '0', md: '6' }}>
+      <IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} />
       <Flex alignItems="center">
         <Menu>
-          <MenuButton
-            py={2}
-            transition="all 0.3s"
-            _focus={{ boxShadow: "none" }}
-          >
+          <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>
             <HStack spacing="4">
               <VStack
-                display={{ base: "none", md: "flex" }}
+                display={{ base: 'none', md: 'flex' }}
                 alignItems="flex-start"
                 spacing="1px"
                 ml="2"
@@ -59,7 +50,7 @@ const UserProfile = () => {
                   {loggedUser?.username}
                 </Text>
               </VStack>
-              <Box display={{ base: "none", md: "flex" }}>
+              <Box display={{ base: 'none', md: 'flex' }}>
                 <FiChevronDown />
               </Box>
             </HStack>

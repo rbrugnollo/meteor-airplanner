@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Table,
   TableContainer,
@@ -13,13 +13,13 @@ import {
   ButtonGroup,
   Button,
   Spinner,
-} from "@chakra-ui/react";
-import { AirplanesCollection } from "/imports/api/airplanes/collection";
-import { useFind, useSubscribe } from "meteor/react-meteor-data";
-import AirplaneListItem from "./AirplaneListItem";
-import AirplaneForm from "./AirplaneForm";
-import { FaPlus } from "react-icons/fa6";
-import { RoleNames } from "/imports/api/users/collection";
+} from '@chakra-ui/react';
+import { AirplanesCollection } from '/imports/api/airplanes/collection';
+import { useFind, useSubscribe } from 'meteor/react-meteor-data';
+import AirplaneListItem from './AirplaneListItem';
+import AirplaneForm from './AirplaneForm';
+import { FaPlus } from 'react-icons/fa6';
+import { RoleNames } from '/imports/api/users/collection';
 
 interface AirplaneViewModel {
   _id: string;
@@ -30,20 +30,12 @@ interface AirplaneViewModel {
 export const AirplaneListRoles = [RoleNames.ADMIN];
 
 const AirplaneList = () => {
-  const isLoading = useSubscribe("airplanes.list");
-  const airplanes: AirplaneViewModel[] = useFind(() =>
-    AirplanesCollection.find({})
-  );
+  const isLoading = useSubscribe('airplanes.list');
+  const airplanes: AirplaneViewModel[] = useFind(() => AirplanesCollection.find({}));
 
   if (isLoading())
     return (
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="blue.500"
-        size="xl"
-      />
+      <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
     );
 
   return (
@@ -52,8 +44,8 @@ const AirplaneList = () => {
         p={{ base: 4, md: 8 }}
         width="full"
         minH={{
-          base: "calc(100vh - 6rem)",
-          md: "calc(100vh - 7rem)",
+          base: 'calc(100vh - 6rem)',
+          md: 'calc(100vh - 7rem)',
         }}
         borderWidth={1}
         borderRadius={8}
@@ -69,11 +61,7 @@ const AirplaneList = () => {
           <ButtonGroup gap="2">
             <AirplaneForm
               ActionButton={({ onOpen }) => (
-                <Button
-                  leftIcon={<FaPlus />}
-                  onClick={onOpen}
-                  colorScheme="teal"
-                >
+                <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
                   Add New
                 </Button>
               )}

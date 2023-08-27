@@ -1,6 +1,6 @@
-import { Meteor } from "meteor/meteor";
-import { DDPRateLimiter } from "meteor/ddp-rate-limiter";
-import { _ } from "meteor/underscore";
+import { Meteor } from 'meteor/meteor';
+import { DDPRateLimiter } from 'meteor/ddp-rate-limiter';
+import { _ } from 'meteor/underscore';
 
 // Don't let people write arbitrary data to their 'profile' field from the client
 Meteor.users.deny({
@@ -11,20 +11,20 @@ Meteor.users.deny({
 
 // Get a list of all accounts methods by running `Meteor.server.method_handlers` in meteor shell
 const AUTH_METHODS = [
-  "login",
-  "logout",
-  "logoutOtherClients",
-  "getNewToken",
-  "removeOtherTokens",
-  "configureLoginService",
-  "changePassword",
-  "forgotPassword",
-  "resetPassword",
-  "verifyEmail",
-  "createUser",
-  "ATRemoveService",
-  "ATCreateUserServer",
-  "ATResendVerificationEmail",
+  'login',
+  'logout',
+  'logoutOtherClients',
+  'getNewToken',
+  'removeOtherTokens',
+  'configureLoginService',
+  'changePassword',
+  'forgotPassword',
+  'resetPassword',
+  'verifyEmail',
+  'createUser',
+  'ATRemoveService',
+  'ATCreateUserServer',
+  'ATResendVerificationEmail',
 ];
 
 // Only allow 2 login attempts per connection per 5 seconds
@@ -40,5 +40,5 @@ DDPRateLimiter.addRule(
     },
   },
   2,
-  5000
+  5000,
 );

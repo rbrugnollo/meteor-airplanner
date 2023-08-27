@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   useDisclosure,
   Button,
@@ -10,8 +10,8 @@ import {
   AlertDialogFooter,
   IconButton,
   Tooltip,
-} from "@chakra-ui/react";
-import { FaTrashCan } from "react-icons/fa6";
+} from '@chakra-ui/react';
+import { FaTrashCan } from 'react-icons/fa6';
 
 interface DeleteBtnProps {
   readonly title?: string;
@@ -23,25 +23,20 @@ const DeleteBtn = ({ title, message, onConfirm }: DeleteBtnProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef(null);
 
-  const finalTitle = title ?? "Delete";
-  const finalMessage =
-    message ?? "Are you sure? You can't undo this action afterwards.";
+  const finalTitle = title ?? 'Delete';
+  const finalMessage = message ?? 'Are you sure? You cannot undo this action afterwards.';
   return (
     <>
       <Tooltip label="Delete">
         <IconButton
-          size={{ base: "sm", md: "md" }}
+          size={{ base: 'sm', md: 'md' }}
           aria-label="Delete"
           icon={<FaTrashCan />}
           colorScheme="red"
           onClick={onOpen}
         />
       </Tooltip>
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-      >
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">

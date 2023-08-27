@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Button,
@@ -9,9 +9,9 @@ import {
   Heading,
   Input,
   useToast,
-} from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
-import { Accounts } from "meteor/accounts-base";
+} from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
+import { Accounts } from 'meteor/accounts-base';
 
 interface ForgotPasswordFormData {
   email: string;
@@ -29,12 +29,12 @@ const ForgotPasswordForm = () => {
     Accounts.forgotPassword({ email: data.email }, (error) => {
       if (error) {
         toast({
-          status: "error",
+          status: 'error',
           description: error.message,
         });
       } else {
         toast({
-          status: "success",
+          status: 'success',
           description: `Please follow the instructions sent to ${data.email}.`,
         });
       }
@@ -62,23 +62,15 @@ const ForgotPasswordForm = () => {
               <Input
                 type="email"
                 placeholder="test@test.com"
-                {...register("email", {
-                  required: "Please enter Email",
+                {...register('email', {
+                  required: 'Please enter Email',
                   minLength: 3,
                   maxLength: 200,
                 })}
               />
-              <FormErrorMessage>
-                {errors.email && errors.email.message}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.email && errors.email.message}</FormErrorMessage>
             </FormControl>
-            <Button
-              type="submit"
-              colorScheme="teal"
-              isLoading={isSubmitting}
-              width="full"
-              mt={4}
-            >
+            <Button type="submit" colorScheme="teal" isLoading={isSubmitting} width="full" mt={4}>
               Send Email
             </Button>
           </form>

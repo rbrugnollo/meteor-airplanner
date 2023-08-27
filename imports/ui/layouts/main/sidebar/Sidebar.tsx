@@ -1,31 +1,25 @@
-import React from "react";
-import { Property } from "csstype";
-import { Box, CloseButton, Flex, Text, Spinner } from "@chakra-ui/react";
-import {
-  FaHouse,
-  FaPlane,
-  FaUsers,
-  FaCalendarDays,
-  FaGear,
-} from "react-icons/fa6";
-import { useLoggedUser } from "meteor/quave:logged-user-react";
-import NavLink, { Link } from "./NavLink";
-import { ResponsiveValue } from "@chakra-ui/styled-system/dist";
-import { Roles } from "meteor/alanning:roles";
-import { AirplaneListRoles } from "/imports/ui/pages/airplanes/AirplaneList";
-import { UserListRoles } from "/imports/ui/pages/users/UserList";
+import React from 'react';
+import { Property } from 'csstype';
+import { Box, CloseButton, Flex, Text, Spinner } from '@chakra-ui/react';
+import { FaHouse, FaPlane, FaUsers, FaCalendarDays, FaGear } from 'react-icons/fa6';
+import { useLoggedUser } from 'meteor/quave:logged-user-react';
+import NavLink, { Link } from './NavLink';
+import { ResponsiveValue } from '@chakra-ui/styled-system/dist';
+import { Roles } from 'meteor/alanning:roles';
+import { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
+import { UserListRoles } from '/imports/ui/pages/users/UserList';
 
 const LinkItems: Link[] = [
-  { label: "Home", icon: FaHouse, href: "/app" },
-  { label: "Schedule", icon: FaCalendarDays, href: "schedule" },
+  { label: 'Home', icon: FaHouse, href: '/app' },
+  { label: 'Schedule', icon: FaCalendarDays, href: 'schedule' },
   {
-    label: "Airplanes",
+    label: 'Airplanes',
     icon: FaPlane,
-    href: "airplanes",
+    href: 'airplanes',
     roles: AirplaneListRoles,
   },
-  { label: "Users", icon: FaUsers, href: "users", roles: UserListRoles },
-  { label: "Settings", icon: FaGear, href: "settings" },
+  { label: 'Users', icon: FaUsers, href: 'users', roles: UserListRoles },
+  { label: 'Settings', icon: FaGear, href: 'settings' },
 ];
 
 interface SidebarProps {
@@ -42,7 +36,7 @@ const Sidebar = ({ onClose, display }: SidebarProps) => {
       bg="white"
       borderRight="1px"
       borderRightColor="gray.200"
-      w={{ base: "full", md: 60 }}
+      w={{ base: 'full', md: 60 }}
       pos="fixed"
       h="full"
       display={display}
@@ -51,14 +45,14 @@ const Sidebar = ({ onClose, display }: SidebarProps) => {
         <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
           Airplanner
         </Text>
-        <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
+        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {isLoadingLoggedUser ? (
         <Spinner />
       ) : (
-        LinkItems.filter(
-          (f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)
-        ).map((link, i) => <NavLink key={i} link={link} />)
+        LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)).map(
+          (link, i) => <NavLink key={i} link={link} />,
+        )
       )}
     </Box>
   );

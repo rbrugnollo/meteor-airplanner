@@ -1,5 +1,5 @@
-import React from "react";
-import { Link as ReactRouterLink, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -14,11 +14,10 @@ import {
   Icon,
   useToast,
   Link as ChakraLink,
-} from "@chakra-ui/react";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Meteor } from "meteor/meteor";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
+} from '@chakra-ui/react';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { Meteor } from 'meteor/meteor';
+import { useForm } from 'react-hook-form';
 
 interface LoginFormData {
   email: string;
@@ -41,11 +40,11 @@ const LoginForm = () => {
     Meteor.loginWithPassword(data.email, data.password, (error) => {
       if (error) {
         toast({
-          status: "error",
+          status: 'error',
           description: error.message,
         });
       } else {
-        navigate("/app");
+        navigate('/app');
       }
     });
   };
@@ -71,32 +70,26 @@ const LoginForm = () => {
               <Input
                 type="email"
                 placeholder="test@test.com"
-                {...register("email", {
-                  required: "Please enter Email",
+                {...register('email', {
+                  required: 'Please enter Email',
                   minLength: 3,
                   maxLength: 200,
                 })}
               />
-              <FormErrorMessage>
-                {errors.email && errors.email.message}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.email && errors.email.message}</FormErrorMessage>
             </FormControl>
             <FormControl isRequired isInvalid={!!errors.password} mt={6}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <InputGroup>
                 <Input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="*******"
-                  {...register("password", {
-                    required: "Please enter Password",
+                  {...register('password', {
+                    required: 'Please enter Password',
                   })}
                 />
                 <InputRightElement width="3rem">
-                  <Button
-                    h="1.5rem"
-                    size="sm"
-                    onClick={handlePasswordVisibility}
-                  >
+                  <Button h="1.5rem" size="sm" onClick={handlePasswordVisibility}>
                     {showPassword ? (
                       <Icon as={AiOutlineEye} />
                     ) : (
@@ -105,17 +98,9 @@ const LoginForm = () => {
                   </Button>
                 </InputRightElement>
               </InputGroup>
-              <FormErrorMessage>
-                {errors.password && errors.password.message}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.password && errors.password.message}</FormErrorMessage>
             </FormControl>
-            <Button
-              type="submit"
-              colorScheme="teal"
-              isLoading={isSubmitting}
-              width="full"
-              mt={4}
-            >
+            <Button type="submit" colorScheme="teal" isLoading={isSubmitting} width="full" mt={4}>
               Sign In
             </Button>
             <Box textAlign="center" mt={1} fontSize="sm">

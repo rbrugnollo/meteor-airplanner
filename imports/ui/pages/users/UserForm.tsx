@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Drawer,
   Button,
@@ -14,11 +14,11 @@ import {
   DrawerFooter,
   useDisclosure,
   useToast,
-} from "@chakra-ui/react";
-import { Select } from "chakra-react-select";
-import { useForm, Controller } from "react-hook-form";
-import { Meteor } from "meteor/meteor";
-import { RoleNames } from "/imports/api/users/collection";
+} from '@chakra-ui/react';
+import { Select } from 'chakra-react-select';
+import { useForm, Controller } from 'react-hook-form';
+import { Meteor } from 'meteor/meteor';
+import { RoleNames } from '/imports/api/users/collection';
 
 interface UserFormData {
   name: string;
@@ -47,18 +47,16 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
   } = useForm<UserFormData>({
     defaultValues: async () => {
       if (userId) {
-        const user = await Meteor.callAsync("users.getOne", userId);
+        const user = await Meteor.callAsync('users.getOne', userId);
         return {
           name: user.profile.name,
           email: user.emails[0].address,
-          roles:
-            user.profile.roles?.map((m: string) => ({ label: m, value: m })) ??
-            [],
+          roles: user.profile.roles?.map((m: string) => ({ label: m, value: m })) ?? [],
         };
       }
       return {
-        name: "",
-        email: "",
+        name: '',
+        email: '',
         roles: [],
       };
     },
@@ -69,23 +67,23 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
   const handleFormSubmit = async (data: UserFormData) => {
     if (userId) {
       console.log(data);
-      await Meteor.callAsync("users.update", {
+      await Meteor.callAsync('users.update', {
         _id: userId,
         ...data,
         roles: data.roles.map((m) => m.value),
       });
       toast({
-        description: `User successfully updated.`,
-        status: "success",
+        description: 'User successfully updated.',
+        status: 'success',
       });
     } else {
-      await Meteor.callAsync("users.insert", {
+      await Meteor.callAsync('users.insert', {
         ...data,
         roles: data.roles.map((m) => m.value),
       });
       toast({
-        description: `User successfully created.`,
-        status: "success",
+        description: 'User successfully created.',
+        status: 'success',
       });
     }
     handleClose();
@@ -96,7 +94,7 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
     onClose();
   };
 
-  const headerText = userId ? "Edit User" : "Add new User";
+  const headerText = userId ? 'Edit User' : 'Add new User';
 
   return (
     <>
@@ -107,35 +105,27 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
           <DrawerCloseButton />
           <DrawerHeader>{headerText}</DrawerHeader>
           <DrawerBody>
-            <form
-              id="user-form"
-              noValidate
-              onSubmit={handleSubmit(handleFormSubmit)}
-            >
+            <form id="user-form" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
               <FormControl isRequired isInvalid={!!errors.name}>
                 <FormLabel htmlFor="name">Name</FormLabel>
                 <Input
                   type="text"
-                  {...register("name", {
-                    required: "Please enter Name",
+                  {...register('name', {
+                    required: 'Please enter Name',
                     minLength: 3,
                   })}
                 />
-                <FormErrorMessage>
-                  {errors.name && errors.name.message}
-                </FormErrorMessage>
+                <FormErrorMessage>{errors.name && errors.name.message}</FormErrorMessage>
               </FormControl>
               <FormControl isRequired isInvalid={!!errors.email} mt={6}>
                 <FormLabel htmlFor="email">Email</FormLabel>
                 <Input
                   type="email"
-                  {...register("email", {
-                    required: "Please enter Email",
+                  {...register('email', {
+                    required: 'Please enter Email',
                   })}
                 />
-                <FormErrorMessage>
-                  {errors.email && errors.email.message}
-                </FormErrorMessage>
+                <FormErrorMessage>{errors.email && errors.email.message}</FormErrorMessage>
               </FormControl>
               <Controller
                 control={control}

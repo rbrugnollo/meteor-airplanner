@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Table,
   TableContainer,
@@ -13,13 +13,13 @@ import {
   ButtonGroup,
   Button,
   Spinner,
-} from "@chakra-ui/react";
-import { useFind, useSubscribe } from "meteor/react-meteor-data";
-import UserListItem from "./UserListItem";
-import UserForm from "./UserForm";
-import { FaPlus } from "react-icons/fa6";
-import { Meteor } from "meteor/meteor";
-import { RoleNames } from "/imports/api/users/collection";
+} from '@chakra-ui/react';
+import { useFind, useSubscribe } from 'meteor/react-meteor-data';
+import UserListItem from './UserListItem';
+import UserForm from './UserForm';
+import { FaPlus } from 'react-icons/fa6';
+import { Meteor } from 'meteor/meteor';
+import { RoleNames } from '/imports/api/users/collection';
 
 interface UserViewModel {
   _id: string;
@@ -33,20 +33,14 @@ interface UserViewModel {
 export const UserListRoles = [RoleNames.ADMIN];
 
 const UserList = () => {
-  const isLoading = useSubscribe("users.list");
+  const isLoading = useSubscribe('users.list');
   const users: UserViewModel[] = useFind(() => Meteor.users.find());
 
   console.log(users);
 
   if (isLoading())
     return (
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="blue.500"
-        size="xl"
-      />
+      <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
     );
 
   return (
@@ -55,8 +49,8 @@ const UserList = () => {
         p={{ base: 4, md: 8 }}
         width="full"
         minH={{
-          base: "calc(100vh - 6rem)",
-          md: "calc(100vh - 7rem)",
+          base: 'calc(100vh - 6rem)',
+          md: 'calc(100vh - 7rem)',
         }}
         borderWidth={1}
         borderRadius={8}
@@ -72,11 +66,7 @@ const UserList = () => {
           <ButtonGroup gap="2">
             <UserForm
               ActionButton={({ onOpen }) => (
-                <Button
-                  leftIcon={<FaPlus />}
-                  onClick={onOpen}
-                  colorScheme="teal"
-                >
+                <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
                   Add New
                 </Button>
               )}

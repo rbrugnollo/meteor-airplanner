@@ -1,7 +1,7 @@
-import React from "react";
-import { IconButton, Flex, Text } from "@chakra-ui/react";
-import { FiMenu } from "react-icons/fi";
-import UserProfile from "./UserProfile";
+import React from 'react';
+import { IconButton, Flex, Text } from '@chakra-ui/react';
+import { FiMenu } from 'react-icons/fi';
+import UserProfile from './UserProfile';
 
 type HeaderProps = {
   onOpen: () => void;
@@ -19,17 +19,17 @@ const Header = ({ onOpen }: HeaderProps) => (
     bg="white"
     borderBottomWidth="1px"
     borderBottomColor="gray.200"
-    justifyContent={{ base: "space-between", md: "flex-end" }}
+    justifyContent={{ base: 'space-between', md: 'flex-end' }}
   >
     <IconButton
-      display={{ base: "flex", md: "none" }}
+      display={{ base: 'flex', md: 'none' }}
       onClick={onOpen}
       variant="outline"
       aria-label="open menu"
       icon={<FiMenu />}
     />
     <Text
-      display={{ base: "flex", md: "none" }}
+      display={{ base: 'flex', md: 'none' }}
       fontSize="2xl"
       fontFamily="monospace"
       fontWeight="bold"

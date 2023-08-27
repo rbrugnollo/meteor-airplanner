@@ -1,7 +1,7 @@
-import React from "react";
-import { Flex, Icon, Text } from "@chakra-ui/react";
-import { IconType } from "react-icons";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Flex, Icon, Text } from '@chakra-ui/react';
+import { IconType } from 'react-icons';
+import { Link } from 'react-router-dom';
 
 export interface Link {
   label: string;
@@ -24,8 +24,8 @@ const NavLink = ({ link }: NavLinkProps) => (
       role="group"
       cursor="pointer"
       _hover={{
-        bg: "cyan.400",
-        color: "white",
+        bg: 'cyan.400',
+        color: 'white',
       }}
     >
       {link.icon && (
@@ -33,7 +33,7 @@ const NavLink = ({ link }: NavLinkProps) => (
           mr="4"
           fontSize="16"
           _groupHover={{
-            color: "white",
+            color: 'white',
           }}
           as={link.icon}
         />

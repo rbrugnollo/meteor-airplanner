@@ -1,14 +1,14 @@
-import { Accounts } from "meteor/accounts-base";
-import { Roles } from "meteor/alanning:roles";
-import { Meteor } from "meteor/meteor";
-import { RoleNames } from "/imports/api/users/collection";
+import { Accounts } from 'meteor/accounts-base';
+import { Roles } from 'meteor/alanning:roles';
+import { Meteor } from 'meteor/meteor';
+import { RoleNames } from '/imports/api/users/collection';
 
 const DefaultAdmin = {
-  username: "admin@admin.com",
-  email: "admin@admin.com",
-  password: "admin123$change",
+  username: 'admin@admin.com',
+  email: 'admin@admin.com',
+  password: 'admin123$change',
   profile: {
-    name: "Default Admin",
+    name: 'Default Admin',
     roles: [RoleNames.ADMIN],
   },
 };

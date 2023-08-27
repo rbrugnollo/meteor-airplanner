@@ -1,5 +1,5 @@
-import React from "react";
-import { useMatch, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useMatch, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -13,11 +13,10 @@ import {
   InputRightElement,
   Icon,
   useToast,
-} from "@chakra-ui/react";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { Accounts } from "meteor/accounts-base";
+} from '@chakra-ui/react';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { useForm } from 'react-hook-form';
+import { Accounts } from 'meteor/accounts-base';
 
 interface PasswordResetFormData {
   password: string;
@@ -31,7 +30,7 @@ const PasswordResetForm = () => {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<PasswordResetFormData>();
-  const match = useMatch("password/:action/:token");
+  const match = useMatch('password/:action/:token');
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -40,19 +39,19 @@ const PasswordResetForm = () => {
 
   const handleFormSubmit = (data: PasswordResetFormData) => {
     setShowPassword(false);
-    const token = match?.params.token ?? "";
+    const token = match?.params.token ?? '';
     Accounts.resetPassword(token, data.password, function (err) {
       if (err) {
         toast({
-          status: "error",
+          status: 'error',
           description: err.message,
         });
       }
       toast({
-        status: "success",
-        description: "Password successfully defined",
+        status: 'success',
+        description: 'Password successfully defined',
       });
-      navigate("/app");
+      navigate('/app');
     });
   };
 
@@ -68,10 +67,7 @@ const PasswordResetForm = () => {
         mt={8}
       >
         <Box textAlign="center">
-          <Heading>
-            {match?.params.action == "enroll-account" ? "Set" : "Reset"}{" "}
-            Password
-          </Heading>
+          <Heading>{match?.params.action == 'enroll-account' ? 'Set' : 'Reset'} Password</Heading>
         </Box>
         <Box my={4} textAlign="left">
           <form noValidate onSubmit={handleSubmit(handleFormSubmit)}>
@@ -79,26 +75,22 @@ const PasswordResetForm = () => {
               <FormLabel htmlFor="password">Password</FormLabel>
               <InputGroup>
                 <Input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="*******"
-                  {...register("password", {
-                    required: "Please enter Password",
+                  {...register('password', {
+                    required: 'Please enter Password',
                     minLength: {
                       value: 8,
-                      message: "Password must have at least 8 chars",
+                      message: 'Password must have at least 8 chars',
                     },
                     maxLength: {
                       value: 50,
-                      message: "Password cannot have more than 50 chars",
+                      message: 'Password cannot have more than 50 chars',
                     },
                   })}
                 />
                 <InputRightElement width="3rem">
-                  <Button
-                    h="1.5rem"
-                    size="sm"
-                    onClick={handlePasswordVisibility}
-                  >
+                  <Button h="1.5rem" size="sm" onClick={handlePasswordVisibility}>
                     {showPassword ? (
                       <Icon as={AiOutlineEye} />
                     ) : (
@@ -107,31 +99,25 @@ const PasswordResetForm = () => {
                   </Button>
                 </InputRightElement>
               </InputGroup>
-              <FormErrorMessage>
-                {errors.password && errors.password.message}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.password && errors.password.message}</FormErrorMessage>
             </FormControl>
             <FormControl isRequired isInvalid={!!errors.confirm} mt={6}>
               <FormLabel htmlFor="confirm">Confirm Password</FormLabel>
               <InputGroup>
                 <Input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="*******"
-                  {...register("confirm", {
-                    required: "Please enter Password Confirmation",
+                  {...register('confirm', {
+                    required: 'Please enter Password Confirmation',
                     validate: (val: string) => {
-                      if (watch("password") != val) {
-                        return "Your passwords do no match";
+                      if (watch('password') != val) {
+                        return 'Your passwords do no match';
                       }
                     },
                   })}
                 />
                 <InputRightElement width="3rem">
-                  <Button
-                    h="1.5rem"
-                    size="sm"
-                    onClick={handlePasswordVisibility}
-                  >
+                  <Button h="1.5rem" size="sm" onClick={handlePasswordVisibility}>
                     {showPassword ? (
                       <Icon as={AiOutlineEye} />
                     ) : (
@@ -140,17 +126,9 @@ const PasswordResetForm = () => {
                   </Button>
                 </InputRightElement>
               </InputGroup>
-              <FormErrorMessage>
-                {errors.confirm && errors.confirm.message}
-              </FormErrorMessage>
+              <FormErrorMessage>{errors.confirm && errors.confirm.message}</FormErrorMessage>
             </FormControl>
-            <Button
-              type="submit"
-              colorScheme="teal"
-              isLoading={isSubmitting}
-              width="full"
-              mt={4}
-            >
+            <Button type="submit" colorScheme="teal" isLoading={isSubmitting} width="full" mt={4}>
               Sign In
             </Button>
           </form>
