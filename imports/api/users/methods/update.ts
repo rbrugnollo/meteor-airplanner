@@ -2,6 +2,8 @@ import { Roles } from 'meteor/alanning:roles';
 import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import { AirplanesCollection } from '../../airplanes/collection';
+import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
 import { removeDefault } from './removeDefault';
 
 export const update = createMethod({
@@ -27,5 +29,53 @@ export const update = createMethod({
 
     // Remove default user if possible
     await removeDefault();
+
+    // Update dependent collections
+    await updateAirplanesCollection({ user: { value: _id, label: name } });
+  },
+});
+
+export const updateAirplanesCollection = createMethod({
+  name: 'users.updateAirplanesCollection',
+  schema: z.object({
+    user: ValueLabelTypeSchema,
+  }),
+  async run({ user }) {
+    await AirplanesCollection.updateAsync(
+      { 'captain.value': user.value },
+      {
+        $set: {
+          'captain.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await AirplanesCollection.updateAsync(
+      { 'firstOfficer.value': user.value },
+      {
+        $set: {
+          'firstOfficer.value': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await AirplanesCollection.updateAsync(
+      { 'manager.value': user.value },
+      {
+        $set: {
+          'firstOfficer.value': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await AirplanesCollection.updateAsync(
+      { 'pilots.value': user.value },
+      {
+        $set: {
+          'pilots.$.label': user.label,
+        },
+      },
+      { multi: true },
+    );
   },
 });
