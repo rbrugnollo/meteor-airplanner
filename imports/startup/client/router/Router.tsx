@@ -10,6 +10,20 @@ import Authorized from './Authorized';
 import AirplaneList, { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import UserList, { UserListRoles } from '/imports/ui/pages/users/UserList';
 
+const mainLoader = ({ request }: { request: Request }) => {
+  const url = `${window.location.origin}/`;
+  if (request.url === url) {
+    const loggedUserId = Meteor.userId();
+    if (!loggedUserId) {
+      throw redirect('/login');
+    } else {
+      throw redirect('/app');
+    }
+  }
+
+  return null;
+};
+
 const loggedInOnly = () => {
   const loggedUserId = Meteor.userId();
   if (!loggedUserId) {
@@ -21,7 +35,7 @@ const loggedInOnly = () => {
 const notLoggedInOnly = () => {
   const loggedUser = Meteor.userId();
   if (loggedUser) {
-    throw redirect('/');
+    throw redirect('/app');
   }
   return null;
 };
@@ -30,6 +44,7 @@ const Router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    loader: mainLoader,
     children: [
       {
         path: 'login',
