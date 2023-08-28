@@ -18,19 +18,21 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
 import { Select } from 'chakra-react-select';
-import { RoleNames } from '/imports/api/users/collection';
+import { RoleNames, Pilots } from '/imports/api/users/collection';
 import { insert } from '/imports/api/airplanes/methods/insert';
 import { update } from '/imports/api/airplanes/methods/update';
 import { getOne } from '/imports/api/airplanes/methods/getOne';
 import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
 import { selectByRoles } from '/imports/api/users/publications/selectByRoles';
+import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 
 interface AirplaneFormData {
   name: string;
   tailNumber: string;
-  captain?: string;
-  firstOfficer?: string;
-  manager?: string;
+  captain?: ValueLabelType;
+  firstOfficer?: ValueLabelType;
+  manager?: ValueLabelType;
+  pilots?: ValueLabelType[];
 }
 
 interface AirplaneFormActionButtonProps {
@@ -49,6 +51,9 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const users: Meteor.User[] = useFind(() =>
     Meteor.users.find({ 'profile.roles': { $in: roles } }, {}),
   );
+
+  // use lodash to filter users variable by role, the roles are RoleNames.CAPTAIN and RoleNames.FIRST_OFFICER
+
   const {
     register,
     handleSubmit,
@@ -95,7 +100,6 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
       });
       handleClose();
     } catch (e: unknown) {
-      console.log(e);
       if (e instanceof Meteor.Error) {
         toast({
           description: e.message,
@@ -122,10 +126,17 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
 
     onOpen();
 
+    console.log(airplaneId);
+
     if (airplaneId) {
       const airplane = await getOne({ _id: airplaneId });
+      console.log(airplane);
       setValue('name', airplane?.name || '');
       setValue('tailNumber', airplane?.tailNumber || '');
+      setValue('captain', airplane?.captain);
+      setValue('firstOfficer', airplane?.firstOfficer);
+      setValue('manager', airplane?.manager);
+      setValue('pilots', airplane?.pilots);
     }
   };
 
@@ -184,10 +195,10 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       value={value}
                       options={
                         users
-                          ?.filter((f) => f.profile.roles?.includes(RoleNames.CAPTAIN))
+                          ?.filter((f) => f.profile?.roles?.includes(RoleNames.CAPTAIN))
                           .map((m) => ({
-                            label: m.profile.name,
-                            value: m.username,
+                            label: m.profile?.name,
+                            value: m._id,
                           })) ?? []
                       }
                       placeholder="Captain"
@@ -210,8 +221,8 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       value={value}
                       options={
                         users
-                          ?.filter((f) => f.profile.roles?.includes(RoleNames.FIRST_OFFICER))
-                          .map((m) => ({ label: m.profile.name, value: m.username })) ?? []
+                          ?.filter((f) => f.profile?.roles?.includes(RoleNames.FIRST_OFFICER))
+                          .map((m) => ({ label: m.profile?.name, value: m._id })) ?? []
                       }
                       placeholder="First Officer"
                       closeMenuOnSelect
@@ -233,12 +244,41 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       value={value}
                       options={
                         users?.map((m) => ({
-                          label: m.profile.name,
-                          value: m.username,
+                          label: m.profile?.name,
+                          value: m._id,
                         })) ?? []
                       }
                       placeholder="Manager"
                       closeMenuOnSelect
+                    />
+                  </FormControl>
+                )}
+              />
+              <Controller
+                control={control}
+                name="pilots"
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6}>
+                    <FormLabel htmlFor="pilots">Pilots</FormLabel>
+                    <Select
+                      isMulti
+                      name={name}
+                      ref={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      options={
+                        users
+                          ?.filter(
+                            (f) => f.profile?.roles?.some((role: string) => Pilots.includes(role)),
+                          )
+                          ?.map((m) => ({
+                            label: m.profile?.name,
+                            value: m._id,
+                          })) ?? []
+                      }
+                      placeholder="Pilots"
+                      closeMenuOnSelect={false}
                     />
                   </FormControl>
                 )}

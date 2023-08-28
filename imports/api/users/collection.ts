@@ -8,6 +8,8 @@ export const RoleNames = {
   PASSENGER: 'Passenger',
 };
 
+export const Pilots = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
+
 if (Meteor.isServer) {
   AuditLogsCollection.addLogger(Meteor.users);
 }
