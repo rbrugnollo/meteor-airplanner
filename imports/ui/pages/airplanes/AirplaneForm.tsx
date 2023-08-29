@@ -47,12 +47,10 @@ interface AirplaneFormProps {
 const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const roles = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
-  const isSubLoading = useSubscribe(() => selectByRoles({ roles }));
+  useSubscribe(() => selectByRoles({ roles }));
   const users: Meteor.User[] = useFind(() =>
     Meteor.users.find({ 'profile.roles': { $in: roles } }, {}),
   );
-
-  // use lodash to filter users variable by role, the roles are RoleNames.CAPTAIN and RoleNames.FIRST_OFFICER
 
   const {
     register,
@@ -65,10 +63,6 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
 
   const toast = useToast();
 
-  if (!isSubLoading()) {
-    console.log(users);
-  }
-
   const handleInsert = async (data: AirplaneFormData) => {
     try {
       await insert(data);
@@ -78,7 +72,6 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
       });
       handleClose();
     } catch (e: unknown) {
-      console.log(e);
       if (e instanceof Meteor.Error) {
         toast({
           description: e.message,
@@ -126,11 +119,8 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
 
     onOpen();
 
-    console.log(airplaneId);
-
     if (airplaneId) {
       const airplane = await getOne({ _id: airplaneId });
-      console.log(airplane);
       setValue('name', airplane?.name || '');
       setValue('tailNumber', airplane?.tailNumber || '');
       setValue('captain', airplane?.captain);
