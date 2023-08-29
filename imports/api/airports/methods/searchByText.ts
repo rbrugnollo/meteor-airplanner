@@ -7,7 +7,7 @@ export const searchByText = createMethod({
   schema: z.object({
     q: z.string(),
   }),
-  async run({ q }) {
+  run({ q }) {
     return AirportsCollection.find(
       {
         $or: [

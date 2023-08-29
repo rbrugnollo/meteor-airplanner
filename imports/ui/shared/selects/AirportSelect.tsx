@@ -17,15 +17,13 @@ const AirportSelect = (props: AirportSelectProps) => {
     if (!inputValue || inputValue.length < 3) {
       callback([]);
     }
-    searchByText({ q: inputValue })
-      .then((airports) => airports)
-      .then((airports) => {
-        const options: AirportOption[] = airports.map((airport) => ({
-          value: airport._id!,
-          label: `(${airport.icao}) ${airport.name} - ${airport.city}`,
-        }));
-        callback(options);
-      });
+    searchByText({ q: inputValue }).then((airports) => {
+      const options: AirportOption[] = airports.map((airport) => ({
+        value: airport._id!,
+        label: `(${airport.icao}) ${airport.name} - ${airport.city}`,
+      }));
+      callback(options);
+    });
   };
 
   const { selectRef, loadOptions: _loadOptions, ...rest } = props;
