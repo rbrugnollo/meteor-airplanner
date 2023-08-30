@@ -1,20 +1,19 @@
 import React from 'react';
 import {
-  IconButton,
   Box,
-  Flex,
-  HStack,
-  VStack,
   Text,
-  Menu,
-  MenuButton,
   Icon,
-  MenuItem,
-  MenuList,
   Spinner,
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Button,
+  Divider,
 } from '@chakra-ui/react';
 import { useLoggedUser } from 'meteor/quave:logged-user-react';
-import { FiChevronDown, FiBell, FiLogOut } from 'react-icons/fi';
+import { FiLogOut } from 'react-icons/fi';
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router';
 
@@ -33,36 +32,39 @@ const UserProfile = () => {
   }
 
   return (
-    <HStack spacing={{ base: '0', md: '6' }}>
-      <IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} />
-      <Flex alignItems="center">
-        <Menu>
-          <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>
-            <HStack spacing="4">
-              <VStack
-                display={{ base: 'none', md: 'flex' }}
-                alignItems="flex-start"
-                spacing="1px"
-                ml="2"
-              >
-                <Text fontSize="lg">{loggedUser?.profile?.name}</Text>
-                <Text fontSize="md" color="gray.600">
-                  {loggedUser?.username}
-                </Text>
-              </VStack>
-              <Box display={{ base: 'none', md: 'flex' }}>
-                <FiChevronDown />
-              </Box>
-            </HStack>
-          </MenuButton>
-          <MenuList fontSize="lg" bg="white" borderColor="gray.200">
-            <MenuItem icon={<Icon as={FiLogOut} />} onClick={logOut}>
+    <>
+      <Accordion allowToggle borderTop="0px" borderBottom="0px">
+        <AccordionItem borderTop="0px" borderBottom="0px">
+          <AccordionButton
+            _hover={{
+              bg: 'transparent',
+            }}
+          >
+            <Box as="span" flex="1" textAlign="left">
+              <Text fontSize="md" color="gray.50">
+                {loggedUser?.profile?.name}
+              </Text>
+              <Text fontSize="sm" color="gray.100">
+                {loggedUser?.username}
+              </Text>
+            </Box>
+            <AccordionIcon color="white" />
+          </AccordionButton>
+          <AccordionPanel pb={4}>
+            <Divider />
+            <Button
+              leftIcon={<Icon as={FiLogOut} />}
+              onClick={logOut}
+              color="white"
+              variant="ghost"
+              fontWeight="normal"
+            >
               Sign out
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </Flex>
-    </HStack>
+            </Button>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 };
 

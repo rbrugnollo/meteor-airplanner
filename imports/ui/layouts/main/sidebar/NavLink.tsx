@@ -23,8 +23,9 @@ const NavLink = ({ link }: NavLinkProps) => (
       borderRadius="lg"
       role="group"
       cursor="pointer"
+      color="white"
       _hover={{
-        bg: 'cyan.400',
+        bg: 'teal.400',
         color: 'white',
       }}
     >

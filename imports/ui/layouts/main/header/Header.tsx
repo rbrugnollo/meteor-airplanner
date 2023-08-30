@@ -1,7 +1,6 @@
 import React from 'react';
 import { IconButton, Flex, Text } from '@chakra-ui/react';
 import { FiMenu } from 'react-icons/fi';
-import UserProfile from './UserProfile';
 
 type HeaderProps = {
   onOpen: () => void;
@@ -13,30 +12,33 @@ const Header = ({ onOpen }: HeaderProps) => (
     px="4"
     position="sticky"
     top="0"
-    height="20"
+    height={{ base: 10, md: 20 }}
     zIndex="1"
     alignItems="center"
-    bg="white"
+    bg="teal"
     borderBottomWidth="1px"
     borderBottomColor="gray.200"
-    justifyContent={{ base: 'space-between', md: 'flex-end' }}
+    justifyContent="start"
+    display={{ base: 'flex', md: 'none' }}
   >
     <IconButton
       display={{ base: 'flex', md: 'none' }}
       onClick={onOpen}
-      variant="outline"
+      variant="ghost"
+      color="white"
       aria-label="open menu"
       icon={<FiMenu />}
     />
     <Text
+      ml={6}
       display={{ base: 'flex', md: 'none' }}
       fontSize="2xl"
       fontFamily="monospace"
       fontWeight="bold"
+      color="white"
     >
       Airplanner
     </Text>
-    <UserProfile />
   </Flex>
 );
 

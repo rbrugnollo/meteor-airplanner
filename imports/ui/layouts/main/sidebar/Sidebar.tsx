@@ -18,6 +18,7 @@ import { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import { UserListRoles } from '/imports/ui/pages/users/UserList';
 import { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
 import { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
+import UserProfile from '../header/UserProfile';
 
 const LinkItems: Link[] = [
   { label: 'Home', icon: FaHouse, href: '/app' },
@@ -55,7 +56,7 @@ const Sidebar = ({ onClose, display }: SidebarProps) => {
   return (
     <Box
       transition="3s ease"
-      bg="white"
+      bg="teal"
       borderRight="1px"
       borderRightColor="gray.200"
       w={{ base: 'full', md: 60 }}
@@ -64,17 +65,26 @@ const Sidebar = ({ onClose, display }: SidebarProps) => {
       display={display}
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
+        <Text fontSize="2xl" color="white" fontFamily="monospace" fontWeight="bold">
           Airplanner
         </Text>
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
+        <CloseButton color="white" display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {isLoadingLoggedUser ? (
         <Spinner />
       ) : (
-        LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)).map(
-          (link, i) => <NavLink key={i} link={link} />,
-        )
+        <>
+          <Box mt={30}>
+            {LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)).map(
+              (link, i) => (
+                <NavLink key={i} link={link} />
+              ),
+            )}
+          </Box>
+          <Box position="absolute" bottom="0" w="full" mb={5}>
+            <UserProfile />
+          </Box>
+        </>
       )}
     </Box>
   );
