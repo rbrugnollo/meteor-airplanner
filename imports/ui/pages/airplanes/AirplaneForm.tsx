@@ -17,14 +17,12 @@ import {
 } from '@chakra-ui/react';
 import { useForm, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
-import { Select } from 'chakra-react-select';
-import { RoleNames, Pilots } from '/imports/api/users/collection';
+import { RoleNames } from '/imports/api/users/collection';
 import { insert } from '/imports/api/airplanes/methods/insert';
 import { update } from '/imports/api/airplanes/methods/update';
 import { getOne } from '/imports/api/airplanes/methods/getOne';
-import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
-import { selectByRoles } from '/imports/api/users/publications/selectByRoles';
 import { ValueLabelType } from '/imports/api/common/ValueLabelType';
+import UserSelect from '../../shared/selects/UserSelect';
 
 interface AirplaneFormData {
   name: string;
@@ -46,11 +44,6 @@ interface AirplaneFormProps {
 
 const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const roles = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
-  useSubscribe(() => selectByRoles({ roles }));
-  const users: Meteor.User[] = useFind(() =>
-    Meteor.users.find({ 'profile.roles': { $in: roles } }, {}),
-  );
 
   const {
     register,
@@ -177,22 +170,13 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
                   <FormControl mt={6}>
                     <FormLabel htmlFor="captain">Captain</FormLabel>
-                    <Select
+                    <UserSelect
                       name={name}
-                      ref={ref}
+                      selectRef={ref}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      options={
-                        users
-                          ?.filter((f) => f.profile?.roles?.includes(RoleNames.CAPTAIN))
-                          .map((m) => ({
-                            label: m.profile?.name,
-                            value: m._id,
-                          })) ?? []
-                      }
-                      placeholder="Captain"
-                      closeMenuOnSelect
+                      roles={[RoleNames.CAPTAIN]}
                     />
                   </FormControl>
                 )}
@@ -203,19 +187,13 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
                   <FormControl mt={6}>
                     <FormLabel htmlFor="firstOfficer">First Officer</FormLabel>
-                    <Select
+                    <UserSelect
                       name={name}
-                      ref={ref}
+                      selectRef={ref}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      options={
-                        users
-                          ?.filter((f) => f.profile?.roles?.includes(RoleNames.FIRST_OFFICER))
-                          .map((m) => ({ label: m.profile?.name, value: m._id })) ?? []
-                      }
-                      placeholder="First Officer"
-                      closeMenuOnSelect
+                      roles={[RoleNames.FIRST_OFFICER]}
                     />
                   </FormControl>
                 )}
@@ -226,20 +204,13 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
                   <FormControl mt={6}>
                     <FormLabel htmlFor="manager">Manager</FormLabel>
-                    <Select
+                    <UserSelect
                       name={name}
-                      ref={ref}
+                      selectRef={ref}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      options={
-                        users?.map((m) => ({
-                          label: m.profile?.name,
-                          value: m._id,
-                        })) ?? []
-                      }
-                      placeholder="Manager"
-                      closeMenuOnSelect
+                      roles={[RoleNames.CAPTAIN]}
                     />
                   </FormControl>
                 )}
@@ -250,25 +221,14 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
                   <FormControl mt={6}>
                     <FormLabel htmlFor="pilots">Pilots</FormLabel>
-                    <Select
+                    <UserSelect
                       isMulti
                       name={name}
-                      ref={ref}
+                      selectRef={ref}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      options={
-                        users
-                          ?.filter(
-                            (f) => f.profile?.roles?.some((role: string) => Pilots.includes(role)),
-                          )
-                          ?.map((m) => ({
-                            label: m.profile?.name,
-                            value: m._id,
-                          })) ?? []
-                      }
-                      placeholder="Pilots"
-                      closeMenuOnSelect={false}
+                      roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER]}
                     />
                   </FormControl>
                 )}
