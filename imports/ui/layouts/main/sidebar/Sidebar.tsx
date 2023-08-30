@@ -1,13 +1,21 @@
 import React from 'react';
 import { Property } from 'csstype';
 import { Box, CloseButton, Flex, Text, Spinner } from '@chakra-ui/react';
-import { FaHouse, FaPlane, FaUsers, FaCalendarDays, FaGear } from 'react-icons/fa6';
+import {
+  FaHouse,
+  FaPlane,
+  FaUsers,
+  FaCalendarDays,
+  FaGear,
+  FaMoneyBillTransfer,
+} from 'react-icons/fa6';
 import { useLoggedUser } from 'meteor/quave:logged-user-react';
 import NavLink, { Link } from './NavLink';
 import { ResponsiveValue } from '@chakra-ui/styled-system/dist';
 import { Roles } from 'meteor/alanning:roles';
 import { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import { UserListRoles } from '/imports/ui/pages/users/UserList';
+import { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
 
 const LinkItems: Link[] = [
   { label: 'Home', icon: FaHouse, href: '/app' },
@@ -19,6 +27,12 @@ const LinkItems: Link[] = [
     roles: AirplaneListRoles,
   },
   { label: 'Users', icon: FaUsers, href: 'users', roles: UserListRoles },
+  {
+    label: 'Cost Centers',
+    icon: FaMoneyBillTransfer,
+    href: 'costCenters',
+    roles: CostCenterListRoles,
+  },
   { label: 'Settings', icon: FaGear, href: 'settings' },
 ];
 

@@ -15,6 +15,8 @@ import {
   useDisclosure,
   useToast,
   Textarea,
+  InputGroup,
+  InputRightAddon,
 } from '@chakra-ui/react';
 import { useForm, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
@@ -28,16 +30,19 @@ import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 import AirportSelect from '../../shared/selects/AirportSelect';
 import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import UserSelect from '../../shared/selects/UserSelect';
+import CostCenterSelect from '../../shared/selects/CostCenterSelect';
 
 interface FlightFormData {
   airplane: ValueLabelType;
   scheduledDateTime: Date;
-  estimatedFlightTime: number;
+  estimatedDuration: number;
   origin: ValueLabelType;
   destination: ValueLabelType;
   captain: ValueLabelType;
   firstOfficer: ValueLabelType;
   passengers: ValueLabelType[];
+  requester: ValueLabelType;
+  costCenter: ValueLabelType;
   notes: string;
 }
 
@@ -223,16 +228,16 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
                   </FormControl>
                 )}
               />
-              <FormControl mt={6} isRequired isInvalid={!!errors.estimatedFlightTime}>
-                <FormLabel htmlFor="estimatedFlightTime">Flight Time</FormLabel>
+              <FormControl mt={6} isRequired isInvalid={!!errors.estimatedDuration}>
+                <FormLabel htmlFor="estimatedFlightTime">Duration</FormLabel>
                 <Input
                   placeholder="HH:mm"
-                  {...register('estimatedFlightTime', {
-                    required: 'Please enter Flight Time',
+                  {...register('estimatedDuration', {
+                    required: 'Please enter Duration',
                   })}
                 />
                 <FormErrorMessage>
-                  {errors.estimatedFlightTime && errors.estimatedFlightTime.message}
+                  {errors.estimatedDuration && errors.estimatedDuration.message}
                 </FormErrorMessage>
               </FormControl>
               <Controller
@@ -287,6 +292,46 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
                   </FormControl>
                 )}
               />
+              <Controller
+                control={control}
+                name="requester"
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6}>
+                    <FormLabel htmlFor="requester">Requester</FormLabel>
+                    <UserSelect
+                      name={name}
+                      selectRef={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER, RoleNames.PASSENGER]}
+                    />
+                  </FormControl>
+                )}
+              />
+              <Controller
+                control={control}
+                name="costCenter"
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6}>
+                    <FormLabel htmlFor="costCenter">Cost Center</FormLabel>
+                    <CostCenterSelect
+                      name={name}
+                      selectRef={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                    />
+                  </FormControl>
+                )}
+              />
+              <FormControl mt={6}>
+                <FormLabel htmlFor="percentage">%</FormLabel>
+                <InputGroup>
+                  <Input />
+                  <InputRightAddon>%</InputRightAddon>
+                </InputGroup>
+              </FormControl>
               <FormControl mt={6}>
                 <FormLabel htmlFor="notes">Notes</FormLabel>
                 <Textarea {...register('notes')} />
