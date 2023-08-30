@@ -11,7 +11,7 @@ import { UserListRoles } from '/imports/ui/pages/users/UserList';
 
 const LinkItems: Link[] = [
   { label: 'Home', icon: FaHouse, href: '/app' },
-  { label: 'Schedule', icon: FaCalendarDays, href: 'schedule' },
+  { label: 'Flight Schedule', icon: FaCalendarDays, href: 'flightSchedule' },
   {
     label: 'Airplanes',
     icon: FaPlane,

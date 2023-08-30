@@ -9,6 +9,7 @@ import ForgotPasswordForm from '/imports/ui/pages/login/ForgotPasswordForm';
 import Authorized from './Authorized';
 import AirplaneList, { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import UserList, { UserListRoles } from '/imports/ui/pages/users/UserList';
+import FlightScheduleList from '/imports/ui/pages/flightSchedule/FlightScheduleList';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
@@ -66,6 +67,10 @@ const Router = createBrowserRouter([
         element: <MainLayout />,
         loader: loggedInOnly,
         children: [
+          {
+            path: 'flightSchedule',
+            element: <Authorized Component={FlightScheduleList} roles={AirplaneListRoles} />,
+          },
           {
             path: 'airplanes',
             element: <Authorized Component={AirplaneList} roles={AirplaneListRoles} />,
