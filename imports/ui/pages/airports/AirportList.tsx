@@ -14,24 +14,24 @@ import {
   Button,
   Spinner,
 } from '@chakra-ui/react';
-import { CostCentersCollection } from '/imports/api/costCenters/collection';
+import { AirportsCollection } from '/imports/api/airports/collection';
 import { FaPlus } from 'react-icons/fa6';
 import { RoleNames } from '/imports/api/users/collection';
 import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
-import { list } from '/imports/api/costCenters/publications/list';
-import CostCenterForm from './CostCenterForm';
-import CostCenterListItem from './CostCenterListItem';
+import { list } from '/imports/api/airports/publications/list';
+import AirportForm from './AirportForm';
+import AirportListItem from './AirportListItem';
 
-interface CostCenterViewModel {
-  _id?: string;
+interface AirportViewModel {
+  _id: string;
   name: string;
 }
 
-export const CostCenterListRoles = [RoleNames.ADMIN];
+export const AirportListRoles = [RoleNames.ADMIN];
 
-const CostCenterList = () => {
+const AirportList = () => {
   const isLoading = useSubscribe(list);
-  const costCenters: CostCenterViewModel[] = useFind(() => CostCentersCollection.find({}));
+  const airports: AirportViewModel[] = useFind(() => AirportsCollection.find({}));
 
   if (isLoading())
     return (
@@ -54,12 +54,12 @@ const CostCenterList = () => {
         <Flex minWidth="max-content" alignItems="center" gap="2" mb={3}>
           <Box>
             <Heading as="h3" size="lg">
-              CostCenters
+              Airport
             </Heading>
           </Box>
           <Spacer />
           <ButtonGroup gap="2">
-            <CostCenterForm
+            <AirportForm
               ActionButton={({ onOpen }) => (
                 <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
                   Add New
@@ -73,12 +73,13 @@ const CostCenterList = () => {
             <Thead>
               <Tr>
                 <Th>Name</Th>
+                <Th>Location</Th>
                 <Th>&nbsp;</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {costCenters.map((a) => (
-                <CostCenterListItem key={a._id} costCenter={a} />
+              {airports.map((a) => (
+                <AirportListItem key={a._id} airport={a} />
               ))}
             </Tbody>
           </Table>
@@ -88,4 +89,4 @@ const CostCenterList = () => {
   );
 };
 
-export default CostCenterList;
+export default AirportList;

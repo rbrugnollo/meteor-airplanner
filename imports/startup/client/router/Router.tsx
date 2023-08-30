@@ -11,6 +11,7 @@ import AirplaneList, { AirplaneListRoles } from '/imports/ui/pages/airplanes/Air
 import UserList, { UserListRoles } from '/imports/ui/pages/users/UserList';
 import FlightScheduleList from '/imports/ui/pages/flightSchedule/FlightScheduleList';
 import CostCenterList, { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
+import AirportList, { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
@@ -75,6 +76,10 @@ const Router = createBrowserRouter([
           {
             path: 'airplanes',
             element: <Authorized Component={AirplaneList} roles={AirplaneListRoles} />,
+          },
+          {
+            path: 'airports',
+            element: <Authorized Component={AirportList} roles={AirportListRoles} />,
           },
           {
             path: 'users',

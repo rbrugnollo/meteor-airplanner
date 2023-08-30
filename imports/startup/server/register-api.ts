@@ -8,6 +8,7 @@ import '../../api/airplanes/publications';
 
 // Airports
 import '../../api/airports/methods';
+import '../../api/airports/publications';
 
 // CostCenters
 import '../../api/costCenters/methods';

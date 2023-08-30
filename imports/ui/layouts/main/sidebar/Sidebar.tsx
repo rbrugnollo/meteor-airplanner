@@ -9,6 +9,7 @@ import {
   FaGear,
   FaMoneyBillTransfer,
 } from 'react-icons/fa6';
+import { CiAirportSign1 } from 'react-icons/ci';
 import { useLoggedUser } from 'meteor/quave:logged-user-react';
 import NavLink, { Link } from './NavLink';
 import { ResponsiveValue } from '@chakra-ui/styled-system/dist';
@@ -16,6 +17,7 @@ import { Roles } from 'meteor/alanning:roles';
 import { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import { UserListRoles } from '/imports/ui/pages/users/UserList';
 import { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
+import { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
 
 const LinkItems: Link[] = [
   { label: 'Home', icon: FaHouse, href: '/app' },
@@ -25,6 +27,12 @@ const LinkItems: Link[] = [
     icon: FaPlane,
     href: 'airplanes',
     roles: AirplaneListRoles,
+  },
+  {
+    label: 'Airports',
+    icon: CiAirportSign1,
+    href: 'airports',
+    roles: AirportListRoles,
   },
   { label: 'Users', icon: FaUsers, href: 'users', roles: UserListRoles },
   {
