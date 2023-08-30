@@ -43,18 +43,17 @@ const CostCenterList = () => {
       <Box
         p={{ base: 4, md: 8 }}
         width="full"
+        h="full"
         minH={{
-          base: 'calc(100vh - 6rem)',
-          md: 'calc(100vh - 7rem)',
+          base: 'calc(100vh - 2rem)',
+          md: '100vh',
         }}
-        borderWidth={1}
-        borderRadius={8}
         bgColor="white"
       >
-        <Flex minWidth="max-content" alignItems="center" gap="2" mb={3}>
+        <Flex minWidth="max-content" alignItems="center" gap="2" mb={6}>
           <Box>
             <Heading as="h3" size="lg">
-              CostCenters
+              Cost Centers
             </Heading>
           </Box>
           <Spacer />

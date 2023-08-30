@@ -18,7 +18,7 @@ const MainLayout = () => {
 
   if (isLoading()) return <Spinner />;
   return (
-    <Box minH="100vh" bg="gray.100">
+    <Box minH="100vh" bg="white">
       <Sidebar onClose={onClose} display={{ base: 'none', md: 'block' }} />
       <Drawer
         autoFocus={false}
@@ -36,7 +36,7 @@ const MainLayout = () => {
 
       {/* Header */}
       <Header onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }} p={{ base: 2, md: 4 }}>
+      <Box h="full" bg="white" ml={{ base: 0, md: 60 }} p={0}>
         <Outlet />
       </Box>
     </Box>
