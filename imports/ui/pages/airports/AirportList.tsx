@@ -12,7 +12,7 @@ import {
   Spacer,
   ButtonGroup,
   Button,
-  Spinner,
+  SkeletonText,
 } from '@chakra-ui/react';
 import { AirportsCollection } from '/imports/api/airports/collection';
 import { FaPlus } from 'react-icons/fa6';
@@ -32,12 +32,6 @@ export const AirportListRoles = [RoleNames.ADMIN];
 const AirportList = () => {
   const isLoading = useSubscribe(list);
   const airports: AirportViewModel[] = useFind(() => AirportsCollection.find({}));
-
-  if (isLoading())
-    return (
-      <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
-    );
-
   return (
     <Flex width="full" align="center" justifyContent="center">
       <Box
@@ -67,22 +61,24 @@ const AirportList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer minH="full" whiteSpace="normal">
-          <Table size="sm" variant="striped" colorScheme="teal">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Location</Th>
-                <Th>&nbsp;</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {airports.map((a) => (
-                <AirportListItem key={a._id} airport={a} />
-              ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
+          <TableContainer minH="full" whiteSpace="normal">
+            <Table size="sm" variant="striped" colorScheme="teal">
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Location</Th>
+                  <Th>&nbsp;</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {airports.map((a) => (
+                  <AirportListItem key={a._id} airport={a} />
+                ))}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </SkeletonText>
       </Box>
     </Flex>
   );

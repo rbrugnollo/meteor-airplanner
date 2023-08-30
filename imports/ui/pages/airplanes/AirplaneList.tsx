@@ -12,7 +12,7 @@ import {
   Spacer,
   ButtonGroup,
   Button,
-  Spinner,
+  SkeletonText,
 } from '@chakra-ui/react';
 import { AirplanesCollection } from '/imports/api/airplanes/collection';
 import AirplaneListItem from './AirplaneListItem';
@@ -33,11 +33,6 @@ export const AirplaneListRoles = [RoleNames.ADMIN];
 const AirplaneList = () => {
   const isLoading = useSubscribe(list);
   const airplanes: AirplaneViewModel[] = useFind(() => AirplanesCollection.find({}));
-
-  if (isLoading())
-    return (
-      <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
-    );
 
   return (
     <Flex width="full" align="center" justifyContent="center">
@@ -68,22 +63,24 @@ const AirplaneList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer minH="full" whiteSpace="normal">
-          <Table size="sm" variant="striped" colorScheme="teal">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Tail Number</Th>
-                <Th>&nbsp;</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {airplanes.map((a) => (
-                <AirplaneListItem key={a._id} airplane={a} />
-              ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
+          <TableContainer minH="full" whiteSpace="normal">
+            <Table size="sm" variant="striped" colorScheme="teal">
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Tail Number</Th>
+                  <Th>&nbsp;</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {airplanes.map((a) => (
+                  <AirplaneListItem key={a._id} airplane={a} />
+                ))}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </SkeletonText>
       </Box>
     </Flex>
   );

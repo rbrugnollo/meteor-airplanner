@@ -3,7 +3,6 @@ import {
   Box,
   Text,
   Icon,
-  Spinner,
   Accordion,
   AccordionButton,
   AccordionIcon,
@@ -19,17 +18,13 @@ import { useNavigate } from 'react-router';
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const { loggedUser, isLoadingLoggedUser } = useLoggedUser();
+  const { loggedUser } = useLoggedUser();
 
   const logOut = () => {
     Meteor.logout(() => {
       navigate('/login');
     });
   };
-
-  if (isLoadingLoggedUser) {
-    return <Spinner />;
-  }
 
   return (
     <>

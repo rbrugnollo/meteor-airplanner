@@ -12,7 +12,7 @@ import {
   Spacer,
   ButtonGroup,
   Button,
-  Spinner,
+  SkeletonText,
 } from '@chakra-ui/react';
 import UserListItem from './UserListItem';
 import UserForm from './UserForm';
@@ -36,13 +36,6 @@ export const UserListRoles = [RoleNames.ADMIN];
 const UserList = () => {
   const isLoading = useSubscribe(list);
   const users: UserViewModel[] = useFind(() => Meteor.users.find());
-
-  console.log(users);
-
-  if (isLoading())
-    return (
-      <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
-    );
 
   return (
     <Flex width="full" align="center" justifyContent="center">
@@ -73,22 +66,24 @@ const UserList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer minH="full" whiteSpace="normal">
-          <Table size="sm" variant="striped" colorScheme="teal">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Roles</Th>
-                <Th>&nbsp;</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {users.map((a) => (
-                <UserListItem key={a._id} user={a} />
-              ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
+          <TableContainer minH="full" whiteSpace="normal">
+            <Table size="sm" variant="striped" colorScheme="teal">
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Roles</Th>
+                  <Th>&nbsp;</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {users.map((a) => (
+                  <UserListItem key={a._id} user={a} />
+                ))}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </SkeletonText>
       </Box>
     </Flex>
   );

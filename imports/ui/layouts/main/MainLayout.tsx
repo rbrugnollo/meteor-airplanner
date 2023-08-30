@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import Header from './header/Header';
 import Sidebar from './sidebar/Sidebar';
-import { Box, Drawer, DrawerContent, Spinner, useDisclosure } from '@chakra-ui/react';
+import { Box, Drawer, DrawerContent, useDisclosure } from '@chakra-ui/react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { roles } from '/imports/api/users/publications/roles';
 import { useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
+import LoadingSpinner from './Loading';
 
 const MainLayout = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -16,7 +17,7 @@ const MainLayout = () => {
     onClose();
   }, [location]);
 
-  if (isLoading()) return <Spinner />;
+  if (isLoading()) return <LoadingSpinner />;
   return (
     <Box minH="100vh" bg="white">
       <Sidebar onClose={onClose} display={{ base: 'none', md: 'block' }} />

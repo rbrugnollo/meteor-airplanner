@@ -12,7 +12,7 @@ import {
   Spacer,
   ButtonGroup,
   Button,
-  Spinner,
+  SkeletonText,
 } from '@chakra-ui/react';
 import { CostCentersCollection } from '/imports/api/costCenters/collection';
 import { FaPlus } from 'react-icons/fa6';
@@ -32,11 +32,6 @@ export const CostCenterListRoles = [RoleNames.ADMIN];
 const CostCenterList = () => {
   const isLoading = useSubscribe(list);
   const costCenters: CostCenterViewModel[] = useFind(() => CostCentersCollection.find({}));
-
-  if (isLoading())
-    return (
-      <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
-    );
 
   return (
     <Flex width="full" align="center" justifyContent="center">
@@ -67,21 +62,23 @@ const CostCenterList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer minH="full" whiteSpace="normal">
-          <Table size="sm" variant="striped" colorScheme="teal">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>&nbsp;</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {costCenters.map((a) => (
-                <CostCenterListItem key={a._id} costCenter={a} />
-              ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
+          <TableContainer minH="full" whiteSpace="normal">
+            <Table size="sm" variant="striped" colorScheme="teal">
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>&nbsp;</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {costCenters.map((a) => (
+                  <CostCenterListItem key={a._id} costCenter={a} />
+                ))}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </SkeletonText>
       </Box>
     </Flex>
   );

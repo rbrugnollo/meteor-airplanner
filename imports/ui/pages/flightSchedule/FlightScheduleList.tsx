@@ -12,6 +12,7 @@ import {
   Spacer,
   ButtonGroup,
   Button,
+  SkeletonText,
 } from '@chakra-ui/react';
 import { FaPlus } from 'react-icons/fa6';
 import { RoleNames } from '/imports/api/users/collection';
@@ -49,18 +50,20 @@ const FlightScheduleList = () => {
             />
           </ButtonGroup>
         </Flex>
-        <TableContainer minH="full" whiteSpace="normal">
-          <Table size="sm" variant="striped" colorScheme="teal">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Tail Number</Th>
-                <Th>&nbsp;</Th>
-              </Tr>
-            </Thead>
-            <Tbody>{null}</Tbody>
-          </Table>
-        </TableContainer>
+        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={true}>
+          <TableContainer minH="full" whiteSpace="normal">
+            <Table size="sm" variant="striped" colorScheme="teal">
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Tail Number</Th>
+                  <Th>&nbsp;</Th>
+                </Tr>
+              </Thead>
+              <Tbody>{null}</Tbody>
+            </Table>
+          </TableContainer>
+        </SkeletonText>
       </Box>
     </Flex>
   );

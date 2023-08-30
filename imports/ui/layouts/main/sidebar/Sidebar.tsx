@@ -1,6 +1,6 @@
 import React from 'react';
 import { Property } from 'csstype';
-import { Box, CloseButton, Flex, Text, Spinner } from '@chakra-ui/react';
+import { Box, CloseButton, Flex, Text, SkeletonText } from '@chakra-ui/react';
 import {
   FaHouse,
   FaPlane,
@@ -70,22 +70,18 @@ const Sidebar = ({ onClose, display }: SidebarProps) => {
         </Text>
         <CloseButton color="white" display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
-      {isLoadingLoggedUser ? (
-        <Spinner />
-      ) : (
-        <>
-          <Box mt={30}>
-            {LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)).map(
-              (link, i) => (
-                <NavLink key={i} link={link} />
-              ),
-            )}
-          </Box>
-          <Box position="absolute" bottom="0" w="full" mb={5}>
-            <UserProfile />
-          </Box>
-        </>
-      )}
+      <SkeletonText noOfLines={6} spacing={4} skeletonHeight={8} isLoaded={!isLoadingLoggedUser}>
+        <Box mt={30}>
+          {LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)).map(
+            (link, i) => (
+              <NavLink key={i} link={link} />
+            ),
+          )}
+        </Box>
+        <Box position="absolute" bottom="0" w="full" mb={5}>
+          <UserProfile />
+        </Box>
+      </SkeletonText>
     </Box>
   );
 };
