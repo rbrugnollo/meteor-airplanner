@@ -23,8 +23,8 @@ const UserSelect = <IsMulti extends boolean = false>(props: UserSelectProps<IsMu
       .then((items) => {
         setOptions(
           items.map((item) => ({
-            value: item._id!,
-            label: item.profile?.name,
+            value: item._id ?? '',
+            label: item.profile?.name ?? '',
           })),
         );
       })

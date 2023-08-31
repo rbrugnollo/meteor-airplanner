@@ -72,7 +72,7 @@ const Sidebar = ({ onClose, display }: SidebarProps) => {
       </Flex>
       <SkeletonText noOfLines={6} spacing={4} skeletonHeight={8} isLoaded={!isLoadingLoggedUser}>
         <Box mt={30}>
-          {LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser._id, f.roles)).map(
+          {LinkItems.filter((f) => !f.roles || Roles.userIsInRole(loggedUser?._id, f.roles)).map(
             (link, i) => (
               <NavLink key={i} link={link} />
             ),

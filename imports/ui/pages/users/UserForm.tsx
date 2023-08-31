@@ -114,8 +114,8 @@ const UserForm = ({ userId, ActionButton }: UserFormProps) => {
 
     if (userId) {
       const user = await getOne({ _id: userId });
-      setValue('name', user?.profile?.name);
-      setValue('email', user?.emails?.[0].address || '');
+      setValue('name', user?.profile?.name ?? '');
+      setValue('email', user?.emails?.[0].address ?? '');
       setValue('roles', user?.profile?.roles?.map((m: string) => ({ label: m, value: m })) ?? []);
     }
   };
