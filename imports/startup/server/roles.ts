@@ -39,12 +39,3 @@ export const RolesStartup = async () => {
   CreateRoles();
   await AddDefaultAdmin();
 };
-
-export const RolesStartup2 = () => {
-  console.log('airports startup');
-  //   if (AirportsCollection.find().count() === 0) {
-  //     const fileContent = readFileSync('./airports.json', 'utf-8');
-  //     const parsedData = JSON.parse(fileContent);
-  //     console.log(parsedData[0]);
-  //   }
-};

@@ -23,11 +23,11 @@ import { list } from '/imports/api/users/publications/list';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 
 interface UserViewModel {
-  _id: string;
-  username: string;
-  profile: {
-    name: string;
-    roles: string[];
+  readonly _id: string;
+  readonly username?: string;
+  readonly profile?: {
+    readonly name?: string;
+    readonly roles?: string[];
   };
 }
 

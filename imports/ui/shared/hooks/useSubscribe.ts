@@ -6,11 +6,12 @@ const useSubscribeClient = (func: () => Meteor.SubscriptionHandle): (() => boole
   let updateOnReady = false;
   let subscription: Meteor.SubscriptionHandle;
 
-  const isReady = useTracker(
+  const isReady = useTracker<boolean>(
     () => {
       subscription = func();
       return subscription.ready();
     },
+    // @ts-expect-error Meteor typings are wrong
     () => !updateOnReady,
   );
 

@@ -4,11 +4,11 @@ import UserForm from './UserForm';
 import EditBtn from '../../shared/editBtn/EditBtn';
 
 interface UserViewModel {
-  _id: string;
-  username: string;
-  profile: {
-    name: string;
-    roles: string[];
+  readonly _id: string;
+  readonly username?: string;
+  readonly profile?: {
+    readonly name?: string;
+    readonly roles?: string[];
   };
 }
 

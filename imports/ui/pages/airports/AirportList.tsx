@@ -23,8 +23,11 @@ import AirportForm from './AirportForm';
 import AirportListItem from './AirportListItem';
 
 interface AirportViewModel {
-  _id: string;
-  name: string;
+  readonly _id: string;
+  readonly name: string;
+  readonly icao: string;
+  readonly city: string;
+  readonly country: string;
 }
 
 export const AirportListRoles = [RoleNames.ADMIN];

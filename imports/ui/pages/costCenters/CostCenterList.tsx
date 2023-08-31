@@ -23,7 +23,7 @@ import CostCenterForm from './CostCenterForm';
 import CostCenterListItem from './CostCenterListItem';
 
 interface CostCenterViewModel {
-  _id?: string;
+  _id: string;
   name: string;
 }
 

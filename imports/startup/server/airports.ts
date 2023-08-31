@@ -13,7 +13,6 @@ interface AirportJson {
 }
 
 export const AirplanesStartup = () => {
-  console.log('airports startup');
   if (AirportsCollection.find().count() === 0) {
     const fileContent = readFileSync('assets/app/files/airports.json', 'utf-8');
     const airports = JSON.parse(fileContent);

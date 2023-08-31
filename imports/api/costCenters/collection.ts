@@ -6,7 +6,6 @@ import { BaseCollection } from '../common/BaseCollection';
 export const COLLECTION_NAME = 'costCenters';
 
 export interface CostCenter extends BaseCollection {
-  readonly _id?: string;
   readonly name: string;
 }
 
