@@ -13,3 +13,7 @@ import '../../api/airports/publications';
 // CostCenters
 import '../../api/costCenters/methods';
 import '../../api/costCenters/publications';
+
+// Flights
+import '../../api/flights/methods';
+import '../../api/flights/publications';

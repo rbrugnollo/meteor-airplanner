@@ -18,32 +18,33 @@ import {
   InputGroup,
   InputRightAddon,
 } from '@chakra-ui/react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
-import { Select } from 'chakra-react-select';
 import { RoleNames } from '/imports/api/users/collection';
-import { insert } from '/imports/api/airplanes/methods/insert';
-import { update } from '/imports/api/airplanes/methods/update';
-import { getOne } from '/imports/api/airplanes/methods/getOne';
-import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
+import { insert as insertFlight } from '/imports/api/flights/methods/insert';
+import { update } from '/imports/api/flights/methods/update';
+import { getOne } from '/imports/api/flights/methods/getOne';
 import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 import AirportSelect from '../../shared/selects/AirportSelect';
 import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import UserSelect from '../../shared/selects/UserSelect';
 import CostCenterSelect from '../../shared/selects/CostCenterSelect';
 
-interface FlightFormData {
-  airplane: ValueLabelType;
-  scheduledDateTime: Date;
-  estimatedDuration: number;
-  origin: ValueLabelType;
-  destination: ValueLabelType;
-  captain: ValueLabelType;
-  firstOfficer: ValueLabelType;
-  passengers: ValueLabelType[];
-  requester: ValueLabelType;
-  costCenter: ValueLabelType;
-  notes: string;
+export interface FlightFormData {
+  readonly airplane: ValueLabelType;
+  readonly scheduledDateTime: Date;
+  readonly estimatedDuration: string;
+  readonly origin: ValueLabelType;
+  readonly destination: ValueLabelType;
+  readonly captain?: ValueLabelType;
+  readonly firstOfficer?: ValueLabelType;
+  readonly passengers?: ValueLabelType[];
+  readonly requesters?: {
+    readonly requester?: ValueLabelType;
+    readonly costCenter?: ValueLabelType;
+    readonly percentage?: number;
+  }[];
+  readonly notes?: string;
 }
 
 interface FlightFormActionButtonProps {
@@ -51,11 +52,11 @@ interface FlightFormActionButtonProps {
 }
 
 interface FlightFormProps {
-  readonly airplaneId?: string;
+  readonly flightId?: string;
   readonly ActionButton: React.JSXElementConstructor<FlightFormActionButtonProps>;
 }
 
-const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
+const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const {
@@ -66,51 +67,56 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
     setValue,
     formState: { errors, isSubmitting, isLoading },
   } = useForm<FlightFormData>();
+  const { fields, append } = useFieldArray({
+    control,
+    name: 'requesters',
+  });
 
   const toast = useToast();
 
   const handleInsert = async (data: FlightFormData) => {
-    // try {
-    //   await insert(data);
-    //   toast({
-    //     description: 'Airplane successfully created.',
-    //     status: 'success',
-    //   });
-    //   handleClose();
-    // } catch (e: unknown) {
-    //   console.log(e);
-    //   if (e instanceof Meteor.Error) {
-    //     toast({
-    //       description: e.message,
-    //       status: 'error',
-    //     });
-    //   }
-    // }
+    console.log(data);
+    try {
+      await insertFlight({ ...data, scheduledDateTime: new Date() });
+      toast({
+        description: 'Flight successfully created.',
+        status: 'success',
+      });
+      handleClose();
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Meteor.Error) {
+        toast({
+          description: e.message,
+          status: 'error',
+        });
+      }
+    }
   };
 
   const handleUpdate = async (data: FlightFormData) => {
-    // try {
-    //   await update({
-    //     _id: airplaneId!,
-    //     ...data,
-    //   });
-    //   toast({
-    //     description: 'Airplane successfully updated.',
-    //     status: 'success',
-    //   });
-    //   handleClose();
-    // } catch (e: unknown) {
-    //   if (e instanceof Meteor.Error) {
-    //     toast({
-    //       description: e.message,
-    //       status: 'error',
-    //     });
-    //   }
-    // }
+    try {
+      await update({
+        _id: flightId!,
+        ...data,
+      });
+      toast({
+        description: 'Flight successfully updated.',
+        status: 'success',
+      });
+      handleClose();
+    } catch (e: unknown) {
+      if (e instanceof Meteor.Error) {
+        toast({
+          description: e.message,
+          status: 'error',
+        });
+      }
+    }
   };
 
   const handleFormSubmit = async (data: FlightFormData) => {
-    if (airplaneId) {
+    if (flightId) {
       await handleUpdate(data);
     } else {
       await handleInsert(data);
@@ -118,26 +124,34 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
   };
 
   const handleOpen = async () => {
-    // setValue('name', '');
-    // setValue('tailNumber', '');
-    // setValue('manager', undefined);
-    // setValue('captain', undefined);
-    // setValue('firstOfficer', undefined);
+    setValue('airplane', undefined);
+    setValue('scheduledDateTime', undefined);
+    setValue('estimatedDuration', undefined);
+    setValue('origin', undefined);
+    setValue('destination', undefined);
+    setValue('captain', undefined);
+    setValue('firstOfficer', undefined);
+    setValue('passengers', undefined);
+    setValue('requesters', undefined);
+    setValue('notes', undefined);
 
     onOpen();
 
-    // console.log(airplaneId);
-
-    // if (airplaneId) {
-    //   const airplane = await getOne({ _id: airplaneId });
-    //   console.log(airplane);
-    //   setValue('name', airplane?.name || '');
-    //   setValue('tailNumber', airplane?.tailNumber || '');
-    //   setValue('captain', airplane?.captain);
-    //   setValue('firstOfficer', airplane?.firstOfficer);
-    //   setValue('manager', airplane?.manager);
-    //   setValue('pilots', airplane?.pilots);
-    // }
+    if (flightId) {
+      const flight = await getOne({ _id: flightId });
+      if (flight) {
+        setValue('airplane', flight.airplane);
+        setValue('scheduledDateTime', flight.scheduledDateTime);
+        setValue('estimatedDuration', flight.estimatedDuration);
+        setValue('origin', flight.origin);
+        setValue('destination', flight.destination);
+        setValue('captain', flight.captain);
+        setValue('firstOfficer', flight.firstOfficer);
+        setValue('passengers', flight.passengers);
+        setValue('requesters', flight.requesters);
+        setValue('notes', flight.notes);
+      }
+    }
   };
 
   const handleClose = () => {
@@ -145,7 +159,7 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
     onClose();
   };
 
-  const headerText = airplaneId ? 'Edit Airplane' : 'Schedule a new Flight';
+  const headerText = flightId ? 'Edit Airplane' : 'Schedule a new Flight';
 
   return (
     <>
@@ -184,6 +198,7 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
                   type="datetime-local"
                   {...register('scheduledDateTime', {
                     required: 'Please enter Date and Time',
+                    valueAsDate: true,
                   })}
                 />
                 <FormErrorMessage>
@@ -292,46 +307,87 @@ const FlightForm = ({ airplaneId, ActionButton }: FlightFormProps) => {
                   </FormControl>
                 )}
               />
-              <Controller
-                control={control}
-                name="requester"
-                render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
-                    <FormLabel htmlFor="requester">Requester</FormLabel>
-                    <UserSelect
-                      name={name}
-                      selectRef={ref}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER, RoleNames.PASSENGER]}
-                    />
+              {fields.map((field, index) => (
+                <div key={field.id}>
+                  <Controller
+                    control={control}
+                    name={`requesters.${index}.requester`}
+                    rules={{ required: 'Please enter Requester' }}
+                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                      <FormControl
+                        mt={6}
+                        isRequired
+                        isInvalid={!!(errors.requesters && errors.requesters[0]?.requester)}
+                      >
+                        <FormLabel htmlFor={`requesters.${index}.requester`}>Requester</FormLabel>
+                        <UserSelect
+                          name={name}
+                          selectRef={ref}
+                          onChange={onChange}
+                          onBlur={onBlur}
+                          value={value}
+                          roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER, RoleNames.PASSENGER]}
+                        />
+                        <FormErrorMessage>
+                          {errors.requesters &&
+                            errors.requesters[0]?.requester &&
+                            errors.requesters[0]?.requester.message}
+                        </FormErrorMessage>
+                      </FormControl>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name={`requesters.${index}.costCenter`}
+                    rules={{ required: 'Please enter Cost Center' }}
+                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                      <FormControl
+                        mt={6}
+                        isRequired
+                        isInvalid={!!(errors.requesters && errors.requesters[0]?.costCenter)}
+                      >
+                        <FormLabel htmlFor={`requesters.${index}.costCenter`}>
+                          Cost Center
+                        </FormLabel>
+                        <CostCenterSelect
+                          name={name}
+                          selectRef={ref}
+                          onChange={onChange}
+                          onBlur={onBlur}
+                          value={value}
+                        />
+                        <FormErrorMessage>
+                          {errors.requesters &&
+                            errors.requesters[0]?.costCenter &&
+                            errors.requesters[0]?.costCenter.message}
+                        </FormErrorMessage>
+                      </FormControl>
+                    )}
+                  />
+                  <FormControl
+                    mt={6}
+                    isRequired
+                    isInvalid={!!(errors.requesters && errors.requesters[0]?.percentage)}
+                  >
+                    <FormLabel htmlFor={`requesters.${index}.percentage`}>Percentage</FormLabel>
+                    <InputGroup>
+                      <Input
+                        {...register(`requesters.${index}.percentage`, {
+                          required: 'Please enter Percentage',
+                          valueAsNumber: true,
+                        })}
+                      />
+                      <InputRightAddon>%</InputRightAddon>
+                    </InputGroup>
+                    <FormErrorMessage>
+                      {errors.requesters &&
+                        errors.requesters[0]?.percentage &&
+                        errors.requesters[0]?.percentage.message}
+                    </FormErrorMessage>
                   </FormControl>
-                )}
-              />
-              <Controller
-                control={control}
-                name="costCenter"
-                render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
-                    <FormLabel htmlFor="costCenter">Cost Center</FormLabel>
-                    <CostCenterSelect
-                      name={name}
-                      selectRef={ref}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                    />
-                  </FormControl>
-                )}
-              />
-              <FormControl mt={6}>
-                <FormLabel htmlFor="percentage">%</FormLabel>
-                <InputGroup>
-                  <Input />
-                  <InputRightAddon>%</InputRightAddon>
-                </InputGroup>
-              </FormControl>
+                </div>
+              ))}
+              <Button onClick={() => append({})}>Add</Button>
               <FormControl mt={6}>
                 <FormLabel htmlFor="notes">Notes</FormLabel>
                 <Textarea {...register('notes')} />
