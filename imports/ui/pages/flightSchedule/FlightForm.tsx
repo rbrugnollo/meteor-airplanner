@@ -29,6 +29,7 @@ import AirportSelect from '../../shared/selects/AirportSelect';
 import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import UserSelect from '../../shared/selects/UserSelect';
 import CostCenterSelect from '../../shared/selects/CostCenterSelect';
+import DatePicker from '../../shared/datePicker/DatePicker';
 
 export interface FlightFormData {
   readonly airplane: ValueLabelType;
@@ -77,7 +78,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   const handleInsert = async (data: FlightFormData) => {
     console.log(data);
     try {
-      await insertFlight({ ...data, scheduledDateTime: new Date() });
+      await insertFlight(data);
       toast({
         description: 'Flight successfully created.',
         status: 'success',
@@ -124,11 +125,11 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   };
 
   const handleOpen = async () => {
-    setValue('airplane', undefined);
-    setValue('scheduledDateTime', undefined);
-    setValue('estimatedDuration', undefined);
-    setValue('origin', undefined);
-    setValue('destination', undefined);
+    setValue('airplane', undefined as unknown as ValueLabelType);
+    setValue('scheduledDateTime', undefined as unknown as Date);
+    setValue('estimatedDuration', undefined as unknown as string);
+    setValue('origin', undefined as unknown as ValueLabelType);
+    setValue('destination', undefined as unknown as ValueLabelType);
     setValue('captain', undefined);
     setValue('firstOfficer', undefined);
     setValue('passengers', undefined);
@@ -191,20 +192,30 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                   </FormControl>
                 )}
               />
-              <FormControl mt={6} isRequired isInvalid={!!errors.scheduledDateTime}>
-                <FormLabel htmlFor="scheduledDateTime">Date Time</FormLabel>
-                <Input
-                  placeholder="Select Date and Time"
-                  type="datetime-local"
-                  {...register('scheduledDateTime', {
-                    required: 'Please enter Date and Time',
-                    valueAsDate: true,
-                  })}
-                />
-                <FormErrorMessage>
-                  {errors.scheduledDateTime && errors.scheduledDateTime.message}
-                </FormErrorMessage>
-              </FormControl>
+              <Controller
+                control={control}
+                name="scheduledDateTime"
+                rules={{ required: 'Please enter Date and Time' }}
+                render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                  <FormControl mt={6} isRequired isInvalid={!!errors.scheduledDateTime}>
+                    <FormLabel htmlFor="scheduledDateTime">Date Time</FormLabel>
+                    <DatePicker
+                      name={name}
+                      datepickerRef={ref}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      selected={value}
+                      showTimeSelect
+                      dateFormat="Pp"
+                      timeFormat="p"
+                      placeholderText="Click to select"
+                    />
+                    <FormErrorMessage>
+                      {errors.scheduledDateTime && errors.scheduledDateTime.message}
+                    </FormErrorMessage>
+                  </FormControl>
+                )}
+              />
               <Controller
                 control={control}
                 name="origin"
@@ -247,8 +258,13 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                 <FormLabel htmlFor="estimatedFlightTime">Duration</FormLabel>
                 <Input
                   placeholder="HH:mm"
+                  type="text"
                   {...register('estimatedDuration', {
                     required: 'Please enter Duration',
+                    pattern: {
+                      value: /^((\d+:)?\d+:)?\d*$/,
+                      message: 'Entered value does not match time format',
+                    },
                   })}
                 />
                 <FormErrorMessage>
