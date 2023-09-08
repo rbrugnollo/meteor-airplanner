@@ -8,6 +8,6 @@ export const getOne = createMethod({
     _id: z.string(),
   }),
   async run({ _id }) {
-    return AirplanesCollection.findOneAsync(_id);
+    return await AirplanesCollection.findOneAsync(_id);
   },
 });

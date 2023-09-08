@@ -17,6 +17,8 @@ import {
   Textarea,
   InputGroup,
   InputRightAddon,
+  Text,
+  Box,
 } from '@chakra-ui/react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
@@ -30,6 +32,7 @@ import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import UserSelect from '../../shared/selects/UserSelect';
 import CostCenterSelect from '../../shared/selects/CostCenterSelect';
 import DatePicker from '../../shared/datePicker/DatePicker';
+import PilotSelect from '../../shared/selects/PilotSelect';
 
 export interface FlightFormData {
   readonly airplane: ValueLabelType;
@@ -66,8 +69,23 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
     reset,
     control,
     setValue,
+    watch,
+    getValues,
     formState: { errors, isSubmitting, isLoading },
-  } = useForm<FlightFormData>();
+  } = useForm<FlightFormData>({
+    defaultValues: {
+      airplane: undefined,
+      scheduledDateTime: undefined,
+      estimatedDuration: undefined,
+      origin: undefined,
+      destination: undefined,
+      captain: undefined,
+      firstOfficer: undefined,
+      passengers: undefined,
+      requesters: undefined,
+      notes: undefined,
+    },
+  });
   const { fields, append } = useFieldArray({
     control,
     name: 'requesters',
@@ -76,7 +94,6 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   const toast = useToast();
 
   const handleInsert = async (data: FlightFormData) => {
-    console.log(data);
     try {
       await insertFlight(data);
       toast({
@@ -85,7 +102,6 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
       });
       handleClose();
     } catch (e: unknown) {
-      console.log(e);
       if (e instanceof Meteor.Error) {
         toast({
           description: e.message,
@@ -125,19 +141,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   };
 
   const handleOpen = async () => {
-    setValue('airplane', undefined as unknown as ValueLabelType);
-    setValue('scheduledDateTime', undefined as unknown as Date);
-    setValue('estimatedDuration', undefined as unknown as string);
-    setValue('origin', undefined as unknown as ValueLabelType);
-    setValue('destination', undefined as unknown as ValueLabelType);
-    setValue('captain', undefined);
-    setValue('firstOfficer', undefined);
-    setValue('passengers', undefined);
-    setValue('requesters', undefined);
-    setValue('notes', undefined);
-
     onOpen();
-
     if (flightId) {
       const flight = await getOne({ _id: flightId });
       if (flight) {
@@ -182,7 +186,11 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                     <AirplaneSelect
                       name={name}
                       selectRef={ref}
-                      onChange={onChange}
+                      onChange={(e) => {
+                        setValue('captain', undefined);
+                        setValue('firstOfficer', undefined);
+                        onChange(e);
+                      }}
                       onBlur={onBlur}
                       value={value}
                     />
@@ -277,12 +285,17 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
                   <FormControl mt={6}>
                     <FormLabel htmlFor="captain">Captain</FormLabel>
-                    <UserSelect
+                    <PilotSelect
+                      isDisabled={!watch('airplane')}
+                      airplaneId={watch('airplane')?.value}
                       name={name}
                       selectRef={ref}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
+                      onOptionsLoaded={({ captain }) => {
+                        if (captain && !getValues('captain')) setValue('captain', captain);
+                      }}
                       roles={[RoleNames.CAPTAIN]}
                     />
                   </FormControl>
@@ -294,12 +307,18 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
                   <FormControl mt={6}>
                     <FormLabel htmlFor="firstOfficer">First Officer</FormLabel>
-                    <UserSelect
+                    <PilotSelect
+                      isDisabled={!watch('airplane')}
+                      airplaneId={watch('airplane')?.value}
                       name={name}
                       selectRef={ref}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
+                      onOptionsLoaded={({ firstOfficer }) => {
+                        if (firstOfficer && !getValues('firstOfficer'))
+                          setValue('firstOfficer', firstOfficer);
+                      }}
                       roles={[RoleNames.FIRST_OFFICER]}
                     />
                   </FormControl>
@@ -313,6 +332,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                     <FormLabel htmlFor="passengers">Passengers</FormLabel>
                     <UserSelect
                       isMulti
+                      isDisabled={!watch('airplane')}
                       name={name}
                       selectRef={ref}
                       onChange={onChange}
@@ -323,87 +343,107 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                   </FormControl>
                 )}
               />
-              {fields.map((field, index) => (
-                <div key={field.id}>
-                  <Controller
-                    control={control}
-                    name={`requesters.${index}.requester`}
-                    rules={{ required: 'Please enter Requester' }}
-                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                      <FormControl
-                        mt={6}
-                        isRequired
-                        isInvalid={!!(errors.requesters && errors.requesters[0]?.requester)}
-                      >
-                        <FormLabel htmlFor={`requesters.${index}.requester`}>Requester</FormLabel>
-                        <UserSelect
-                          name={name}
-                          selectRef={ref}
-                          onChange={onChange}
-                          onBlur={onBlur}
-                          value={value}
-                          roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER, RoleNames.PASSENGER]}
+              <Box mt={6}>
+                <Text>Requesters</Text>
+                {fields.map((field, index) => (
+                  <div key={field.id}>
+                    <Controller
+                      control={control}
+                      name={`requesters.${index}.requester`}
+                      rules={{ required: 'Please enter Requester' }}
+                      render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                        <FormControl
+                          mt={6}
+                          isRequired
+                          isInvalid={!!(errors.requesters && errors.requesters[0]?.requester)}
+                        >
+                          <FormLabel htmlFor={`requesters.${index}.requester`}>Requester</FormLabel>
+                          <UserSelect
+                            name={name}
+                            selectRef={ref}
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            value={value}
+                            roles={[
+                              RoleNames.CAPTAIN,
+                              RoleNames.FIRST_OFFICER,
+                              RoleNames.PASSENGER,
+                            ]}
+                          />
+                          <FormErrorMessage>
+                            {errors.requesters &&
+                              errors.requesters[0]?.requester &&
+                              errors.requesters[0]?.requester.message}
+                          </FormErrorMessage>
+                        </FormControl>
+                      )}
+                    />
+                    <Controller
+                      control={control}
+                      name={`requesters.${index}.costCenter`}
+                      rules={{ required: 'Please enter Cost Center' }}
+                      render={({ field: { onChange, onBlur, value, name, ref } }) => (
+                        <FormControl
+                          mt={6}
+                          isRequired
+                          isInvalid={!!(errors.requesters && errors.requesters[0]?.costCenter)}
+                        >
+                          <FormLabel htmlFor={`requesters.${index}.costCenter`}>
+                            Cost Center
+                          </FormLabel>
+                          <CostCenterSelect
+                            name={name}
+                            selectRef={ref}
+                            onChange={onChange}
+                            onBlur={onBlur}
+                            value={value}
+                          />
+                          <FormErrorMessage>
+                            {errors.requesters &&
+                              errors.requesters[0]?.costCenter &&
+                              errors.requesters[0]?.costCenter.message}
+                          </FormErrorMessage>
+                        </FormControl>
+                      )}
+                    />
+                    <FormControl
+                      mt={6}
+                      isRequired
+                      isInvalid={!!(errors.requesters && errors.requesters[0]?.percentage)}
+                    >
+                      <FormLabel htmlFor={`requesters.${index}.percentage`}>Percentage</FormLabel>
+                      <InputGroup>
+                        <Input
+                          {...register(`requesters.${index}.percentage`, {
+                            required: 'Please enter Percentage',
+                            valueAsNumber: true,
+                          })}
                         />
-                        <FormErrorMessage>
-                          {errors.requesters &&
-                            errors.requesters[0]?.requester &&
-                            errors.requesters[0]?.requester.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name={`requesters.${index}.costCenter`}
-                    rules={{ required: 'Please enter Cost Center' }}
-                    render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                      <FormControl
-                        mt={6}
-                        isRequired
-                        isInvalid={!!(errors.requesters && errors.requesters[0]?.costCenter)}
-                      >
-                        <FormLabel htmlFor={`requesters.${index}.costCenter`}>
-                          Cost Center
-                        </FormLabel>
-                        <CostCenterSelect
-                          name={name}
-                          selectRef={ref}
-                          onChange={onChange}
-                          onBlur={onBlur}
-                          value={value}
-                        />
-                        <FormErrorMessage>
-                          {errors.requesters &&
-                            errors.requesters[0]?.costCenter &&
-                            errors.requesters[0]?.costCenter.message}
-                        </FormErrorMessage>
-                      </FormControl>
-                    )}
-                  />
-                  <FormControl
-                    mt={6}
-                    isRequired
-                    isInvalid={!!(errors.requesters && errors.requesters[0]?.percentage)}
-                  >
-                    <FormLabel htmlFor={`requesters.${index}.percentage`}>Percentage</FormLabel>
-                    <InputGroup>
-                      <Input
-                        {...register(`requesters.${index}.percentage`, {
-                          required: 'Please enter Percentage',
-                          valueAsNumber: true,
-                        })}
-                      />
-                      <InputRightAddon>%</InputRightAddon>
-                    </InputGroup>
-                    <FormErrorMessage>
-                      {errors.requesters &&
-                        errors.requesters[0]?.percentage &&
-                        errors.requesters[0]?.percentage.message}
-                    </FormErrorMessage>
-                  </FormControl>
-                </div>
-              ))}
-              <Button onClick={() => append({})}>Add</Button>
+                        <InputRightAddon>%</InputRightAddon>
+                      </InputGroup>
+                      <FormErrorMessage>
+                        {errors.requesters &&
+                          errors.requesters[0]?.percentage &&
+                          errors.requesters[0]?.percentage.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </div>
+                ))}
+              </Box>
+              <Button
+                onClick={() => {
+                  append({});
+                  const requesters = getValues('requesters');
+                  requesters?.forEach((_item, index) => {
+                    setValue(
+                      `requesters.${index}.percentage`,
+                      parseFloat((100 / requesters.length).toFixed(2)),
+                    );
+                  });
+                }}
+              >
+                Add
+              </Button>
               <FormControl mt={6}>
                 <FormLabel htmlFor="notes">Notes</FormLabel>
                 <Textarea {...register('notes')} />
