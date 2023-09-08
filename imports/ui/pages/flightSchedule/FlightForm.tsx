@@ -82,7 +82,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
       captain: undefined,
       firstOfficer: undefined,
       passengers: undefined,
-      requesters: undefined,
+      requesters: [],
       notes: undefined,
     },
   });
@@ -141,6 +141,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   };
 
   const handleOpen = async () => {
+    setValue('requesters', undefined);
     onOpen();
     if (flightId) {
       const flight = await getOne({ _id: flightId });

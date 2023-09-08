@@ -31,6 +31,7 @@ interface AirplaneFormData {
   firstOfficer?: ValueLabelType;
   manager?: ValueLabelType;
   pilots?: ValueLabelType[];
+  seats?: number;
 }
 
 interface AirplaneFormActionButtonProps {
@@ -52,7 +53,16 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
     control,
     setValue,
     formState: { errors, isSubmitting, isLoading },
-  } = useForm<AirplaneFormData>();
+  } = useForm<AirplaneFormData>({
+    defaultValues: {
+      name: undefined,
+      tailNumber: undefined,
+      manager: undefined,
+      captain: undefined,
+      firstOfficer: undefined,
+      seats: undefined,
+    },
+  });
 
   const toast = useToast();
 
@@ -96,6 +106,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   };
 
   const handleFormSubmit = async (data: AirplaneFormData) => {
+    console.log(data);
     if (airplaneId) {
       await handleUpdate(data);
     } else {
@@ -104,12 +115,6 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
   };
 
   const handleOpen = async () => {
-    setValue('name', '');
-    setValue('tailNumber', '');
-    setValue('manager', undefined);
-    setValue('captain', undefined);
-    setValue('firstOfficer', undefined);
-
     onOpen();
 
     if (airplaneId) {
@@ -120,6 +125,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
       setValue('firstOfficer', airplane?.firstOfficer);
       setValue('manager', airplane?.manager);
       setValue('pilots', airplane?.pilots);
+      setValue('seats', airplane?.seats);
     }
   };
 
@@ -233,6 +239,15 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                   </FormControl>
                 )}
               />
+              <FormControl mt={6}>
+                <FormLabel htmlFor="seats">Seats</FormLabel>
+                <Input
+                  type="number"
+                  {...register('seats', {
+                    valueAsNumber: true,
+                  })}
+                />
+              </FormControl>
             </form>
           </DrawerBody>
           <DrawerFooter>

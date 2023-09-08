@@ -15,6 +15,7 @@ export const update = createMethod({
     firstOfficer: ValueLabelTypeSchema.optional(),
     manager: ValueLabelTypeSchema.optional(),
     pilots: z.array(ValueLabelTypeSchema).optional(),
+    seats: z.number().optional(),
   }),
   async run(airplane) {
     const { _id, ...data } = airplane;

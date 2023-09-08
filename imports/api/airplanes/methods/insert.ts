@@ -13,6 +13,7 @@ export const insert = createMethod({
     firstOfficer: ValueLabelTypeSchema.optional(),
     manager: ValueLabelTypeSchema.optional(),
     pilots: z.array(ValueLabelTypeSchema).optional(),
+    seats: z.number().optional(),
   }),
   async run(airplane) {
     let pilots = airplane.pilots ?? [];

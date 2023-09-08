@@ -13,6 +13,7 @@ export interface Airplane extends BaseCollection {
   readonly firstOfficer?: ValueLabelType;
   readonly manager?: ValueLabelType;
   readonly pilots?: ValueLabelType[];
+  readonly seats?: number;
 }
 
 export const AirplanesCollection = new Mongo.Collection<Airplane>(COLLECTION_NAME);
