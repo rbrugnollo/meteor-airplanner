@@ -4,6 +4,7 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { AirplanesCollection } from '../../airplanes/collection';
 import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
+import { FlightsCollection } from '../../flights/collection';
 import { removeDefault } from './removeDefault';
 
 export const update = createMethod({
@@ -32,6 +33,7 @@ export const update = createMethod({
 
     // Update dependent collections
     await updateAirplanesCollection({ user: { value: _id, label: name } });
+    await updateFlightsCollection({ user: { value: _id, label: name } });
   },
 });
 
@@ -73,6 +75,51 @@ export const updateAirplanesCollection = createMethod({
       {
         $set: {
           'pilots.$.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+  },
+});
+
+export const updateFlightsCollection = createMethod({
+  name: 'users.updateFlightsCollection',
+  schema: z.object({
+    user: ValueLabelTypeSchema,
+  }),
+  async run({ user }) {
+    await FlightsCollection.updateAsync(
+      { 'captain.value': user.value },
+      {
+        $set: {
+          'captain.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await FlightsCollection.updateAsync(
+      { 'firstOfficer.value': user.value },
+      {
+        $set: {
+          'firstOfficer.value': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await FlightsCollection.updateAsync(
+      { 'passengers.value': user.value },
+      {
+        $set: {
+          'passengers.$.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await FlightsCollection.updateAsync(
+      { 'requesters.requester.value': user.value },
+      {
+        $set: {
+          'requesters.$.requester.label': user.label,
         },
       },
       { multi: true },
