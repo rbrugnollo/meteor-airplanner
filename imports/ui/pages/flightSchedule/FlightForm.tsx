@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Drawer,
   Button,
@@ -33,6 +33,8 @@ import UserSelect from '../../shared/selects/UserSelect';
 import CostCenterSelect from '../../shared/selects/CostCenterSelect';
 import DatePicker from '../../shared/datePicker/DatePicker';
 import PilotSelect from '../../shared/selects/PilotSelect';
+import { Airplane } from '/imports/api/airplanes/collection';
+import { getOne as getOneAirplane } from '/imports/api/airplanes/methods/getOne';
 
 export interface FlightFormData {
   readonly airplane: ValueLabelType;
@@ -92,6 +94,27 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
   });
 
   const toast = useToast();
+
+  const [airplane, setAirplane] = useState<Airplane | undefined>(undefined);
+
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (name === 'airplane' && type === 'change') {
+        handleFetchAirplane(value?.airplane?.value);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  const handleFetchAirplane = async (airplaneId?: string) => {
+    setAirplane(undefined);
+    if (airplaneId) {
+      const airplane = await getOneAirplane({ _id: airplaneId });
+      if (airplane) {
+        setAirplane(airplane);
+      }
+    }
+  };
 
   const handleInsert = async (data: FlightFormData) => {
     try {
@@ -328,8 +351,18 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
               <Controller
                 control={control}
                 name="passengers"
+                rules={{
+                  validate: (value) => {
+                    const seats = airplane?.seats;
+                    const length = value?.length ?? 0;
+                    if (seats && length > seats) {
+                      return `This airplane can only take ${seats} passengers`;
+                    }
+                    return true;
+                  },
+                }}
                 render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
+                  <FormControl mt={6} isInvalid={!!errors.passengers}>
                     <FormLabel htmlFor="passengers">Passengers</FormLabel>
                     <UserSelect
                       isMulti
@@ -341,6 +374,9 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                       value={value}
                       roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER, RoleNames.PASSENGER]}
                     />
+                    <FormErrorMessage>
+                      {errors.passengers && errors.passengers.message}
+                    </FormErrorMessage>
                   </FormControl>
                 )}
               />
