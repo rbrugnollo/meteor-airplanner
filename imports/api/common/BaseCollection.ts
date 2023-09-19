@@ -5,3 +5,6 @@ export interface BaseCollection {
   readonly updatedAt: Date;
   readonly updatedBy: string;
 }
+
+export type BaseCollectionTypes = '_id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy';
+export type IdBaseCollectionTypes = 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy';

@@ -1,11 +1,10 @@
-import React, { SyntheticEvent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import * as Yup from 'yup';
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   useMediaQuery,
   Theme,
@@ -117,7 +116,6 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
               name="name"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
-              type="name"
               value={formik.values.name}
             />
             <TextField
@@ -135,7 +133,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
               multiple
               onBlur={formik.handleBlur}
               defaultValue={formik.initialValues.roles}
-              onChange={(_e: SyntheticEvent, value: readonly string[]) => {
+              onChange={(_e, value) => {
                 formik.setFieldValue('roles', value);
               }}
               value={formik.values.roles}

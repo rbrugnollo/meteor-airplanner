@@ -9,11 +9,11 @@ export const COLLECTION_NAME = 'airplanes';
 export interface Airplane extends BaseCollection {
   readonly name: string;
   readonly tailNumber: string;
-  readonly captain?: ValueLabelType;
-  readonly firstOfficer?: ValueLabelType;
-  readonly manager?: ValueLabelType;
-  readonly pilots?: ValueLabelType[];
-  readonly seats?: number;
+  readonly captain?: ValueLabelType | null;
+  readonly firstOfficer?: ValueLabelType | null;
+  readonly manager?: ValueLabelType | null;
+  readonly pilots?: ValueLabelType[] | null;
+  readonly seats: number;
 }
 
 export const AirplanesCollection = new Mongo.Collection<Airplane>(COLLECTION_NAME);

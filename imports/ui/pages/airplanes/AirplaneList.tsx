@@ -1,15 +1,33 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
-import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Stack,
+  Typography,
+  useMediaQuery,
+  Theme,
+  MenuItem,
+  ListItemText,
+  ListItemIcon,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import Delete from '@mui/icons-material/Delete';
+import Edit from '@mui/icons-material/Edit';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/airplanes/publications/list';
 import { RoleName } from '/imports/api/users/collection';
 import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
+import AirplaneForm from './AirplaneForm';
 
 export const AirplaneListRoles: RoleName[] = ['Admin'];
 
 const AirplaneList = () => {
+  const [modalProps, setModalProps] = useState<{ open: boolean; airplaneId?: string }>({
+    open: false,
+    airplaneId: undefined,
+  });
   const isLoading = useSubscribe(list);
   const airplanes = useFind(() => AirplanesCollection.find());
   const columns = useMemo<MrtColumnDef<Airplane>[]>(
@@ -56,7 +74,11 @@ const AirplaneList = () => {
               <Typography variant="h5">Airplanes</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button startIcon={<AddIcon />} variant="contained">
+                  <Button
+                    startIcon={<AddIcon />}
+                    variant="contained"
+                    onClick={() => setModalProps({ open: true, airplaneId: undefined })}
+                  >
                     Add
                   </Button>
                 </Stack>
@@ -75,9 +97,40 @@ const AirplaneList = () => {
               muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
               columns={columns}
               data={airplanes}
+              enableRowActions
+              renderRowActionMenuItems={({ row, closeMenu }) => [
+                <MenuItem
+                  key={3}
+                  onClick={() => {
+                    closeMenu();
+                    setModalProps({ open: true, airplaneId: row.original._id });
+                  }}
+                >
+                  <ListItemIcon>
+                    <Edit color="primary" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Edit</ListItemText>
+                </MenuItem>,
+                <MenuItem
+                  key={2}
+                  onClick={() => {
+                    console.info('Remove', row);
+                    closeMenu();
+                  }}
+                >
+                  <ListItemIcon>
+                    <Delete color="error" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Delete</ListItemText>
+                </MenuItem>,
+              ]}
             />
           </Stack>
         </Container>
+        <AirplaneForm
+          {...modalProps}
+          onClose={() => setModalProps({ open: false, airplaneId: undefined })}
+        />
       </Box>
     </>
   );

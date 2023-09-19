@@ -1,270 +1,205 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import * as Yup from 'yup';
 import {
-  Drawer,
   Button,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Input,
-  DrawerOverlay,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
-import { useForm, Controller } from 'react-hook-form';
-import { Meteor } from 'meteor/meteor';
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  useMediaQuery,
+  Theme,
+  TextField,
+  Stack,
+} from '@mui/material';
+import { useFormik } from 'formik';
 import { insert } from '/imports/api/airplanes/methods/insert';
 import { update } from '/imports/api/airplanes/methods/update';
-import { getOne } from '/imports/api/airplanes/methods/getOne';
-import { ValueLabelType } from '/imports/api/common/ValueLabelType';
+import { useSnackbar } from 'notistack';
+import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
+import { Meteor } from 'meteor/meteor';
 import UserSelect from '../../shared/selects/UserSelect';
+import { BaseCollectionTypes } from '/imports/api/common/BaseCollection';
 
-interface AirplaneFormData {
-  name: string;
-  tailNumber: string;
-  captain?: ValueLabelType;
-  firstOfficer?: ValueLabelType;
-  manager?: ValueLabelType;
-  pilots?: ValueLabelType[];
-  seats?: number;
-}
-
-interface AirplaneFormActionButtonProps {
-  readonly onOpen: () => void;
-}
+type AirplaneFormValues = Omit<Airplane, BaseCollectionTypes>;
 
 interface AirplaneFormProps {
   readonly airplaneId?: string;
-  readonly ActionButton: React.JSXElementConstructor<AirplaneFormActionButtonProps>;
+  readonly open: boolean;
+  readonly onClose: () => void;
 }
 
-const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-    setValue,
-    formState: { errors, isSubmitting, isLoading },
-  } = useForm<AirplaneFormData>({
-    defaultValues: {
-      name: undefined,
-      tailNumber: undefined,
-      manager: undefined,
-      captain: undefined,
-      firstOfficer: undefined,
-      seats: undefined,
+const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
+  const formik = useFormik<AirplaneFormValues>({
+    initialValues: {
+      name: '',
+      tailNumber: '',
+      seats: 0,
+      manager: null,
+      captain: null,
+      firstOfficer: null,
+      pilots: [],
     },
+    validationSchema: Yup.object<AirplaneFormValues>().shape({
+      name: Yup.string().required('Name is required'),
+      tailNumber: Yup.string().required('Tail Number is required'),
+      seats: Yup.number().required('Seats is required'),
+    }),
+    onSubmit: async (values) => {
+      if (airplaneId) {
+        await handleUpdate(values);
+      } else {
+        await handleInsert(values);
+      }
+    },
+    enableReinitialize: true,
   });
+  useEffect(() => {
+    formik.resetForm();
+    if (open && airplaneId) {
+      const airplane = AirplanesCollection.findOne(airplaneId);
+      if (airplane) {
+        const { _id, ...values } = airplane;
+        console.log(values);
+        formik.setValues(values);
+      }
+    }
+  }, [open]);
 
-  const toast = useToast();
-
-  const handleInsert = async (data: AirplaneFormData) => {
+  const handleInsert = async (data: AirplaneFormValues) => {
     try {
       await insert(data);
-      toast({
-        description: 'Airplane successfully created.',
-        status: 'success',
-      });
-      handleClose();
+      enqueueSnackbar('Airplane successfully created.', { variant: 'success' });
+      onClose();
     } catch (e: unknown) {
+      console.log(e);
       if (e instanceof Meteor.Error) {
-        toast({
-          description: e.message,
-          status: 'error',
-        });
+        enqueueSnackbar(e.message, { variant: 'error' });
       }
     }
   };
 
-  const handleUpdate = async (data: AirplaneFormData) => {
+  const handleUpdate = async (data: AirplaneFormValues) => {
     try {
       await update({
         _id: airplaneId!,
         ...data,
       });
-      toast({
-        description: 'Airplane successfully updated.',
-        status: 'success',
-      });
-      handleClose();
+      enqueueSnackbar('Airplane successfully updated.', { variant: 'success' });
+      onClose();
     } catch (e: unknown) {
+      console.log(e);
       if (e instanceof Meteor.Error) {
-        toast({
-          description: e.message,
-          status: 'error',
-        });
+        enqueueSnackbar(e.message, { variant: 'error' });
       }
     }
   };
 
-  const handleFormSubmit = async (data: AirplaneFormData) => {
-    console.log(data);
-    if (airplaneId) {
-      await handleUpdate(data);
-    } else {
-      await handleInsert(data);
-    }
-  };
-
-  const handleOpen = async () => {
-    onOpen();
-
-    if (airplaneId) {
-      const airplane = await getOne({ _id: airplaneId });
-      setValue('name', airplane?.name || '');
-      setValue('tailNumber', airplane?.tailNumber || '');
-      setValue('captain', airplane?.captain);
-      setValue('firstOfficer', airplane?.firstOfficer);
-      setValue('manager', airplane?.manager);
-      setValue('pilots', airplane?.pilots);
-      setValue('seats', airplane?.seats);
-    }
-  };
-
-  const handleClose = () => {
-    reset();
-    onClose();
-  };
-
-  const headerText = airplaneId ? 'Edit Airplane' : 'Add new Airplane';
-
   return (
-    <>
-      <ActionButton onOpen={handleOpen} />
-      <Drawer isOpen={isOpen} placement="right" onClose={handleClose} size="md">
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>{headerText}</DrawerHeader>
-          <DrawerBody>
-            <form id="airplane-form" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
-              <FormControl isRequired isInvalid={!!errors.name}>
-                <FormLabel htmlFor="name">Name</FormLabel>
-                <Input
-                  type="text"
-                  {...register('name', {
-                    required: 'Please enter Name',
-                    minLength: 3,
-                    maxLength: 300,
-                  })}
-                />
-                <FormErrorMessage>{errors.name && errors.name.message}</FormErrorMessage>
-              </FormControl>
-              <FormControl isRequired isInvalid={!!errors.tailNumber} mt={6}>
-                <FormLabel htmlFor="tailNumber">Tail Number</FormLabel>
-                <Input
-                  type="text"
-                  {...register('tailNumber', {
-                    required: 'Please enter Tail Number',
-                  })}
-                />
-                <FormErrorMessage>
-                  {errors.tailNumber && errors.tailNumber.message}
-                </FormErrorMessage>
-              </FormControl>
-              <Controller
-                control={control}
-                name="captain"
-                render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
-                    <FormLabel htmlFor="captain">Captain</FormLabel>
-                    <UserSelect
-                      name={name}
-                      selectRef={ref}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      roles={['Captain']}
-                    />
-                  </FormControl>
-                )}
-              />
-              <Controller
-                control={control}
-                name="firstOfficer"
-                render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
-                    <FormLabel htmlFor="firstOfficer">First Officer</FormLabel>
-                    <UserSelect
-                      name={name}
-                      selectRef={ref}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      roles={['First Officer']}
-                    />
-                  </FormControl>
-                )}
-              />
-              <Controller
-                control={control}
-                name="manager"
-                render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
-                    <FormLabel htmlFor="manager">Manager</FormLabel>
-                    <UserSelect
-                      name={name}
-                      selectRef={ref}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      roles={['Captain']}
-                    />
-                  </FormControl>
-                )}
-              />
-              <Controller
-                control={control}
-                name="pilots"
-                render={({ field: { onChange, onBlur, value, name, ref } }) => (
-                  <FormControl mt={6}>
-                    <FormLabel htmlFor="pilots">Pilots</FormLabel>
-                    <UserSelect
-                      isMulti
-                      name={name}
-                      selectRef={ref}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      roles={['Captain', 'First Officer']}
-                    />
-                  </FormControl>
-                )}
-              />
-              <FormControl mt={6}>
-                <FormLabel htmlFor="seats">Seats</FormLabel>
-                <Input
-                  type="number"
-                  {...register('seats', {
-                    valueAsNumber: true,
-                  })}
-                />
-              </FormControl>
-            </form>
-          </DrawerBody>
-          <DrawerFooter>
-            <Button variant="outline" mr={3} onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              isLoading={isLoading || isSubmitting}
-              type="submit"
-              form="airplane-form"
-              colorScheme="blue"
-            >
-              Save
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    </>
+    <Dialog
+      fullScreen={fullScreen}
+      PaperProps={{ sx: { width: 450 } }}
+      open={open}
+      onClose={onClose}
+    >
+      <DialogTitle>{airplaneId ? 'Update' : 'Add new'} Airplane</DialogTitle>
+      <DialogContent>
+        <form id="airplane-form" noValidate onSubmit={formik.handleSubmit}>
+          <Stack sx={{ mt: 1 }} spacing={3}>
+            <TextField
+              error={!!(formik.touched.name && formik.errors.name)}
+              fullWidth
+              helperText={formik.touched.name && formik.errors.name}
+              label="Name"
+              name="name"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.name}
+            />
+            <TextField
+              error={!!(formik.touched.tailNumber && formik.errors.tailNumber)}
+              fullWidth
+              helperText={formik.touched.tailNumber && formik.errors.tailNumber}
+              label="Tail Number"
+              name="tailNumber"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.tailNumber}
+            />
+            <TextField
+              error={!!(formik.touched.seats && formik.errors.seats)}
+              fullWidth
+              helperText={formik.touched.seats && formik.errors.seats}
+              label="Seats"
+              name="seats"
+              type="number"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.seats}
+            />
+            <UserSelect
+              fullWidth
+              label="Manager"
+              name="manager"
+              roles={['Airplane Manager']}
+              onBlur={formik.handleBlur}
+              onChange={(_e, value) => {
+                formik.setFieldValue('manager', value);
+              }}
+              defaultValue={formik.initialValues.manager ?? null}
+              value={formik.values.manager ?? null}
+            />
+            <UserSelect
+              fullWidth
+              label="Captain"
+              name="captain"
+              roles={['Captain']}
+              onBlur={formik.handleBlur}
+              onChange={(_e, value) => {
+                formik.setFieldValue('captain', value);
+              }}
+              defaultValue={formik.initialValues.captain ?? null}
+              value={formik.values.captain ?? null}
+            />
+            <UserSelect
+              fullWidth
+              label="First Officer"
+              name="firstOfficer"
+              roles={['First Officer']}
+              onBlur={formik.handleBlur}
+              onChange={(_e, value) => {
+                formik.setFieldValue('firstOfficer', value);
+              }}
+              defaultValue={formik.initialValues.firstOfficer ?? null}
+              value={formik.values.firstOfficer ?? null}
+            />
+            <UserSelect
+              multiple
+              fullWidth
+              label="Pilots"
+              name="pilots"
+              roles={['Captain', 'First Officer']}
+              onBlur={formik.handleBlur}
+              onChange={(_e, value) => {
+                formik.setFieldValue('pilots', value);
+              }}
+              defaultValue={formik.initialValues.pilots ?? []}
+              value={formik.values.pilots ?? []}
+            />
+          </Stack>
+        </form>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button type="submit" form="airplane-form" autoFocus>
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

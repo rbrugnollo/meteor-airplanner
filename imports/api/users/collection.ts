@@ -7,6 +7,7 @@ export const RoleNames = {
   FIRST_OFFICER: 'First Officer',
   SECRETARY: 'Secretary',
   SCHEDULE_EDITOR: 'Schedule Editor',
+  AIRPLANE_MANAGER: 'Airplane Manager',
   FLIGHT_REQUESTER: 'Flight Requester',
   FLIGHT_AUTHORIZER: 'Flight Authorizer',
   PASSENGER: 'Passenger',
@@ -14,14 +15,13 @@ export const RoleNames = {
 
 export const Pilots = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
 
-export type Admin = 'Admin';
-
 export type RoleName =
-  | Admin
+  | 'Admin'
   | 'Captain'
   | 'First Officer'
   | 'Secretary'
   | 'Schedule Editor'
+  | 'Airplane Manager'
   | 'Flight Requester'
   | 'Flight Authorizer'
   | 'Passenger';

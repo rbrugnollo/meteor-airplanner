@@ -1,26 +1,30 @@
-import { Select, Props, GroupBase } from 'chakra-react-select';
 import React, { useEffect, useState } from 'react';
-import { RefCallBack } from 'react-hook-form';
-import { RoleName } from '/imports/api/users/collection';
+import { Autocomplete, TextField, CircularProgress, AutocompleteProps } from '@mui/material';
 import { searchByText } from '/imports/api/users/methods/searchByText';
+import { RoleName } from '/imports/api/users/collection';
+import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 
-export interface UserOption {
-  value: string;
-  label: string;
-}
-
-interface UserSelectProps<IsMulti extends boolean = false>
-  extends Props<UserOption, IsMulti, GroupBase<UserOption>> {
-  readonly selectRef: RefCallBack;
+interface UserSelectProps<Multiple extends boolean | undefined = false>
+  extends Omit<
+    AutocompleteProps<ValueLabelType, Multiple, false, false>,
+    'options' | 'renderInput'
+  > {
   readonly roles: RoleName[];
+  readonly label?: React.ReactNode;
+  readonly name: string;
 }
 
-const UserSelect = <IsMulti extends boolean = false>(props: UserSelectProps<IsMulti>) => {
-  const [options, setOptions] = useState<UserOption[]>([]);
+const UserSelect = <Multiple extends boolean | undefined = false>({
+  roles,
+  name,
+  label,
+  ...rest
+}: UserSelectProps<Multiple>) => {
+  const [options, setOptions] = useState<ValueLabelType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    searchByText({ roles: props.roles })
+    searchByText({ roles })
       .then((items) => {
         setOptions(
           items.map((item) => ({
@@ -34,22 +38,29 @@ const UserSelect = <IsMulti extends boolean = false>(props: UserSelectProps<IsMu
       });
   }, []);
 
-  const {
-    selectRef,
-    isLoading: _isLoading,
-    isSearchable: _isSearchable,
-    options: _options,
-    roles: _roles,
-    ...rest
-  } = props;
-
   return (
-    <Select<UserOption, IsMulti, GroupBase<UserOption>>
-      isSearchable
-      isLoading={isLoading}
-      options={options}
-      ref={selectRef}
+    <Autocomplete<ValueLabelType, Multiple>
       {...rest}
+      isOptionEqualToValue={(option, value) => option.value === value.value}
+      getOptionLabel={(option) => option.label}
+      options={options}
+      loading={isLoading}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          name={name}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
+        />
+      )}
     />
   );
 };

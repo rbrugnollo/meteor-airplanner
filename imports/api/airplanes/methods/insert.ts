@@ -1,20 +1,12 @@
 import { uniqBy } from 'lodash';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
-import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
-import { AirplanesCollection } from '../collection';
+import { BaseCollectionTypes } from '../../common/BaseCollection';
+import { Airplane, AirplanesCollection } from '../collection';
 
 export const insert = createMethod({
   name: 'airplanes.insert',
-  schema: z.object({
-    name: z.string(),
-    tailNumber: z.string(),
-    captain: ValueLabelTypeSchema.optional(),
-    firstOfficer: ValueLabelTypeSchema.optional(),
-    manager: ValueLabelTypeSchema.optional(),
-    pilots: z.array(ValueLabelTypeSchema).optional(),
-    seats: z.number().optional(),
-  }),
+  schema: z.custom<Omit<Airplane, BaseCollectionTypes>>(),
   async run(airplane) {
     let pilots = airplane.pilots ?? [];
     if (airplane.captain) {
