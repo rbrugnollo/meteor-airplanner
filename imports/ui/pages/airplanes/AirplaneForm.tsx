@@ -17,7 +17,6 @@ import {
 } from '@chakra-ui/react';
 import { useForm, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
-import { RoleNames } from '/imports/api/users/collection';
 import { insert } from '/imports/api/airplanes/methods/insert';
 import { update } from '/imports/api/airplanes/methods/update';
 import { getOne } from '/imports/api/airplanes/methods/getOne';
@@ -182,7 +181,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      roles={[RoleNames.CAPTAIN]}
+                      roles={['Captain']}
                     />
                   </FormControl>
                 )}
@@ -199,7 +198,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      roles={[RoleNames.FIRST_OFFICER]}
+                      roles={['First Officer']}
                     />
                   </FormControl>
                 )}
@@ -216,7 +215,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      roles={[RoleNames.CAPTAIN]}
+                      roles={['Captain']}
                     />
                   </FormControl>
                 )}
@@ -234,7 +233,7 @@ const AirplaneForm = ({ airplaneId, ActionButton }: AirplaneFormProps) => {
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER]}
+                      roles={['Captain', 'First Officer']}
                     />
                   </FormControl>
                 )}

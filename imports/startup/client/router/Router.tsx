@@ -1,24 +1,27 @@
 import React from 'react';
 import { createBrowserRouter, redirect } from 'react-router-dom';
-import MainLayout from '/imports/ui/layouts/main/MainLayout';
 import { App } from '/imports/ui/App';
-import LoginForm from '/imports/ui/pages/login/LoginForm';
 import { Meteor } from 'meteor/meteor';
-import PasswordResetForm from '/imports/ui/pages/login/PasswordResetForm';
+import LoginForm from '/imports/ui/pages/login/LoginForm';
+import AuthLayout from '/imports/ui/layouts/auth/AuthLayout';
 import ForgotPasswordForm from '/imports/ui/pages/login/ForgotPasswordForm';
+import PasswordResetForm from '/imports/ui/pages/login/PasswordResetForm';
+import MainLayout from '/imports/ui/layouts/main/MainLayout';
 import Authorized from './Authorized';
-import AirplaneList, { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import UserList, { UserListRoles } from '/imports/ui/pages/users/UserList';
-import FlightScheduleList from '/imports/ui/pages/flightSchedule/FlightScheduleList';
-import CostCenterList, { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
 import AirportList, { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
+import AirplaneList, { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
+import CostCenterList, { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
+import FlightScheduleList, {
+  FlightScheduleListRoles,
+} from '/imports/ui/pages/flightSchedule/FlightScheduleList';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
   if (request.url === url) {
     const loggedUserId = Meteor.userId();
     if (!loggedUserId) {
-      throw redirect('/login');
+      throw redirect('/auth/login');
     } else {
       throw redirect('/app');
     }
@@ -30,7 +33,7 @@ const mainLoader = ({ request }: { request: Request }) => {
 const loggedInOnly = () => {
   const loggedUserId = Meteor.userId();
   if (!loggedUserId) {
-    throw redirect('/login');
+    throw redirect('/auth/login');
   }
   return null;
 };
@@ -50,19 +53,23 @@ const Router = createBrowserRouter([
     loader: mainLoader,
     children: [
       {
-        path: 'login',
-        element: <LoginForm />,
+        path: 'auth',
+        element: <AuthLayout />,
         loader: notLoggedInOnly,
-      },
-      {
-        path: 'forgot',
-        element: <ForgotPasswordForm />,
-        loader: notLoggedInOnly,
-      },
-      {
-        path: 'password/:action/:token',
-        element: <PasswordResetForm />,
-        loader: notLoggedInOnly,
+        children: [
+          {
+            path: 'login',
+            element: <LoginForm />,
+          },
+          {
+            path: 'forgot',
+            element: <ForgotPasswordForm />,
+          },
+          {
+            path: 'password/:action/:token',
+            element: <PasswordResetForm />,
+          },
+        ],
       },
       {
         path: 'app',
@@ -71,23 +78,23 @@ const Router = createBrowserRouter([
         children: [
           {
             path: 'flightSchedule',
-            element: <Authorized Component={FlightScheduleList} roles={AirplaneListRoles} />,
-          },
-          {
-            path: 'airplanes',
-            element: <Authorized Component={AirplaneList} roles={AirplaneListRoles} />,
+            element: <Authorized Component={FlightScheduleList} roles={FlightScheduleListRoles} />,
           },
           {
             path: 'airports',
             element: <Authorized Component={AirportList} roles={AirportListRoles} />,
           },
           {
-            path: 'users',
-            element: <Authorized Component={UserList} roles={UserListRoles} />,
+            path: 'airplanes',
+            element: <Authorized Component={AirplaneList} roles={AirplaneListRoles} />,
           },
           {
             path: 'costCenters',
             element: <Authorized Component={CostCenterList} roles={CostCenterListRoles} />,
+          },
+          {
+            path: 'users',
+            element: <Authorized Component={UserList} roles={UserListRoles} />,
           },
         ],
       },

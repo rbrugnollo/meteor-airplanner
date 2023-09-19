@@ -1,6 +1,8 @@
+import { Roles } from 'meteor/alanning:roles';
+import { Mongo } from 'meteor/mongo';
+import { RoleName } from '/imports/api/users/collection';
+
 declare module 'meteor/meteor' {
-  import { Roles } from 'meteor/alanning:roles';
-  import { Mongo } from 'meteor/mongo';
   namespace Meteor {
     export interface User {
       _id: string;
@@ -11,16 +13,8 @@ declare module 'meteor/meteor' {
     }
     export interface UserProfile {
       name: string;
-      roles: string[];
+      roles: RoleName[];
     }
     const roleAssignment: Mongo.Collection<Roles.Role>;
   }
-}
-
-declare module 'meteor/quave:logged-user-react' {
-  import { Meteor } from 'meteor/meteor';
-  export const useLoggedUser: () => {
-    loggedUser: Meteor.User | null;
-    isLoadingLoggedUser: boolean;
-  };
 }

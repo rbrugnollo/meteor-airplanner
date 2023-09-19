@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { RefCallBack } from 'react-hook-form';
 import { getOne } from '/imports/api/airplanes/methods/getOne';
 import { ValueLabelType } from '/imports/api/common/ValueLabelType';
+import { RoleName } from '/imports/api/users/collection';
 import { searchByText } from '/imports/api/users/methods/searchByText';
 
 export interface PilotOption {
@@ -14,7 +15,7 @@ interface PilotSelectProps<IsMulti extends boolean = false>
   extends Props<PilotOption, IsMulti, GroupBase<PilotOption>> {
   readonly selectRef: RefCallBack;
   readonly airplaneId: string;
-  readonly roles: string[];
+  readonly roles: RoleName[];
   readonly onOptionsLoaded?: (result: {
     captain?: ValueLabelType;
     firstOfficer?: ValueLabelType;

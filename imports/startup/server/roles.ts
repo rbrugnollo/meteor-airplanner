@@ -1,7 +1,7 @@
 import { Accounts } from 'meteor/accounts-base';
 import { Roles } from 'meteor/alanning:roles';
 import { Meteor } from 'meteor/meteor';
-import { RoleNames } from '/imports/api/users/collection';
+import { RoleName, RoleNames } from '/imports/api/users/collection';
 
 export const DefaultAdmin = {
   username: 'admin@admin.com',
@@ -9,7 +9,7 @@ export const DefaultAdmin = {
   password: 'admin123$change',
   profile: {
     name: 'Default Admin',
-    roles: [RoleNames.ADMIN],
+    roles: ['Admin'] as RoleName[],
   },
 };
 
@@ -22,7 +22,7 @@ const CreateRoles = () => {
 };
 
 const AddDefaultAdmin = async () => {
-  const adminUsers = await Roles.getUsersInRole(RoleNames.ADMIN).fetchAsync();
+  const adminUsers = await Roles.getUsersInRole('Admin').fetchAsync();
   if (adminUsers.length > 1) {
     const defaultAdmin = Accounts.findUserByUsername(DefaultAdmin.username);
     if (defaultAdmin) {
@@ -31,7 +31,7 @@ const AddDefaultAdmin = async () => {
   }
   if (!adminUsers.length) {
     const userId = await Accounts.createUserAsync(DefaultAdmin);
-    Roles.addUsersToRoles(userId, RoleNames.ADMIN);
+    Roles.addUsersToRoles(userId, 'Admin');
   }
 };
 

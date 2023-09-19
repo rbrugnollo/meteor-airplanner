@@ -1,6 +1,7 @@
 import { Select, Props, GroupBase } from 'chakra-react-select';
 import React, { useEffect, useState } from 'react';
 import { RefCallBack } from 'react-hook-form';
+import { RoleName } from '/imports/api/users/collection';
 import { searchByText } from '/imports/api/users/methods/searchByText';
 
 export interface UserOption {
@@ -11,7 +12,7 @@ export interface UserOption {
 interface UserSelectProps<IsMulti extends boolean = false>
   extends Props<UserOption, IsMulti, GroupBase<UserOption>> {
   readonly selectRef: RefCallBack;
-  readonly roles: string[];
+  readonly roles: RoleName[];
 }
 
 const UserSelect = <IsMulti extends boolean = false>(props: UserSelectProps<IsMulti>) => {

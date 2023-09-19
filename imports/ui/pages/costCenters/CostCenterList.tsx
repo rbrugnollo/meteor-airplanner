@@ -1,86 +1,77 @@
-import React from 'react';
-import {
-  Table,
-  TableContainer,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Flex,
-  Box,
-  Heading,
-  Spacer,
-  ButtonGroup,
-  Button,
-  SkeletonText,
-} from '@chakra-ui/react';
-import { CostCentersCollection } from '/imports/api/costCenters/collection';
-import { FaPlus } from 'react-icons/fa6';
-import { RoleNames } from '/imports/api/users/collection';
-import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
+import React, { useMemo } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
+import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/costCenters/publications/list';
-import CostCenterForm from './CostCenterForm';
-import CostCenterListItem from './CostCenterListItem';
+import { RoleName } from '/imports/api/users/collection';
+import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/collection';
 
-interface CostCenterViewModel {
-  _id: string;
-  name: string;
-}
-
-export const CostCenterListRoles = [RoleNames.ADMIN];
+export const CostCenterListRoles: RoleName[] = ['Admin'];
 
 const CostCenterList = () => {
   const isLoading = useSubscribe(list);
-  const costCenters: CostCenterViewModel[] = useFind(() => CostCentersCollection.find({}));
+  const costCenters = useFind(() => CostCentersCollection.find());
+  const columns = useMemo<MrtColumnDef<CostCenter>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+      },
+    ],
+    [],
+  );
+  const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
 
   return (
-    <Flex width="full" align="center" justifyContent="center">
+    <>
       <Box
-        p={{ base: 4, md: 8 }}
-        width="full"
-        h="full"
-        minH={{
-          base: 'calc(100vh - 2rem)',
-          md: '100vh',
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 2,
         }}
-        bgColor="white"
       >
-        <Flex minWidth="max-content" alignItems="center" gap="2" mb={6}>
-          <Box>
-            <Heading as="h3" size="lg">
-              Cost Centers
-            </Heading>
-          </Box>
-          <Spacer />
-          <ButtonGroup gap="2">
-            <CostCenterForm
-              ActionButton={({ onOpen }) => (
-                <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
-                  Add New
-                </Button>
-              )}
+        <Container
+          maxWidth="xl"
+          sx={{
+            px: { xs: 0 },
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack
+              sx={{ px: { xs: 2 } }}
+              direction="row"
+              justifyContent="space-between"
+              spacing={4}
+            >
+              <Typography variant="h5">Cost Centers</Typography>
+              <div>
+                <Stack direction="row" spacing={2}>
+                  <Button startIcon={<AddIcon />} variant="contained">
+                    Add
+                  </Button>
+                </Stack>
+              </div>
+            </Stack>
+            <MaterialReactTable<CostCenter>
+              enableTopToolbar={false}
+              enableBottomToolbar={false}
+              enableDensityToggle={false}
+              enableSorting={false}
+              enableFilters={false}
+              enableHiding={false}
+              enableColumnActions={false}
+              enableRowVirtualization
+              state={{ isLoading: isLoading() }}
+              muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
+              columns={columns}
+              data={costCenters}
             />
-          </ButtonGroup>
-        </Flex>
-        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
-          <TableContainer minH="full" whiteSpace="normal">
-            <Table size="sm" variant="striped" colorScheme="teal">
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th>&nbsp;</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {costCenters.map((a) => (
-                  <CostCenterListItem key={a._id} costCenter={a} />
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </SkeletonText>
+          </Stack>
+        </Container>
       </Box>
-    </Flex>
+    </>
   );
 };
 

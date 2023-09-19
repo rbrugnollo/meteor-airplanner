@@ -1,23 +1,16 @@
 import React from 'react';
-import { Center, Spinner, VStack, Text } from '@chakra-ui/react';
+import { Grid, CircularProgress, Stack, Typography } from '@mui/material';
 
 const LoadingSpinner = () => {
   return (
-    <Center h="100vh" w="100vw">
-      <VStack spacing="24px">
-        <Spinner
-          thickness="16px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="teal.500"
-          height={150}
-          width={150}
-        />
-        <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Airplanner is loading...
-        </Text>
-      </VStack>
-    </Center>
+    <Grid container justifyContent="center" alignItems="center" style={{ minHeight: '100vh' }}>
+      <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
+        <CircularProgress />
+        <Typography variant="h5" component="h1">
+          Loading...
+        </Typography>
+      </Stack>
+    </Grid>
   );
 };
 

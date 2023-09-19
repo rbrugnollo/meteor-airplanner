@@ -1,89 +1,82 @@
-import React from 'react';
-import {
-  Table,
-  TableContainer,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Flex,
-  Box,
-  Heading,
-  Spacer,
-  ButtonGroup,
-  Button,
-  SkeletonText,
-} from '@chakra-ui/react';
-import { FaPlus } from 'react-icons/fa6';
-import { RoleNames } from '/imports/api/users/collection';
-import FlightForm from './FlightForm';
-import { ValueLabelType } from '/imports/api/common/ValueLabelType';
-import { useSubscribe, useFind } from '../../shared/hooks/useSubscribe';
-import { FlightsCollection } from '/imports/api/flights/collection';
+import React, { useMemo } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
+import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
+import { RoleName } from '/imports/api/users/collection';
+import { Flight, FlightsCollection } from '/imports/api/flights/collection';
 import { list } from '/imports/api/flights/publications/list';
-import FlightScheduleListItem from './FlightScheduleListItem';
 
-export const FlightScheduleListRoles = [RoleNames.ADMIN];
-
-interface FlightViewModel {
-  readonly _id: string;
-  readonly airplane: ValueLabelType;
-  readonly scheduledDateTime: Date;
-}
+export const FlightScheduleListRoles: RoleName[] = ['Admin'];
 
 const FlightScheduleList = () => {
   const isLoading = useSubscribe(list);
-  const flights: FlightViewModel[] = useFind(() => FlightsCollection.find({}));
+  const flights = useFind(() => FlightsCollection.find({}));
+  const columns = useMemo<MrtColumnDef<Flight>[]>(
+    () => [
+      {
+        accessorKey: 'airplane.label',
+        header: 'Airplane',
+      },
+      {
+        accessorKey: 'scheduledDateTime',
+        header: 'Scheduled Date',
+        accessorFn: (row) => row.scheduledDateTime.toDateString(),
+      },
+    ],
+    [],
+  );
+  const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
 
   return (
-    <Flex width="full" align="center" justifyContent="center">
+    <>
       <Box
-        p={{ base: 4, md: 8 }}
-        width="full"
-        h="full"
-        minH={{
-          base: 'calc(100vh - 2rem)',
-          md: '100vh',
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 2,
         }}
-        bgColor="white"
       >
-        <Flex minWidth="max-content" alignItems="center" gap="2" mb={6}>
-          <Box>
-            <Heading as="h3" size="lg">
-              Flight Schedule
-            </Heading>
-          </Box>
-          <Spacer />
-          <ButtonGroup gap="2">
-            <FlightForm
-              ActionButton={({ onOpen }) => (
-                <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
-                  Add New
-                </Button>
-              )}
+        <Container
+          maxWidth="xl"
+          sx={{
+            px: { xs: 0 },
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack
+              sx={{ px: { xs: 2 } }}
+              direction="row"
+              justifyContent="space-between"
+              spacing={4}
+            >
+              <Typography variant="h5">Flight Schedule</Typography>
+              <div>
+                <Stack direction="row" spacing={2}>
+                  <Button startIcon={<AddIcon />} variant="contained">
+                    Add
+                  </Button>
+                </Stack>
+              </div>
+            </Stack>
+            <MaterialReactTable<Flight>
+              enableTopToolbar={false}
+              enableBottomToolbar={false}
+              enableDensityToggle={false}
+              enableSorting={false}
+              enableFilters={false}
+              enableHiding={false}
+              enableColumnActions={false}
+              enableRowVirtualization
+              state={{ isLoading: isLoading() }}
+              muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
+              columns={columns}
+              data={flights}
             />
-          </ButtonGroup>
-        </Flex>
-        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
-          <TableContainer minH="full" whiteSpace="normal">
-            <Table size="sm" variant="striped" colorScheme="teal">
-              <Thead>
-                <Tr>
-                  <Th>Airplane</Th>
-                  <Th>DateTime</Th>
-                  <Th>&nbsp;</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {flights.map((a) => (
-                  <FlightScheduleListItem key={a._id} flight={a} />
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </SkeletonText>
+          </Stack>
+        </Container>
       </Box>
-    </Flex>
+    </>
   );
 };
 

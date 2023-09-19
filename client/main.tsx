@@ -4,6 +4,12 @@ import { RouterProvider } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import Router from '/imports/startup/client/router/Router';
 import '/imports/startup/client';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { SnackbarProvider } from 'notistack';
+import { createTheme } from '/imports/ui/theme';
+
+const theme = createTheme();
 
 Meteor.startup(() => {
   const container = document.getElementById('react-target');
@@ -12,7 +18,12 @@ Meteor.startup(() => {
   const root = createRoot(container);
   root.render(
     <React.StrictMode>
-      <RouterProvider router={Router} />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <SnackbarProvider>
+          <RouterProvider router={Router} />
+        </SnackbarProvider>
+      </ThemeProvider>
     </React.StrictMode>,
   );
 });

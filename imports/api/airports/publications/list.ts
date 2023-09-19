@@ -1,11 +1,15 @@
+import { Mongo } from 'meteor/mongo';
 import { createPublication } from 'meteor/zodern:relay';
 import { z } from 'zod';
-import { AirportsCollection } from '../collection';
+import { Airport, AirportsCollection } from '../collection';
 
 export const list = createPublication({
   name: 'airports.list',
-  schema: z.undefined(),
-  run() {
-    return AirportsCollection.find({ country: 'Brazil' }, { limit: 100, sort: { name: 1 } });
+  schema: z.object({
+    selector: z.custom<Mongo.Selector<Airport>>(),
+    options: z.custom<Mongo.Options<Airport>>(),
+  }),
+  run({ selector, options }) {
+    return AirportsCollection.find(selector, options);
   },
 });

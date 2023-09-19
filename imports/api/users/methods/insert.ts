@@ -9,7 +9,7 @@ export const insert = createMethod({
   schema: z.object({
     email: z.string(),
     name: z.string(),
-    roles: z.string().array(),
+    roles: z.any().array(),
   }),
   async run({ name, email, roles }) {
     const userId = await Accounts.createUserAsync({

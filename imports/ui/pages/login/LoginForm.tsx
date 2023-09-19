@@ -1,117 +1,112 @@
-import React, { useState } from 'react';
-import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Heading,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Icon,
-  useToast,
-  Link as ChakraLink,
-} from '@chakra-ui/react';
-import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { Box, Button, Divider, Stack, TextField, Typography } from '@mui/material';
 import { Meteor } from 'meteor/meteor';
-import { useForm } from 'react-hook-form';
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 
 const LoginForm = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>();
-  const toast = useToast();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handlePasswordVisibility = () => setShowPassword(!showPassword);
-  const handleFormSubmit = (data: LoginFormData) => {
-    setShowPassword(false);
-    Meteor.loginWithPassword(data.email, data.password, (error) => {
-      if (error) {
-        toast({
-          status: 'error',
-          description: error.message,
-        });
-      } else {
-        navigate('/app');
-      }
-    });
-  };
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+      submit: null,
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+      password: Yup.string().max(255).required('Password is required'),
+    }),
+    onSubmit: async (values, helpers) => {
+      Meteor.loginWithPassword(values.email, values.password, (error) => {
+        if (error) {
+          enqueueSnackbar(error.message, { variant: 'error' });
+          helpers.setSubmitting(false);
+        } else {
+          navigate('/app');
+        }
+      });
+    },
+  });
 
   return (
-    <Flex width="full" align="center" justifyContent="center">
+    <>
       <Box
-        p={8}
-        maxWidth="500px"
-        borderWidth={1}
-        borderRadius={8}
-        boxShadow="lg"
-        bgColor="white"
-        mt={8}
+        sx={{
+          backgroundColor: 'background.paper',
+          flex: '1 1 auto',
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
       >
-        <Box textAlign="center">
-          <Heading>Login</Heading>
-        </Box>
-        <Box my={4} textAlign="left">
-          <form noValidate onSubmit={handleSubmit(handleFormSubmit)}>
-            <FormControl isRequired isInvalid={!!errors.email}>
-              <FormLabel htmlFor="email">Email</FormLabel>
-              <Input
-                type="email"
-                placeholder="test@test.com"
-                {...register('email', {
-                  required: 'Please enter Email',
-                  minLength: 3,
-                  maxLength: 200,
-                })}
-              />
-              <FormErrorMessage>{errors.email && errors.email.message}</FormErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={!!errors.password} mt={6}>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <InputGroup>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="*******"
-                  {...register('password', {
-                    required: 'Please enter Password',
-                  })}
+        <Box
+          sx={{
+            maxWidth: 550,
+            px: 3,
+            py: '100px',
+            width: '100%',
+          }}
+        >
+          <div>
+            <Stack
+              direction="row"
+              divider={<Divider orientation="vertical" flexItem />}
+              spacing={2}
+              style={{ marginBottom: '40px' }}
+            >
+              <img width={128} src="/logo.png" />
+              <Typography fontWeight="bold" variant="h4">
+                Login
+              </Typography>
+            </Stack>
+            <form noValidate onSubmit={formik.handleSubmit}>
+              <Stack spacing={3}>
+                <TextField
+                  error={!!(formik.touched.email && formik.errors.email)}
+                  fullWidth
+                  helperText={formik.touched.email && formik.errors.email}
+                  label="Email Address"
+                  name="email"
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  type="email"
+                  value={formik.values.email}
                 />
-                <InputRightElement width="3rem">
-                  <Button h="1.5rem" size="sm" onClick={handlePasswordVisibility}>
-                    {showPassword ? (
-                      <Icon as={AiOutlineEye} />
-                    ) : (
-                      <Icon as={AiOutlineEyeInvisible} />
-                    )}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-              <FormErrorMessage>{errors.password && errors.password.message}</FormErrorMessage>
-            </FormControl>
-            <Button type="submit" colorScheme="teal" isLoading={isSubmitting} width="full" mt={4}>
-              Sign In
-            </Button>
-            <Box textAlign="center" mt={1} fontSize="sm">
-              <ChakraLink as={ReactRouterLink} to="/forgot">
-                Forgot Password?
-              </ChakraLink>
-            </Box>
-          </form>
+                <TextField
+                  error={!!(formik.touched.password && formik.errors.password)}
+                  fullWidth
+                  helperText={formik.touched.password && formik.errors.password}
+                  label="Password"
+                  name="password"
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  type="password"
+                  value={formik.values.password}
+                />
+              </Stack>
+              <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
+                Continue
+              </Button>
+              <Button
+                fullWidth
+                size="large"
+                sx={{ mt: 3 }}
+                {...{
+                  component: RouterLink,
+                  to: '/auth/forgot',
+                }}
+              >
+                Forgot password?
+              </Button>
+            </form>
+          </div>
         </Box>
       </Box>
-    </Flex>
+    </>
   );
 };
 

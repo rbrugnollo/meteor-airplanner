@@ -1,141 +1,120 @@
-import React, { useState } from 'react';
-import { useMatch, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Heading,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Icon,
-  useToast,
-} from '@chakra-ui/react';
-import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
-import { useForm } from 'react-hook-form';
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { Box, Button, Divider, Stack, TextField, Typography } from '@mui/material';
 import { Accounts } from 'meteor/accounts-base';
+import { useMatch, useNavigate } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 
-interface PasswordResetFormData {
-  password: string;
-  confirm: string;
-}
+const getCharacterValidationError = (str: string) => {
+  return `Your password must have at least 1 ${str} character`;
+};
 
-const PasswordResetForm = () => {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<PasswordResetFormData>();
+const ForgotPasswordForm = () => {
   const match = useMatch('password/:action/:token');
-  const toast = useToast();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handlePasswordVisibility = () => setShowPassword(!showPassword);
-
-  const handleFormSubmit = (data: PasswordResetFormData) => {
-    setShowPassword(false);
-    const token = match?.params.token ?? '';
-    Accounts.resetPassword(token, data.password, function (err) {
-      if (err) {
-        toast({
-          status: 'error',
-          description: err.message,
-        });
-      }
-      toast({
-        status: 'success',
-        description: 'Password successfully defined',
+  const formik = useFormik({
+    initialValues: {
+      password: '',
+      confirm: '',
+      submit: null,
+    },
+    validationSchema: Yup.object({
+      password: Yup.string()
+        .max(255)
+        .required('Password is required')
+        .matches(/[0-9]/, getCharacterValidationError('digit'))
+        .matches(/[a-z]/, getCharacterValidationError('lowercase'))
+        .matches(/[A-Z]/, getCharacterValidationError('uppercase')),
+      confirm: Yup.string()
+        .max(255)
+        .required('Confirm is required')
+        .oneOf([Yup.ref('password')], 'Passwords does not match'),
+    }),
+    onSubmit: async (values, helpers) => {
+      const token = match?.params.token ?? '';
+      Accounts.resetPassword(token, values.password, function (err) {
+        if (err) {
+          enqueueSnackbar(err.message, { variant: 'error' });
+          helpers.setSubmitting(false);
+        } else {
+          enqueueSnackbar('Password successfully defined', {
+            variant: 'success',
+          });
+          navigate('/app');
+        }
       });
-      navigate('/app');
-    });
-  };
+    },
+  });
 
   return (
-    <Flex width="full" align="center" justifyContent="center">
+    <>
       <Box
-        p={8}
-        maxWidth="500px"
-        borderWidth={1}
-        borderRadius={8}
-        boxShadow="lg"
-        bgColor="white"
-        mt={8}
+        sx={{
+          backgroundColor: 'background.paper',
+          flex: '1 1 auto',
+          alignItems: 'center',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
       >
-        <Box textAlign="center">
-          <Heading>{match?.params.action == 'enroll-account' ? 'Set' : 'Reset'} Password</Heading>
-        </Box>
-        <Box my={4} textAlign="left">
-          <form noValidate onSubmit={handleSubmit(handleFormSubmit)}>
-            <FormControl isRequired isInvalid={!!errors.password}>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <InputGroup>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="*******"
-                  {...register('password', {
-                    required: 'Please enter Password',
-                    minLength: {
-                      value: 8,
-                      message: 'Password must have at least 8 chars',
-                    },
-                    maxLength: {
-                      value: 50,
-                      message: 'Password cannot have more than 50 chars',
-                    },
-                  })}
+        <Box
+          sx={{
+            maxWidth: 550,
+            px: 3,
+            py: '100px',
+            width: '100%',
+          }}
+        >
+          <div>
+            <Stack
+              direction="row"
+              divider={<Divider orientation="vertical" flexItem />}
+              spacing={2}
+              style={{ marginBottom: '40px' }}
+              alignItems="center"
+            >
+              <img style={{ maxWidth: 128, height: '100%' }} src="/logo.png" />
+              <Typography fontWeight="bold" variant="h4">
+                {match?.params.action == 'enroll-account' ? 'Set' : 'Reset'} Password
+              </Typography>
+            </Stack>
+            <form noValidate onSubmit={formik.handleSubmit}>
+              <Stack spacing={3}>
+                <TextField
+                  error={!!(formik.touched.password && formik.errors.password)}
+                  fullWidth
+                  helperText={formik.touched.password && formik.errors.password}
+                  label="Password"
+                  name="password"
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  type="password"
+                  value={formik.values.password}
                 />
-                <InputRightElement width="3rem">
-                  <Button h="1.5rem" size="sm" onClick={handlePasswordVisibility}>
-                    {showPassword ? (
-                      <Icon as={AiOutlineEye} />
-                    ) : (
-                      <Icon as={AiOutlineEyeInvisible} />
-                    )}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-              <FormErrorMessage>{errors.password && errors.password.message}</FormErrorMessage>
-            </FormControl>
-            <FormControl isRequired isInvalid={!!errors.confirm} mt={6}>
-              <FormLabel htmlFor="confirm">Confirm Password</FormLabel>
-              <InputGroup>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="*******"
-                  {...register('confirm', {
-                    required: 'Please enter Password Confirmation',
-                    validate: (val: string) => {
-                      if (watch('password') != val) {
-                        return 'Your passwords do no match';
-                      }
-                    },
-                  })}
+                <TextField
+                  error={!!(formik.touched.confirm && formik.errors.confirm)}
+                  fullWidth
+                  helperText={formik.touched.confirm && formik.errors.confirm}
+                  label="Confirm Password"
+                  name="confirm"
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  type="password"
+                  value={formik.values.confirm}
                 />
-                <InputRightElement width="3rem">
-                  <Button h="1.5rem" size="sm" onClick={handlePasswordVisibility}>
-                    {showPassword ? (
-                      <Icon as={AiOutlineEye} />
-                    ) : (
-                      <Icon as={AiOutlineEyeInvisible} />
-                    )}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-              <FormErrorMessage>{errors.confirm && errors.confirm.message}</FormErrorMessage>
-            </FormControl>
-            <Button type="submit" colorScheme="teal" isLoading={isSubmitting} width="full" mt={4}>
-              Sign In
-            </Button>
-          </form>
+              </Stack>
+              <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
+                Continue
+              </Button>
+            </form>
+          </div>
         </Box>
       </Box>
-    </Flex>
+    </>
   );
 };
 
-export default PasswordResetForm;
+export default ForgotPasswordForm;

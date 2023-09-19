@@ -1,88 +1,85 @@
-import React from 'react';
-import {
-  Table,
-  TableContainer,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Flex,
-  Box,
-  Heading,
-  Spacer,
-  ButtonGroup,
-  Button,
-  SkeletonText,
-} from '@chakra-ui/react';
-import { AirplanesCollection } from '/imports/api/airplanes/collection';
-import AirplaneListItem from './AirplaneListItem';
-import AirplaneForm from './AirplaneForm';
-import { FaPlus } from 'react-icons/fa6';
-import { RoleNames } from '/imports/api/users/collection';
-import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
+import React, { useMemo } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
+import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/airplanes/publications/list';
+import { RoleName } from '/imports/api/users/collection';
+import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
 
-interface AirplaneViewModel {
-  _id: string;
-  name: string;
-  tailNumber: string;
-}
-
-export const AirplaneListRoles = [RoleNames.ADMIN];
+export const AirplaneListRoles: RoleName[] = ['Admin'];
 
 const AirplaneList = () => {
   const isLoading = useSubscribe(list);
-  const airplanes: AirplaneViewModel[] = useFind(() => AirplanesCollection.find({}));
+  const airplanes = useFind(() => AirplanesCollection.find());
+  const columns = useMemo<MrtColumnDef<Airplane>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+      },
+      {
+        accessorKey: 'tailNumber',
+        header: 'Tail Number',
+      },
+      {
+        accessorKey: 'seats',
+        header: 'Seats',
+      },
+    ],
+    [],
+  );
+  const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
 
   return (
-    <Flex width="full" align="center" justifyContent="center">
+    <>
       <Box
-        p={{ base: 4, md: 8 }}
-        width="full"
-        h="full"
-        minH={{
-          base: 'calc(100vh - 2rem)',
-          md: '100vh',
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 2,
         }}
-        bgColor="white"
       >
-        <Flex minWidth="max-content" alignItems="center" gap="2" mb={6}>
-          <Box>
-            <Heading as="h3" size="lg">
-              Airplanes
-            </Heading>
-          </Box>
-          <Spacer />
-          <ButtonGroup gap="2">
-            <AirplaneForm
-              ActionButton={({ onOpen }) => (
-                <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
-                  Add New
-                </Button>
-              )}
+        <Container
+          maxWidth="xl"
+          sx={{
+            px: { xs: 0 },
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack
+              sx={{ px: { xs: 2 } }}
+              direction="row"
+              justifyContent="space-between"
+              spacing={4}
+            >
+              <Typography variant="h5">Airplanes</Typography>
+              <div>
+                <Stack direction="row" spacing={2}>
+                  <Button startIcon={<AddIcon />} variant="contained">
+                    Add
+                  </Button>
+                </Stack>
+              </div>
+            </Stack>
+            <MaterialReactTable<Airplane>
+              enableTopToolbar={false}
+              enableBottomToolbar={false}
+              enableDensityToggle={false}
+              enableSorting={false}
+              enableFilters={false}
+              enableHiding={false}
+              enableColumnActions={false}
+              enableRowVirtualization
+              state={{ isLoading: isLoading() }}
+              muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
+              columns={columns}
+              data={airplanes}
             />
-          </ButtonGroup>
-        </Flex>
-        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
-          <TableContainer minH="full" whiteSpace="normal">
-            <Table size="sm" variant="striped" colorScheme="teal">
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th>Tail Number</Th>
-                  <Th>&nbsp;</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {airplanes.map((a) => (
-                  <AirplaneListItem key={a._id} airplane={a} />
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </SkeletonText>
+          </Stack>
+        </Container>
       </Box>
-    </Flex>
+    </>
   );
 };
 

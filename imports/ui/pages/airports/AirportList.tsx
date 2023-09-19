@@ -1,89 +1,149 @@
-import React from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
-  Table,
-  TableContainer,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Flex,
-  Box,
-  Heading,
-  Spacer,
-  ButtonGroup,
-  Button,
-  SkeletonText,
-} from '@chakra-ui/react';
-import { AirportsCollection } from '/imports/api/airports/collection';
-import { FaPlus } from 'react-icons/fa6';
-import { RoleNames } from '/imports/api/users/collection';
-import { useSubscribe, useFind } from '/imports/ui/shared/hooks/useSubscribe';
+  MaterialReactTable,
+  type MRT_ColumnDef as MrtColumnDef,
+  MRT_Virtualizer as MrtVirtualizer,
+} from 'material-react-table';
+import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
+import { RoleName } from '/imports/api/users/collection';
 import { list } from '/imports/api/airports/publications/list';
-import AirportForm from './AirportForm';
-import AirportListItem from './AirportListItem';
+import { Airport, AirportsCollection } from '/imports/api/airports/collection';
+import AirportListFilter, { AirportListFilterValues } from './AirportListFilter';
+import { Mongo } from 'meteor/mongo';
 
-interface AirportViewModel {
-  readonly _id: string;
-  readonly name: string;
-  readonly icao: string;
-  readonly city: string;
-  readonly country: string;
-}
-
-export const AirportListRoles = [RoleNames.ADMIN];
+export const AirportListRoles: RoleName[] = ['Admin'];
 
 const AirportList = () => {
-  const isLoading = useSubscribe(list);
-  const airports: AirportViewModel[] = useFind(() => AirportsCollection.find({}));
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizerInstanceRef =
+    useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
+  const [selector, setSelector] = useState<Mongo.Selector<Airport>>({ role: null });
+  const [options, setOptions] = useState<Mongo.Options<Airport>>({ sort: { name: 1 }, limit: 50 });
+  const isLoading = useSubscribe(() => {
+    return list({ selector, options });
+  });
+  const airports = useFind(() => AirportsCollection.find(), [selector, options]);
+  const columns = useMemo<MrtColumnDef<Airport>[]>(
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+      },
+      {
+        accessorKey: 'icao',
+        header: 'ICAO',
+      },
+      {
+        accessorKey: 'city',
+        header: 'City',
+      },
+      {
+        accessorKey: 'country',
+        header: 'Country',
+      },
+      {
+        accessorKey: 'timezone',
+        header: 'Timezone',
+      },
+    ],
+    [],
+  );
+  const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
+
+  const fetchMoreOnBottomReached = (containerRefElement?: HTMLDivElement | null) => {
+    if (containerRefElement) {
+      const currentLimit = options?.limit ?? 0;
+      const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
+      if (scrollHeight - scrollTop - clientHeight < 400 && !isLoading() && currentLimit < 500) {
+        setOptions({ ...options, limit: currentLimit + 50 });
+      }
+    }
+  };
+
+  const handleFilter = (values: AirportListFilterValues) => {
+    let selector = {};
+    if (values.search) {
+      selector = {
+        $or: [
+          { name: { $regex: values.search, $options: 'i' } },
+          { city: { $regex: values.search, $options: 'i' } },
+          { icao: { $regex: values.search, $options: 'i' } },
+        ],
+      };
+    }
+    setSelector(selector);
+    // Scroll to the top of the table when the filter changes
+    try {
+      rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <Flex width="full" align="center" justifyContent="center">
+    <>
       <Box
-        p={{ base: 4, md: 8 }}
-        width="full"
-        h="full"
-        minH={{
-          base: 'calc(100vh - 2rem)',
-          md: '100vh',
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 2,
         }}
-        bgColor="white"
       >
-        <Flex minWidth="max-content" alignItems="center" gap="2" mb={6}>
-          <Box>
-            <Heading as="h3" size="lg">
-              Airport
-            </Heading>
-          </Box>
-          <Spacer />
-          <ButtonGroup gap="2">
-            <AirportForm
-              ActionButton={({ onOpen }) => (
-                <Button leftIcon={<FaPlus />} onClick={onOpen} colorScheme="teal">
-                  Add New
-                </Button>
-              )}
+        <Container
+          maxWidth="xl"
+          sx={{
+            px: { xs: 0 },
+          }}
+        >
+          <Stack spacing={2}>
+            <Stack
+              sx={{ px: { xs: 2 } }}
+              direction="row"
+              justifyContent="space-between"
+              spacing={4}
+            >
+              <Typography variant="h5">Airports</Typography>
+              <div>
+                <Stack direction="row" spacing={2}>
+                  <Button startIcon={<AddIcon />} variant="contained">
+                    Add
+                  </Button>
+                  <AirportListFilter onFilter={handleFilter} />
+                </Stack>
+              </div>
+            </Stack>
+            <MaterialReactTable<Airport>
+              enablePagination={false}
+              enableTopToolbar={false}
+              enableBottomToolbar={false}
+              enableDensityToggle={false}
+              enableSorting={false}
+              enableFilters={false}
+              enableHiding={false}
+              enableColumnActions={false}
+              enableRowVirtualization
+              rowVirtualizerProps={{ overscan: 4 }}
+              rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
+              state={{
+                isLoading: isLoading(),
+                columnVisibility: { icao: lgUp, country: lgUp, timezone: lgUp },
+              }}
+              muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
+              columns={columns}
+              data={airports}
+              muiTableContainerProps={{
+                ref: tableContainerRef,
+                sx: { maxHeight: lgUp ? 'calc(100vh - 90px)' : 'calc(100vh - 130px)' },
+                onScroll: (event: React.UIEvent<HTMLDivElement>) =>
+                  fetchMoreOnBottomReached(event.target as HTMLDivElement),
+              }}
             />
-          </ButtonGroup>
-        </Flex>
-        <SkeletonText noOfLines={6} spacing={4} skeletonHeight={10} isLoaded={!isLoading()}>
-          <TableContainer minH="full" whiteSpace="normal">
-            <Table size="sm" variant="striped" colorScheme="teal">
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th>Location</Th>
-                  <Th>&nbsp;</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {airports.map((a) => (
-                  <AirportListItem key={a._id} airport={a} />
-                ))}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </SkeletonText>
+          </Stack>
+        </Container>
       </Box>
-    </Flex>
+    </>
   );
 };
 

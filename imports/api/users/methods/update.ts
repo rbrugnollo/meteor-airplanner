@@ -13,7 +13,7 @@ export const update = createMethod({
     _id: z.string(),
     email: z.string(),
     name: z.string(),
-    roles: z.string().array(),
+    roles: z.any().array(),
   }),
   async run({ _id, name, email, roles }) {
     // const currentEmail = await Meteor.users.findOneAsync({ _id });

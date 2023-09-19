@@ -22,7 +22,6 @@ import {
 } from '@chakra-ui/react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { Meteor } from 'meteor/meteor';
-import { RoleNames } from '/imports/api/users/collection';
 import { insert as insertFlight } from '/imports/api/flights/methods/insert';
 import { update } from '/imports/api/flights/methods/update';
 import { getOne } from '/imports/api/flights/methods/getOne';
@@ -320,7 +319,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                       onOptionsLoaded={({ captain }) => {
                         if (captain && !getValues('captain')) setValue('captain', captain);
                       }}
-                      roles={[RoleNames.CAPTAIN]}
+                      roles={['Captain']}
                     />
                   </FormControl>
                 )}
@@ -343,7 +342,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                         if (firstOfficer && !getValues('firstOfficer'))
                           setValue('firstOfficer', firstOfficer);
                       }}
-                      roles={[RoleNames.FIRST_OFFICER]}
+                      roles={['First Officer']}
                     />
                   </FormControl>
                 )}
@@ -372,7 +371,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      roles={[RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER, RoleNames.PASSENGER]}
+                      roles={['Captain', 'First Officer', 'Passenger']}
                     />
                     <FormErrorMessage>
                       {errors.passengers && errors.passengers.message}
@@ -401,11 +400,7 @@ const FlightForm = ({ flightId, ActionButton }: FlightFormProps) => {
                             onChange={onChange}
                             onBlur={onBlur}
                             value={value}
-                            roles={[
-                              RoleNames.CAPTAIN,
-                              RoleNames.FIRST_OFFICER,
-                              RoleNames.PASSENGER,
-                            ]}
+                            roles={['Captain', 'First Officer', 'Passenger']}
                           />
                           <FormErrorMessage>
                             {errors.requesters &&
