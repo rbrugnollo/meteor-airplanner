@@ -61,7 +61,6 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
       const airplane = AirplanesCollection.findOne(airplaneId);
       if (airplane) {
         const { _id, ...values } = airplane;
-        console.log(values);
         formik.setValues(values);
       }
     }

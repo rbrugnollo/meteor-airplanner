@@ -4,18 +4,34 @@ import {
   type MRT_ColumnDef as MrtColumnDef,
   MRT_Virtualizer as MrtVirtualizer,
 } from 'material-react-table';
-import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Box,
+  Button,
+  Container,
+  Stack,
+  Typography,
+  useMediaQuery,
+  Theme,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+} from '@mui/material';
+import { Add, Edit, Delete } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { RoleName } from '/imports/api/users/collection';
 import { list } from '/imports/api/airports/publications/list';
 import { Airport, AirportsCollection } from '/imports/api/airports/collection';
 import AirportListFilter, { AirportListFilterValues } from './AirportListFilter';
 import { Mongo } from 'meteor/mongo';
+import AirportForm from './AirportForm';
 
 export const AirportListRoles: RoleName[] = ['Admin'];
 
 const AirportList = () => {
+  const [modalProps, setModalProps] = useState<{ open: boolean; airportId?: string }>({
+    open: false,
+    airportId: undefined,
+  });
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -107,7 +123,11 @@ const AirportList = () => {
               <Typography variant="h5">Airports</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button startIcon={<AddIcon />} variant="contained">
+                  <Button
+                    startIcon={<Add />}
+                    onClick={() => setModalProps({ open: true, airportId: undefined })}
+                    variant="contained"
+                  >
                     Add
                   </Button>
                   <AirportListFilter onFilter={handleFilter} />
@@ -139,9 +159,40 @@ const AirportList = () => {
                 onScroll: (event: React.UIEvent<HTMLDivElement>) =>
                   fetchMoreOnBottomReached(event.target as HTMLDivElement),
               }}
+              enableRowActions
+              renderRowActionMenuItems={({ row, closeMenu }) => [
+                <MenuItem
+                  key={3}
+                  onClick={() => {
+                    closeMenu();
+                    setModalProps({ open: true, airportId: row.original._id });
+                  }}
+                >
+                  <ListItemIcon>
+                    <Edit color="primary" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Edit</ListItemText>
+                </MenuItem>,
+                <MenuItem
+                  key={2}
+                  onClick={() => {
+                    console.info('Remove', row);
+                    closeMenu();
+                  }}
+                >
+                  <ListItemIcon>
+                    <Delete color="error" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Delete</ListItemText>
+                </MenuItem>,
+              ]}
             />
           </Stack>
         </Container>
+        <AirportForm
+          {...modalProps}
+          onClose={() => setModalProps({ open: false, airportId: undefined })}
+        />
       </Box>
     </>
   );
