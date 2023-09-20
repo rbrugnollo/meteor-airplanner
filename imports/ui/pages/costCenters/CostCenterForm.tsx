@@ -1,157 +1,122 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import * as Yup from 'yup';
 import {
-  Drawer,
   Button,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Input,
-  DrawerOverlay,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
-import { Meteor } from 'meteor/meteor';
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  useMediaQuery,
+  Theme,
+  TextField,
+  Stack,
+} from '@mui/material';
+import { useFormik } from 'formik';
 import { insert } from '/imports/api/costCenters/methods/insert';
 import { update } from '/imports/api/costCenters/methods/update';
-import { getOne } from '/imports/api/costCenters/methods/getOne';
+import { useSnackbar } from 'notistack';
+import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/collection';
+import { Meteor } from 'meteor/meteor';
+import { BaseCollectionTypes } from '/imports/api/common/BaseCollection';
 
-interface CostCenterFormData {
-  name: string;
-}
-
-interface CostCenterFormActionButtonProps {
-  readonly onOpen: () => void;
-}
+type CostCenterFormValues = Omit<CostCenter, BaseCollectionTypes>;
 
 interface CostCenterFormProps {
   readonly costCenterId?: string;
-  readonly ActionButton: React.JSXElementConstructor<CostCenterFormActionButtonProps>;
+  readonly open: boolean;
+  readonly onClose: () => void;
 }
 
-const CostCenterForm = ({ costCenterId, ActionButton }: CostCenterFormProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
+  const formik = useFormik<CostCenterFormValues>({
+    initialValues: {
+      name: '',
+    },
+    validationSchema: Yup.object<CostCenterFormValues>().shape({
+      name: Yup.string().required('Name is required'),
+    }),
+    onSubmit: async (values) => {
+      if (costCenterId) {
+        await handleUpdate(values);
+      } else {
+        await handleInsert(values);
+      }
+    },
+    enableReinitialize: true,
+  });
+  useEffect(() => {
+    formik.resetForm();
+    if (open && costCenterId) {
+      const costCenter = CostCentersCollection.findOne(costCenterId);
+      if (costCenter) {
+        const { _id, ...values } = costCenter;
+        formik.setValues(values);
+      }
+    }
+  }, [open]);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors, isSubmitting, isLoading },
-  } = useForm<CostCenterFormData>();
-
-  const toast = useToast();
-
-  const handleInsert = async (data: CostCenterFormData) => {
+  const handleInsert = async (data: CostCenterFormValues) => {
     try {
       await insert(data);
-      toast({
-        description: 'Cost Center successfully created.',
-        status: 'success',
-      });
-      handleClose();
+      enqueueSnackbar('Cost Center successfully created.', { variant: 'success' });
+      onClose();
     } catch (e: unknown) {
+      console.log(e);
       if (e instanceof Meteor.Error) {
-        toast({
-          description: e.message,
-          status: 'error',
-        });
+        enqueueSnackbar(e.message, { variant: 'error' });
       }
     }
   };
 
-  const handleUpdate = async (data: CostCenterFormData) => {
+  const handleUpdate = async (data: CostCenterFormValues) => {
     try {
       await update({
         _id: costCenterId!,
         ...data,
       });
-      toast({
-        description: 'Cost Center successfully updated.',
-        status: 'success',
-      });
-      handleClose();
+      enqueueSnackbar('Cost Center successfully updated.', { variant: 'success' });
+      onClose();
     } catch (e: unknown) {
+      console.log(e);
       if (e instanceof Meteor.Error) {
-        toast({
-          description: e.message,
-          status: 'error',
-        });
+        enqueueSnackbar(e.message, { variant: 'error' });
       }
     }
   };
 
-  const handleFormSubmit = async (data: CostCenterFormData) => {
-    if (costCenterId) {
-      await handleUpdate(data);
-    } else {
-      await handleInsert(data);
-    }
-  };
-
-  const handleOpen = async () => {
-    setValue('name', '');
-
-    onOpen();
-
-    if (costCenterId) {
-      const costCenter = await getOne({ _id: costCenterId });
-      setValue('name', costCenter?.name || '');
-    }
-  };
-
-  const handleClose = () => {
-    reset();
-    onClose();
-  };
-
-  const headerText = costCenterId ? 'Edit Cost Center' : 'Add new Cost Center';
-
   return (
-    <>
-      <ActionButton onOpen={handleOpen} />
-      <Drawer isOpen={isOpen} placement="right" onClose={handleClose} size="md">
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>{headerText}</DrawerHeader>
-          <DrawerBody>
-            <form id="costCenter-form" noValidate onSubmit={handleSubmit(handleFormSubmit)}>
-              <FormControl isRequired isInvalid={!!errors.name}>
-                <FormLabel htmlFor="name">Name</FormLabel>
-                <Input
-                  type="text"
-                  {...register('name', {
-                    required: 'Please enter Name',
-                    minLength: 3,
-                    maxLength: 300,
-                  })}
-                />
-                <FormErrorMessage>{errors.name && errors.name.message}</FormErrorMessage>
-              </FormControl>
-            </form>
-          </DrawerBody>
-          <DrawerFooter>
-            <Button variant="outline" mr={3} onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              isLoading={isLoading || isSubmitting}
-              type="submit"
-              form="costCenter-form"
-              colorScheme="blue"
-            >
-              Save
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    </>
+    <Dialog
+      fullScreen={fullScreen}
+      PaperProps={{ sx: { width: 450 } }}
+      open={open}
+      onClose={onClose}
+    >
+      <DialogTitle>{costCenterId ? 'Update' : 'Add new'} Cost Center</DialogTitle>
+      <DialogContent>
+        <form id="costCenter-form" noValidate onSubmit={formik.handleSubmit}>
+          <Stack sx={{ mt: 1 }} spacing={3}>
+            <TextField
+              error={!!(formik.touched.name && formik.errors.name)}
+              fullWidth
+              helperText={formik.touched.name && formik.errors.name}
+              label="Name"
+              name="name"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.name}
+            />
+          </Stack>
+        </form>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button type="submit" form="costCenter-form" autoFocus>
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

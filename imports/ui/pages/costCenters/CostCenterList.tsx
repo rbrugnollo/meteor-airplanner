@@ -1,15 +1,32 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
-import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Stack,
+  Typography,
+  useMediaQuery,
+  Theme,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/costCenters/publications/list';
 import { RoleName } from '/imports/api/users/collection';
 import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/collection';
+import { Edit, Delete } from '@mui/icons-material';
+import CostCenterForm from './CostCenterForm';
 
 export const CostCenterListRoles: RoleName[] = ['Admin'];
 
 const CostCenterList = () => {
+  const [modalProps, setModalProps] = useState<{ open: boolean; costCenterId?: string }>({
+    open: false,
+    costCenterId: undefined,
+  });
   const isLoading = useSubscribe(list);
   const costCenters = useFind(() => CostCentersCollection.find());
   const columns = useMemo<MrtColumnDef<CostCenter>[]>(
@@ -48,7 +65,11 @@ const CostCenterList = () => {
               <Typography variant="h5">Cost Centers</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button startIcon={<AddIcon />} variant="contained">
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={() => setModalProps({ open: true, costCenterId: undefined })}
+                    variant="contained"
+                  >
                     Add
                   </Button>
                 </Stack>
@@ -67,9 +88,40 @@ const CostCenterList = () => {
               muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
               columns={columns}
               data={costCenters}
+              enableRowActions
+              renderRowActionMenuItems={({ row, closeMenu }) => [
+                <MenuItem
+                  key={3}
+                  onClick={() => {
+                    closeMenu();
+                    setModalProps({ open: true, costCenterId: row.original._id });
+                  }}
+                >
+                  <ListItemIcon>
+                    <Edit color="primary" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Edit</ListItemText>
+                </MenuItem>,
+                <MenuItem
+                  key={2}
+                  onClick={() => {
+                    console.info('Remove', row);
+                    closeMenu();
+                  }}
+                >
+                  <ListItemIcon>
+                    <Delete color="error" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Delete</ListItemText>
+                </MenuItem>,
+              ]}
             />
           </Stack>
         </Container>
+        <CostCenterForm
+          {...modalProps}
+          onClose={() => setModalProps({ open: false, costCenterId: undefined })}
+        />
       </Box>
     </>
   );

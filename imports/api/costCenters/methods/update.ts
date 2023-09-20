@@ -1,13 +1,11 @@
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
-import { CostCentersCollection } from '../collection';
+import { IdBaseCollectionTypes } from '../../common/BaseCollection';
+import { CostCenter, CostCentersCollection } from '../collection';
 
 export const update = createMethod({
   name: 'costCenters.update',
-  schema: z.object({
-    _id: z.string(),
-    name: z.string(),
-  }),
+  schema: z.custom<Omit<CostCenter, IdBaseCollectionTypes>>(),
   async run(costCenter) {
     const { _id, ...data } = costCenter;
     return CostCentersCollection.updateAsync(
