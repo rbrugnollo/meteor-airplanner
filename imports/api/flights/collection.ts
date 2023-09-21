@@ -18,11 +18,11 @@ export interface Flight extends BaseCollection {
   readonly estimatedDuration: string;
   readonly origin: ValueLabelType;
   readonly destination: ValueLabelType;
-  readonly captain?: ValueLabelType;
-  readonly firstOfficer?: ValueLabelType;
-  readonly passengers?: ValueLabelType[];
-  readonly requesters?: FlightRequester[];
-  readonly notes?: string;
+  readonly captain?: ValueLabelType | null;
+  readonly firstOfficer?: ValueLabelType | null;
+  readonly passengers?: ValueLabelType[] | null;
+  readonly requesters?: FlightRequester[] | null;
+  readonly notes?: string | null;
 }
 
 export const FlightsCollection = new Mongo.Collection<Flight>(COLLECTION_NAME);

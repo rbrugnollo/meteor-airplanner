@@ -6,5 +6,6 @@ export interface BaseCollection {
   readonly updatedBy: string;
 }
 
+export type Nullable<T> = { [K in keyof T]: T[K] | null };
 export type BaseCollectionTypes = '_id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy';
 export type IdBaseCollectionTypes = 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy';

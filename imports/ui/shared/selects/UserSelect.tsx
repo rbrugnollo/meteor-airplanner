@@ -12,12 +12,18 @@ interface UserSelectProps<Multiple extends boolean | undefined = false>
   readonly roles: RoleName[];
   readonly label?: React.ReactNode;
   readonly name: string;
+  readonly helperText?: React.ReactNode;
+  readonly error?: boolean;
+  readonly filter?: (option: ValueLabelType) => boolean;
 }
 
 const UserSelect = <Multiple extends boolean | undefined = false>({
   roles,
   name,
   label,
+  error,
+  helperText,
+  filter,
   ...rest
 }: UserSelectProps<Multiple>) => {
   const [options, setOptions] = useState<ValueLabelType[]>([]);
@@ -43,13 +49,15 @@ const UserSelect = <Multiple extends boolean | undefined = false>({
       {...rest}
       isOptionEqualToValue={(option, value) => option.value === value.value}
       getOptionLabel={(option) => option.label}
-      options={options}
+      options={filter ? options.filter(filter!) : options}
       loading={isLoading}
       renderInput={(params) => (
         <TextField
           {...params}
           label={label}
           name={name}
+          error={error}
+          helperText={helperText}
           InputProps={{
             ...params.InputProps,
             endAdornment: (

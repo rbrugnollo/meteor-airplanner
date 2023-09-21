@@ -8,6 +8,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { SnackbarProvider } from 'notistack';
 import { createTheme } from '/imports/ui/theme';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const theme = createTheme();
 
@@ -19,10 +21,12 @@ Meteor.startup(() => {
   root.render(
     <React.StrictMode>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <SnackbarProvider>
-          <RouterProvider router={Router} />
-        </SnackbarProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <CssBaseline />
+          <SnackbarProvider>
+            <RouterProvider router={Router} />
+          </SnackbarProvider>
+        </LocalizationProvider>
       </ThemeProvider>
     </React.StrictMode>,
   );

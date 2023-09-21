@@ -113,8 +113,8 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
           <Stack sx={{ mt: 1 }} spacing={3}>
             <TextField
               error={!!(formik.touched.name && formik.errors.name)}
-              fullWidth
               helperText={formik.touched.name && formik.errors.name}
+              fullWidth
               label="Name"
               name="name"
               onBlur={formik.handleBlur}

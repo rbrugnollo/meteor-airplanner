@@ -7,18 +7,13 @@ export const searchByText = createMethod({
   name: 'users.searchByText',
   schema: z.object({
     roles: z.array(z.string()),
-    userIds: z.array(z.string()).optional(),
   }),
-  run({ roles, userIds }) {
-    let selector: Mongo.Selector<Meteor.User> = {
-      'profile.roles': { $in: roles },
-    };
-    if (userIds?.length)
-      selector = {
-        ...selector,
-        _id: { $in: userIds },
-      };
-
+  run({ roles }) {
+    const selector: Mongo.Selector<Meteor.User> = roles.length
+      ? {
+          'profile.roles': { $in: roles },
+        }
+      : {};
     return Meteor.users.find(selector, { sort: { 'profile.name': 1 } }).fetch();
   },
 });
