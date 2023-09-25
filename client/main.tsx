@@ -10,6 +10,7 @@ import { SnackbarProvider } from 'notistack';
 import { createTheme } from '/imports/ui/theme';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const theme = createTheme();
 

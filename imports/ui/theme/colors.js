@@ -48,7 +48,7 @@ export const orange = withAlphas({
   main: '#fd9a44',
   dark: '#f88f41',
   darkest: '#f0813e',
-  contrastText: '#e8733b'
+  contrastText: '#FFFFFF'
 });
 
 export const success = withAlphas({

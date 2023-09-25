@@ -9,6 +9,7 @@ export const insert = createMethod({
   async run(flight) {
     return FlightsCollection.insertAsync({
       ...flight,
+      status: 'Scheduled',
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: this.userId!,

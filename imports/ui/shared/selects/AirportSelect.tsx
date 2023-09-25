@@ -60,7 +60,6 @@ const AirportSelect = <Multiple extends boolean | undefined = false>({
       onInputChange={(_, value, reason) => {
         if (reason === 'input') {
           dHandleSearch(value);
-          console.log(value);
         }
       }}
       renderInput={(params) => (

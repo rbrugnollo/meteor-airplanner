@@ -25,6 +25,7 @@ import FlightListFilter, { FlightListFilterValues } from './FlightListFilter';
 import { Mongo } from 'meteor/mongo';
 import { NpmModuleMongodb } from 'meteor/npm-mongo';
 import FlightForm from './FlightForm';
+import FlightRouteModal from './FlightRouteModal';
 
 export const FlightListRoles: RoleName[] = [
   'Admin',
@@ -36,10 +37,16 @@ export const FlightListRoles: RoleName[] = [
 ];
 
 const FlightList = () => {
-  const [modalProps, setModalProps] = useState<{ open: boolean; flightId?: string }>({
+  const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
     open: false,
     flightId: undefined,
   });
+  const [routeModalProps, setRouteModalProps] = useState<{ open: boolean; flightGroupId?: string }>(
+    {
+      open: false,
+      flightGroupId: undefined,
+    },
+  );
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -54,6 +61,14 @@ const FlightList = () => {
   const flights = useFind(() => FlightsCollection.find(), [selector, options]);
   const columns = useMemo<MrtColumnDef<Flight>[]>(
     () => [
+      {
+        accessorKey: 'groupId',
+        header: 'Group Id',
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+      },
       {
         accessorKey: 'airplane.label',
         header: 'Airplane',
@@ -148,7 +163,7 @@ const FlightList = () => {
                 <Stack direction="row" spacing={2}>
                   <Button
                     startIcon={<Add />}
-                    onClick={() => setModalProps({ open: true, flightId: undefined })}
+                    onClick={() => setFormModalProps({ open: true, flightId: undefined })}
                     variant="contained"
                   >
                     Add
@@ -185,16 +200,28 @@ const FlightList = () => {
               enableRowActions
               renderRowActionMenuItems={({ row, closeMenu }) => [
                 <MenuItem
-                  key={3}
+                  key={4}
                   onClick={() => {
                     closeMenu();
-                    setModalProps({ open: true, flightId: row.original._id });
+                    setFormModalProps({ open: true, flightId: row.original._id });
                   }}
                 >
                   <ListItemIcon>
                     <Edit color="primary" fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Edit</ListItemText>
+                </MenuItem>,
+                <MenuItem
+                  key={3}
+                  onClick={() => {
+                    closeMenu();
+                    setRouteModalProps({ open: true, flightGroupId: row.original.groupId });
+                  }}
+                >
+                  <ListItemIcon>
+                    <Edit color="primary" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>View Map</ListItemText>
                 </MenuItem>,
                 <MenuItem
                   key={2}
@@ -213,8 +240,12 @@ const FlightList = () => {
           </Stack>
         </Container>
         <FlightForm
-          {...modalProps}
-          onClose={() => setModalProps({ open: false, flightId: undefined })}
+          {...formModalProps}
+          onClose={() => setFormModalProps({ open: false, flightId: undefined })}
+        />
+        <FlightRouteModal
+          {...routeModalProps}
+          onClose={() => setRouteModalProps({ open: false, flightGroupId: undefined })}
         />
       </Box>
     </>

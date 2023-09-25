@@ -12,7 +12,7 @@ import { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
 import { UserListRoles } from '/imports/ui/pages/users/UserList';
 import { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
 import { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
-import { FlightScheduleListRoles } from '/imports/ui/pages/flightSchedule/FlightScheduleList';
+import { FlightListRoles } from '/imports/ui/pages/flights/FlightList';
 
 export interface Link {
   label: string;
@@ -28,7 +28,7 @@ const links: Link[] = [
     label: 'Flight Schedule',
     Icon: FaCalendarDays,
     href: 'flightSchedule',
-    roles: FlightScheduleListRoles,
+    roles: FlightListRoles,
     end: false,
   },
   {

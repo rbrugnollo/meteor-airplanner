@@ -17,7 +17,7 @@ import { update } from '/imports/api/flights/methods/update';
 import { useSnackbar } from 'notistack';
 import { Flight, FlightsCollection } from '/imports/api/flights/collection';
 import { Meteor } from 'meteor/meteor';
-import { BaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
+import { IdBaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { getOne as getOneAirplane } from '/imports/api/airplanes/methods/getOne';
 import dayjs from 'dayjs';
@@ -25,8 +25,10 @@ import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import AirportSelect from '../../shared/selects/AirportSelect';
 import UserSelect from '../../shared/selects/UserSelect';
 import { Airplane } from '/imports/api/airplanes/collection';
+import { isEmpty } from 'lodash';
+import createUuid from '../../shared/functions/createUuid';
 
-type FlightFormValues = Nullable<Omit<Flight, BaseCollectionTypes>>;
+type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
 
 interface FlightFormProps {
   readonly flightId?: string;
@@ -41,6 +43,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
   const formik = useFormik<FlightFormValues>({
     initialValues: {
+      _id: null,
+      groupId: null,
       airplane: null,
       scheduledDateTime: null,
       estimatedDuration: '',
@@ -70,22 +74,22 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       destination: Yup.object().required('Destination is required'),
     }),
     onSubmit: async (values) => {
-      if (flightId) {
-        await handleUpdate(values);
-      } else {
-        await handleInsert(values);
-      }
+      const success = values._id ? await handleUpdate(values) : await handleInsert(values);
+      if (success) onClose();
     },
     enableReinitialize: true,
   });
+
   useEffect(() => {
     formik.resetForm();
-    if (open && flightId) {
+    if (!open) return;
+    if (flightId) {
       const flight = FlightsCollection.findOne(flightId);
       if (flight) {
-        const { _id, ...values } = flight;
-        formik.setValues(values);
+        formik.setValues(flight);
       }
+    } else {
+      formik.setFieldValue('groupId', createUuid());
     }
   }, [open]);
 
@@ -97,35 +101,49 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }
   }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
 
-  const handleInsert = async (data: FlightFormValues) => {
-    try {
-      const finalData = data as unknown as Omit<Flight, BaseCollectionTypes>;
-      await insert(finalData);
-      enqueueSnackbar('Flight successfully created.', { variant: 'success' });
-      onClose();
-    } catch (e: unknown) {
-      console.log(e);
-      if (e instanceof Meteor.Error) {
-        enqueueSnackbar(e.message, { variant: 'error' });
+  const handleSaveAndContinue = async () => {
+    const a = await formik.validateForm();
+    if (isEmpty(a)) {
+      const success = formik.values._id
+        ? await handleUpdate(formik.values)
+        : await handleInsert(formik.values);
+      if (success) {
+        formik.setFieldValue('_id', null);
+        formik.setFieldValue('origin', formik.values.destination);
+        formik.setFieldValue('scheduledDateTime', null);
+        formik.setFieldValue('destination', null);
       }
     }
   };
 
-  const handleUpdate = async (data: FlightFormValues) => {
+  const handleInsert = async (data: FlightFormValues) => {
     try {
-      const finalData = data as unknown as Omit<Flight, BaseCollectionTypes>;
-      await update({
-        _id: flightId!,
-        ...finalData,
-      });
-      enqueueSnackbar('Flight successfully updated.', { variant: 'success' });
-      onClose();
+      const { _id, ...finalData } = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
+      await insert(finalData);
+      enqueueSnackbar('Flight successfully created.', { variant: 'success' });
+      return true;
     } catch (e: unknown) {
       console.log(e);
       if (e instanceof Meteor.Error) {
         enqueueSnackbar(e.message, { variant: 'error' });
       }
     }
+    return false;
+  };
+
+  const handleUpdate = async (data: FlightFormValues) => {
+    try {
+      const finalData = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
+      await update(finalData);
+      enqueueSnackbar('Flight successfully updated.', { variant: 'success' });
+      return true;
+    } catch (e: unknown) {
+      console.log(e);
+      if (e instanceof Meteor.Error) {
+        enqueueSnackbar(e.message, { variant: 'error' });
+      }
+    }
+    return false;
   };
 
   const handleFetchAirplane = async (airplaneId?: string) => {
@@ -147,7 +165,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       open={open}
       onClose={onClose}
     >
-      <DialogTitle>{flightId ? 'Update' : 'Add new'} Flight</DialogTitle>
+      <DialogTitle>{formik.values._id ? 'Update' : 'Add new'} Flight</DialogTitle>
       <DialogContent>
         <form id="flight-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
@@ -278,8 +296,11 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSaveAndContinue} autoFocus>
+          Save and Continue
+        </Button>
         <Button type="submit" form="flight-form" autoFocus>
-          Save
+          Save and Close
         </Button>
       </DialogActions>
     </Dialog>
