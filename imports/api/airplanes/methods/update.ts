@@ -19,7 +19,8 @@ export const update = createMethod({
       pilots = [...pilots, airplane.firstOfficer];
     }
     pilots = uniqBy(pilots, 'value');
-    return AirplanesCollection.updateAsync(
+
+    const result = AirplanesCollection.updateAsync(
       { _id },
       {
         $set: {
@@ -30,11 +31,18 @@ export const update = createMethod({
         },
       },
     );
+
+    // Update dependent collections
+    await updateFlightsCollection({
+      airplane: { value: _id, label: `(${data.tailNumber}) ${data.name}` },
+    });
+
+    return result;
   },
 });
 
-export const updateFligtsCollection = createMethod({
-  name: 'airplanes.updateFligtsCollection',
+export const updateFlightsCollection = createMethod({
+  name: 'airplanes.updateFlightsCollection',
   schema: z.object({
     airplane: ValueLabelTypeSchema,
   }),
