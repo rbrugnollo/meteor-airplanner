@@ -9,6 +9,8 @@ import {
   useMediaQuery,
   Theme,
   TextField,
+  IconButton,
+  CircularProgress,
   Stack,
 } from '@mui/material';
 import { FormikErrors, useFormik } from 'formik';
@@ -29,6 +31,7 @@ import { isEmpty } from 'lodash';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import createUuid from '../../shared/functions/createUuid';
 import { list } from '/imports/api/flights/publications/list';
+import { calculateDuration } from '/imports/api/flights/methods/calculateDuration';
 
 type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
 
@@ -40,6 +43,8 @@ interface FlightFormProps {
 
 const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const [airplane, setAirplane] = useState<Airplane | undefined>(undefined);
+  const [calculatingDuration, setCalculatingDuration] = useState(false);
+
   const { enqueueSnackbar } = useSnackbar();
   const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
   const formik = useFormik<FlightFormValues>({
@@ -116,10 +121,20 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   }, [open]);
 
   useEffect(() => {
+    formik.setFieldValue('estimatedDuration', '');
     if (formik.values.origin && formik.values.destination && formik.values.airplane) {
-      formik.setFieldValue('estimatedDuration', '02:00');
-    } else {
-      formik.setFieldValue('estimatedDuration', '');
+      setCalculatingDuration(true);
+      calculateDuration({
+        originAirportId: formik.values.origin.value,
+        destinationAirportId: formik.values.destination.value,
+        airplaneId: formik.values.airplane.value,
+      })
+        .then((duration) => {
+          formik.setFieldValue('estimatedDuration', duration ?? '');
+        })
+        .finally(() => {
+          setCalculatingDuration(false);
+        });
     }
   }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
 
@@ -255,6 +270,11 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
             <TextField
               InputProps={{
                 readOnly: true,
+                endAdornment: calculatingDuration ? (
+                  <IconButton edge="end">
+                    <CircularProgress size={24} />
+                  </IconButton>
+                ) : undefined,
               }}
               fullWidth
               label="Estimated Duration"

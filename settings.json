@@ -8,6 +8,10 @@
     "adsbExchange": {
       "apiKey": "17dd7aebf0msh8df971b8c56119ap1e00e2jsn8c2ac6f98f91",
       "baseUrl": "https://adsbexchange-com1.p.rapidapi.com/v2"
+    },
+    "greatCircleMapper": {
+      "apiKey": "17dd7aebf0msh8df971b8c56119ap1e00e2jsn8c2ac6f98f91",
+      "baseUrl": "https://greatcirclemapper.p.rapidapi.com"
     }
   }
 }

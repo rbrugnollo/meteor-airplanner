@@ -41,7 +41,7 @@ export interface AirplaneInfo {
 export interface Airplane extends BaseCollection {
   readonly name: string;
   readonly tailNumber: string;
-  readonly icaoCode: string;
+  readonly icaoCode?: string | null;
   readonly captain?: ValueLabelType | null;
   readonly firstOfficer?: ValueLabelType | null;
   readonly manager?: ValueLabelType | null;

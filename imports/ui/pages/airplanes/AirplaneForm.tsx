@@ -35,6 +35,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
     initialValues: {
       name: '',
       tailNumber: '',
+      icaoCode: null,
       seats: 0,
       manager: null,
       captain: null,
@@ -125,6 +126,14 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
               value={formik.values.tailNumber}
+            />
+            <TextField
+              fullWidth
+              label="Icao Code"
+              name="icaoCode"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.icaoCode}
             />
             <TextField
               error={!!(formik.touched.seats && formik.errors.seats)}

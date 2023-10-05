@@ -5,6 +5,7 @@ import { IdBaseCollectionTypes } from '../../common/BaseCollection';
 import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
 import { FlightsCollection } from '../../flights/collection';
 import { Airplane, AirplanesCollection } from '../collection';
+import { updateInfo } from './updateInfo';
 
 export const update = createMethod({
   name: 'airplanes.update',
@@ -31,6 +32,9 @@ export const update = createMethod({
         },
       },
     );
+
+    // Update the airplane info if possible
+    await updateInfo({ _id: _id });
 
     // Update dependent collections
     await updateFlightsCollection({

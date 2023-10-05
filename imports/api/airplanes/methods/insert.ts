@@ -3,6 +3,7 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { BaseCollectionTypes } from '../../common/BaseCollection';
 import { Airplane, AirplanesCollection } from '../collection';
+import { updateInfo } from './updateInfo';
 
 export const insert = createMethod({
   name: 'airplanes.insert',
@@ -17,7 +18,7 @@ export const insert = createMethod({
     }
     pilots = uniqBy(pilots, 'value');
 
-    return AirplanesCollection.insertAsync({
+    const airplaneId = await AirplanesCollection.insertAsync({
       ...airplane,
       pilots,
       createdAt: new Date(),
@@ -25,5 +26,10 @@ export const insert = createMethod({
       createdBy: this.userId!,
       updatedBy: this.userId!,
     });
+
+    // Update the airplane info if possible
+    await updateInfo({ _id: airplaneId });
+
+    return airplaneId;
   },
 });
