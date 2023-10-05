@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { Meteor } from 'meteor/meteor';
-import { fetch } from 'meteor/fetch';
 import { defaultHeaders } from './greatCircleMapper';
+import cachedFetch from '../apiCache/apiCache';
 
 interface AircraftInfo {
   name: string;
@@ -23,11 +23,10 @@ interface AircraftInfo {
 
 export const fetchAircraftInfo = async (icaoCode: string) => {
   const { baseUrl } = Meteor.settings.private.greatCircleMapper;
-  const result = await fetch(`${baseUrl}/aircraft/read/${icaoCode}`, {
+  const result = await cachedFetch<AircraftInfo>(`${baseUrl}/aircraft/read/${icaoCode}`, {
     method: 'GET',
     headers: defaultHeaders,
   });
 
-  const json = (await result.json()) as AircraftInfo;
-  return json;
+  return result;
 };

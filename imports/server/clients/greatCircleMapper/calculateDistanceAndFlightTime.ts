@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { Meteor } from 'meteor/meteor';
-import { fetch } from 'meteor/fetch';
 import { defaultHeaders } from './greatCircleMapper';
+import cachedFetch from '../apiCache/apiCache';
 
 export interface RouteLegAirport {
   id: string;
@@ -45,14 +45,12 @@ export const calculateDistanceAndFlightTime = async (
   speedKts: string,
 ) => {
   const { baseUrl } = Meteor.settings.private.greatCircleMapper;
-  const result = await fetch(
+  const result = await cachedFetch<Route>(
     `${baseUrl}/airports/route/${originIcaoCode}-${destinationIcaoCode}/${speedKts}`,
     {
       method: 'GET',
       headers: defaultHeaders,
     },
   );
-
-  const json = (await result.json()) as Route;
-  return json;
+  return result;
 };
