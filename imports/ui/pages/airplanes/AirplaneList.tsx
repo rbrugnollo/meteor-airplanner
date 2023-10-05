@@ -1,5 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
+import {
+  MaterialReactTable,
+  type MRT_ColumnDef as MrtColumnDef,
+  MRT_Row as MrtRow,
+} from 'material-react-table';
 import {
   Box,
   Button,
@@ -20,6 +24,7 @@ import { list } from '/imports/api/airplanes/publications/list';
 import { RoleName } from '/imports/api/users/collection';
 import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
 import AirplaneForm from './AirplaneForm';
+import { fetchPositions } from '/imports/api/airplanes/methods/fetchPositions';
 
 export const AirplaneListRoles: RoleName[] = ['Admin'];
 
@@ -43,6 +48,29 @@ const AirplaneList = () => {
       {
         accessorKey: 'seats',
         header: 'Seats',
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        Cell: ({ row }: { row: MrtRow<Airplane> }) => {
+          return row.original?.position?.isFlying ? (
+            <a
+              href={`https://www.flightradar24.com/${row.original.tailNumber}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Flying
+            </a>
+          ) : (
+            <a
+              href={`https://www.flightradar24.com/data/aircraft/${row.original.tailNumber}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Not Flying
+            </a>
+          );
+        },
       },
     ],
     [],
@@ -80,6 +108,15 @@ const AirplaneList = () => {
                     onClick={() => setModalProps({ open: true, airplaneId: undefined })}
                   >
                     Add
+                  </Button>
+                  <Button
+                    startIcon={<AddIcon />}
+                    variant="contained"
+                    onClick={() => {
+                      fetchPositions();
+                    }}
+                  >
+                    Refresh Status
                   </Button>
                 </Stack>
               </div>

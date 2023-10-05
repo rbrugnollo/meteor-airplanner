@@ -26,7 +26,9 @@ import AirportSelect from '../../shared/selects/AirportSelect';
 import UserSelect from '../../shared/selects/UserSelect';
 import { Airplane } from '/imports/api/airplanes/collection';
 import { isEmpty } from 'lodash';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import createUuid from '../../shared/functions/createUuid';
+import { list } from '/imports/api/flights/publications/list';
 
 type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
 
@@ -38,7 +40,6 @@ interface FlightFormProps {
 
 const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const [airplane, setAirplane] = useState<Airplane | undefined>(undefined);
-
   const { enqueueSnackbar } = useSnackbar();
   const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
   const formik = useFormik<FlightFormValues>({
@@ -79,6 +80,27 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     },
     enableReinitialize: true,
   });
+  useSubscribe(() => {
+    return list({
+      selector: {
+        $and: [{ groupId: formik.values.groupId ?? '' }, { _id: { $ne: formik.values._id ?? '' } }],
+      },
+      options: {},
+    });
+  });
+  const groupFlights = useFind(
+    () =>
+      FlightsCollection.find(
+        {
+          $and: [
+            { groupId: formik.values.groupId ?? '' },
+            { _id: { $ne: formik.values._id ?? '' } },
+          ],
+        },
+        {},
+      ),
+    [formik.values.groupId],
+  );
 
   useEffect(() => {
     formik.resetForm();
@@ -184,6 +206,12 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
             />
             <DateTimePicker
               label="Date and Time"
+              disablePast
+              shouldDisableDate={(date) => {
+                return !!groupFlights
+                  .map((m) => dayjs(m.scheduledDateTime))
+                  .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
+              }}
               value={
                 formik.values.scheduledDateTime ? dayjs(formik.values.scheduledDateTime) : null
               }

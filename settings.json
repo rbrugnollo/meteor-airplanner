@@ -1,0 +1,13 @@
+{
+  "public": {
+    "mapBox": {
+      "apiKey": "pk.eyJ1IjoicmJydWdub2xsbyIsImEiOiJjbG10bmo5ZmcwNW9hMmtxd3Z4ODR6emE3In0.8nYbWY0c8P6xR6rcbMWIoA"
+    }
+  },
+  "private": {
+    "adsbExchange": {
+      "apiKey": "17dd7aebf0msh8df971b8c56119ap1e00e2jsn8c2ac6f98f91",
+      "baseUrl": "https://adsbexchange-com1.p.rapidapi.com/v2"
+    }
+  }
+}

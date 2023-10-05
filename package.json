@@ -13,6 +13,7 @@
     "before-commit": "npm run format && npm run lint:fix"
   },
   "dependencies": {
+    "@aldabil/react-scheduler": "^2.7.23",
     "@babel/runtime": "^7.22.10",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
