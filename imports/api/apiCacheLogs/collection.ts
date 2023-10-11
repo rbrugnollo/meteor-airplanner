@@ -6,7 +6,7 @@ export const COLLECTION_NAME = 'apiCacheLogs';
 export interface ApiCacheLog {
   readonly _id: string;
   readonly key: string;
-  readonly result: Promise<unknown>;
+  readonly result: unknown;
   readonly createdAt: Date;
 }
 

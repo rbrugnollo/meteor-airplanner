@@ -14,21 +14,16 @@ function createFetchMemoizer(): FetchFunction {
       if (dayjs(apiCache.createdAt).diff(dayjs(), 'month') > 6) {
         ApiCacheLogsCollection.removeAsync({ _id: apiCache._id });
       } else {
-        return apiCache.result as Promise<T>;
+        return apiCache.result as T;
       }
     }
 
-    // If not cached, fetch the data and store it in the cache
-    const fetchPromise = fetch(url, init).then((response) => {
-      if (!response.ok) {
-        throw new Error(`Fetch failed for URL: ${url}`);
-      }
-      return response.json() as Promise<T>;
-    });
+    const result = await fetch(url, init);
+    const json = await result.json();
 
-    await ApiCacheLogsCollection.insertAsync({ key, result: fetchPromise, createdAt: new Date() });
+    await ApiCacheLogsCollection.insertAsync({ key, result: json, createdAt: new Date() });
 
-    return fetchPromise;
+    return json;
   };
 }
 
