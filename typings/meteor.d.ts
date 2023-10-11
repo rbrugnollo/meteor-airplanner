@@ -1,5 +1,6 @@
 import { Roles } from 'meteor/alanning:roles';
 import { Mongo } from 'meteor/mongo';
+import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 import { RoleName } from '/imports/api/users/collection';
 
 declare module 'meteor/meteor' {
@@ -14,6 +15,7 @@ declare module 'meteor/meteor' {
     export interface UserProfile {
       name: string;
       roles: RoleName[];
+      base?: ValueLabelType | undefined;
     }
     const roleAssignment: Mongo.Collection<Roles.Role>;
   }

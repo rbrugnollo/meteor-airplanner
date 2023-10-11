@@ -18,11 +18,15 @@ import { insert } from '/imports/api/users/methods/insert';
 import { update } from '/imports/api/users/methods/update';
 import { Meteor } from 'meteor/meteor';
 import { useSnackbar } from 'notistack';
+import { ValueLabelType } from '/imports/api/common/ValueLabelType';
+import AirportSelect from '../../shared/selects/AirportSelect';
+import { intersection } from 'lodash';
 
 interface UserFormValues {
   name: string;
   email: string;
   roles: string[];
+  base?: ValueLabelType;
 }
 
 interface UserFormProps {
@@ -30,6 +34,9 @@ interface UserFormProps {
   readonly open: boolean;
   readonly onClose: () => void;
 }
+
+const isPilot = (roles: string[]) =>
+  intersection(roles, [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER]).length > 0;
 
 const UserForm = ({ userId, open, onClose }: UserFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -39,11 +46,15 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
       roles: [] as string[],
       name: '',
       email: '',
+      base: undefined,
     },
     validationSchema: Yup.object({
       roles: Yup.array().of(Yup.string()),
       name: Yup.string().required('Name is required'),
       email: Yup.string().email('Must be a valid email').required('Email is required'),
+      base: Yup.object().when('roles', ([val], schema) =>
+        isPilot(val) ? schema.required('Base is required') : schema.optional(),
+      ),
     }),
     onSubmit: async (values) => {
       if (userId) {
@@ -55,6 +66,11 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
     enableReinitialize: true,
   });
   useEffect(() => {
+    if (!isPilot(formik.values.roles)) {
+      formik.setFieldValue('base', undefined);
+    }
+  }, [formik.values.roles]);
+  useEffect(() => {
     formik.resetForm();
     if (open && userId) {
       const user = Meteor.users.findOne(userId);
@@ -63,6 +79,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
           name: user.profile?.name ?? '',
           email: user.emails?.[0].address ?? '',
           roles: user.profile?.roles ?? [],
+          base: user.profile?.base ?? undefined,
         });
       }
     }
@@ -141,6 +158,19 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
               getOptionLabel={(option) => option}
               options={Object.entries(RoleNames).map(([_, roleName]) => roleName)}
               renderInput={(params) => <TextField name="roles" {...params} label="Roles" />}
+            />
+            <AirportSelect
+              fullWidth
+              label="Base"
+              name="base"
+              disabled={!isPilot(formik.values.roles)}
+              onBlur={formik.handleBlur}
+              value={formik.values.base}
+              onChange={(_e, value) => {
+                formik.setFieldValue('base', value);
+              }}
+              error={!!(formik.touched.base && formik.errors.base)}
+              helperText={formik.touched.base && formik.errors.base}
             />
           </Stack>
         </form>

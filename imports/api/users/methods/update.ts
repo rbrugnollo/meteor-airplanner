@@ -14,14 +14,16 @@ export const update = createMethod({
     email: z.string(),
     name: z.string(),
     roles: z.any().array(),
+    base: ValueLabelTypeSchema.optional(),
   }),
-  async run({ _id, name, email, roles }) {
+  async run({ _id, name, email, roles, base }) {
     // const currentEmail = await Meteor.users.findOneAsync({ _id });
     const userProps = {
       username: email,
       profile: {
         name,
         roles,
+        base,
       },
       'emails.0.address': email,
     };
