@@ -54,6 +54,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       airplane: null,
       scheduledDateTime: null,
       estimatedDuration: '',
+      handlingDuration: '00:30',
       origin: null,
       destination: null,
       captain: null,
@@ -75,7 +76,12 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     validationSchema: Yup.object<FlightFormValues>().shape({
       airplane: Yup.object().required('Airplane is required'),
       scheduledDateTime: Yup.date().required('Date Time is required'),
-      estimatedDuration: Yup.string().required('Duration is required'),
+      estimatedDuration: Yup.string()
+        .required('Duration is required')
+        .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
+      handlingDuration: Yup.string()
+        .required('Handling is required')
+        .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
       origin: Yup.object().required('Origin is required'),
       destination: Yup.object().required('Destination is required'),
     }),
@@ -280,6 +286,16 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               label="Estimated Duration"
               name="estimatedDuration"
               value={formik.values.estimatedDuration}
+            />
+            <TextField
+              fullWidth
+              label="Handling"
+              name="handlingDuration"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.handlingDuration}
+              error={!!(formik.touched.handlingDuration && formik.errors.handlingDuration)}
+              helperText={formik.touched.handlingDuration && formik.errors.handlingDuration}
             />
             <UserSelect
               fullWidth
