@@ -1,12 +1,24 @@
 /* eslint-disable camelcase */
 import React from 'react';
 import { Scheduler } from '@aldabil/react-scheduler';
+import { ProcessedEvent, RemoteQuery } from '@aldabil/react-scheduler/types';
 import { RoleName } from '/imports/api/users/collection';
 import { Box, Container, Stack, Typography } from '@mui/material';
+import { getMany } from '/imports/api/events/methods/getMany';
 
 export const ScheduleRoles: RoleName[] = ['Admin', 'Captain', 'First Officer'];
 
 const Schedule = () => {
+  const fetch = async (params: RemoteQuery): Promise<ProcessedEvent[]> => {
+    const events = await getMany({ from: params.start, to: params.end });
+    return events.map(({ _id, title, start, end }) => ({
+      event_id: _id,
+      title,
+      start,
+      end,
+    }));
+  };
+
   return (
     <>
       <Box
@@ -51,20 +63,7 @@ const Schedule = () => {
               }}
               day={null}
               week={null}
-              events={[
-                {
-                  event_id: 1,
-                  title: 'Event 1',
-                  start: new Date('2021/5/2 09:30'),
-                  end: new Date('2021/5/2 10:30'),
-                },
-                {
-                  event_id: 2,
-                  title: 'Event 2',
-                  start: new Date('2021/5/4 10:00'),
-                  end: new Date('2021/5/4 11:00'),
-                },
-              ]}
+              getRemoteEvents={fetch}
             />
           </Stack>
         </Container>

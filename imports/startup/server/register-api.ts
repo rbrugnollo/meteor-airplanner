@@ -19,4 +19,5 @@ import '../../api/flights/methods';
 import '../../api/flights/publications';
 
 // Events
-import '../../api/events/collection';
+import '../../api/events/methods';
+import '../../api/events/publications';
