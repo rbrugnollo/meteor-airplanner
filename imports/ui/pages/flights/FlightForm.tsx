@@ -22,6 +22,7 @@ import { Meteor } from 'meteor/meteor';
 import { IdBaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { getOne as getOneAirplane } from '/imports/api/airplanes/methods/getOne';
+import { getOne as getOneAirport } from '/imports/api/airports/methods/getOne';
 import dayjs from 'dayjs';
 import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import AirportSelect from '../../shared/selects/AirportSelect';
@@ -32,6 +33,7 @@ import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import createUuid from '../../shared/functions/createUuid';
 import { list } from '/imports/api/flights/publications/list';
 import { calculateDuration } from '/imports/api/flights/methods/calculateDuration';
+import { Airport } from '/imports/api/airports/collection';
 
 type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
 
@@ -43,6 +45,7 @@ interface FlightFormProps {
 
 const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const [airplane, setAirplane] = useState<Airplane | undefined>(undefined);
+  const [origin, setOrigin] = useState<Airport | undefined>(undefined);
   const [calculatingDuration, setCalculatingDuration] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -144,6 +147,34 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }
   }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
 
+  useEffect(() => {
+    setAirplane(undefined);
+    if (formik.values.airplane) {
+      getOneAirplane({ _id: formik.values.airplane.value })
+        .then((a) => a)
+        .then((airplane) => {
+          if (airplane) {
+            setAirplane(airplane);
+            formik.setFieldValue('captain', airplane.captain);
+            formik.setFieldValue('firstOfficer', airplane.firstOfficer);
+          }
+        });
+    }
+  }, [formik.values.airplane]);
+
+  useEffect(() => {
+    setOrigin(undefined);
+    if (formik.values.origin) {
+      getOneAirport({ _id: formik.values.origin.value })
+        .then((a) => a)
+        .then((airport) => {
+          if (airport) {
+            setOrigin(airport);
+          }
+        });
+    }
+  }, [formik.values.origin]);
+
   const handleSaveAndContinue = async () => {
     const a = await formik.validateForm();
     if (isEmpty(a)) {
@@ -189,18 +220,6 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     return false;
   };
 
-  const handleFetchAirplane = async (airplaneId?: string) => {
-    setAirplane(undefined);
-    if (airplaneId) {
-      const airplane = await getOneAirplane({ _id: airplaneId });
-      if (airplane) {
-        setAirplane(airplane);
-        formik.setFieldValue('captain', airplane.captain);
-        formik.setFieldValue('firstOfficer', airplane.firstOfficer);
-      }
-    }
-  };
-
   return (
     <Dialog
       fullScreen={fullScreen}
@@ -219,35 +238,10 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               onBlur={formik.handleBlur}
               value={formik.values.airplane}
               onChange={(_e, value) => {
-                handleFetchAirplane(value?.value);
                 formik.setFieldValue('airplane', value);
               }}
               error={!!(formik.touched.airplane && formik.errors.airplane)}
               helperText={formik.touched.airplane && formik.errors.airplane}
-            />
-            <DateTimePicker
-              label="Date and Time"
-              disablePast
-              shouldDisableDate={(date) => {
-                return !!groupFlights
-                  .map((m) => dayjs(m.scheduledDateTime))
-                  .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
-              }}
-              value={
-                formik.values.scheduledDateTime ? dayjs(formik.values.scheduledDateTime) : null
-              }
-              onChange={(value) => {
-                formik.setFieldValue('scheduledDateTime', value?.toDate());
-              }}
-              onClose={() => {
-                formik.setFieldTouched('scheduledDateTime', true);
-              }}
-              slotProps={{
-                textField: {
-                  error: !!(formik.touched.scheduledDateTime && formik.errors.scheduledDateTime),
-                  helperText: formik.touched.scheduledDateTime && formik.errors.scheduledDateTime,
-                },
-              }}
             />
             <AirportSelect
               fullWidth
@@ -272,6 +266,32 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               }}
               error={!!(formik.touched.destination && formik.errors.destination)}
               helperText={formik.touched.destination && formik.errors.destination}
+            />
+            <DateTimePicker
+              disabled={formik.values.origin === null}
+              label={`Date and Time (${origin?.timezoneName ?? 'UTC'})`}
+              disablePast
+              timezone={origin?.timezoneName ?? 'UTC'}
+              shouldDisableDate={(date) => {
+                return !!groupFlights
+                  .map((m) => dayjs(m.scheduledDateTime))
+                  .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
+              }}
+              value={
+                formik.values.scheduledDateTime ? dayjs(formik.values.scheduledDateTime) : null
+              }
+              onChange={(value) => {
+                formik.setFieldValue('scheduledDateTime', value?.toDate());
+              }}
+              onClose={() => {
+                formik.setFieldTouched('scheduledDateTime', true);
+              }}
+              slotProps={{
+                textField: {
+                  error: !!(formik.touched.scheduledDateTime && formik.errors.scheduledDateTime),
+                  helperText: formik.touched.scheduledDateTime && formik.errors.scheduledDateTime,
+                },
+              }}
             />
             <TextField
               InputProps={{

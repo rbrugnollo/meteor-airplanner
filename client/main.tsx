@@ -10,7 +10,13 @@ import { SnackbarProvider } from 'notistack';
 import { createTheme } from '/imports/ui/theme';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import utcPlugin from 'dayjs/plugin/utc';
+import timezonePlugin from 'dayjs/plugin/timezone';
 import 'mapbox-gl/dist/mapbox-gl.css';
+
+dayjs.extend(utcPlugin);
+dayjs.extend(timezonePlugin);
 
 const theme = createTheme();
 

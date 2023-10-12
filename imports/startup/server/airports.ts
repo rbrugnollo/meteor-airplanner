@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { AirportsCollection } from '/imports/api/airports/collection';
+import { find } from 'geo-tz';
 
 interface AirportJson {
   readonly name: string;
@@ -17,6 +18,7 @@ export const AirplanesStartup = () => {
     const fileContent = readFileSync('assets/app/files/airports.json', 'utf-8');
     const airports = JSON.parse(fileContent);
     airports.forEach((airport: AirportJson) => {
+      const timezoneName = find(parseFloat(airport.lat), parseFloat(airport.lon))[0];
       AirportsCollection.insert({
         name: airport.name,
         city: airport.city,
@@ -26,6 +28,7 @@ export const AirplanesStartup = () => {
         lat: airport.lat,
         lon: airport.lon,
         timezone: airport.timezone,
+        timezoneName,
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: 'startup',
