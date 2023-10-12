@@ -16,7 +16,8 @@ export interface Flight extends BaseCollection {
   readonly groupId: string;
   readonly status: 'Draft' | 'Published' | 'Scheduled' | 'Confirmed';
   readonly airplane: ValueLabelType;
-  readonly scheduledDateTime: Date;
+  readonly scheduledDepartureDateTime: Date;
+  readonly scheduledArrivalDateTime: Date;
   readonly estimatedDuration: string;
   readonly handlingDuration: string;
   readonly origin: ValueLabelType;

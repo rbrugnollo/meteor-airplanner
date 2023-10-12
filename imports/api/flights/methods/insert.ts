@@ -2,12 +2,13 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { BaseCollectionTypes } from '../../common/BaseCollection';
 import { Flight, FlightsCollection } from '../collection';
+import { upsertEvent } from './upsertEvent';
 
 export const insert = createMethod({
   name: 'flights.insert',
   schema: z.custom<Omit<Flight, BaseCollectionTypes>>(),
   async run(flight) {
-    return FlightsCollection.insertAsync({
+    const result = await FlightsCollection.insertAsync({
       ...flight,
       status: 'Draft',
       createdAt: new Date(),
@@ -15,5 +16,10 @@ export const insert = createMethod({
       createdBy: this.userId!,
       updatedBy: this.userId!,
     });
+
+    // Update dependent collections
+    await upsertEvent(result);
+
+    return result;
   },
 });

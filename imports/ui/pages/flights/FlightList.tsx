@@ -52,7 +52,7 @@ const FlightList = () => {
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
   const [selector, setSelector] = useState<Mongo.Selector<Flight>>({});
   const [options, setOptions] = useState<Mongo.Options<Flight>>({
-    sort: { scheduledDateTime: -1 },
+    sort: { scheduledDepartureDateTime: -1 },
     limit: 50,
   });
   const isLoading = useSubscribe(() => {
@@ -74,9 +74,9 @@ const FlightList = () => {
         header: 'Airplane',
       },
       {
-        accessorKey: 'scheduledDateTime',
+        accessorKey: 'scheduledDepartureDateTime',
         header: 'Scheduled Date',
-        accessorFn: (row) => row.scheduledDateTime.toDateString(),
+        accessorFn: (row) => row.scheduledDepartureDateTime.toDateString(),
       },
     ],
     [],
@@ -114,7 +114,7 @@ const FlightList = () => {
       selectors = [
         ...selectors,
         {
-          scheduledDateTime: {
+          scheduledDepartureDateTime: {
             $gte: values.date.toDate(),
             $lt: new Date(values.date.toDate().getTime() + 24 * 60 * 60 * 1000),
           },

@@ -46,6 +46,7 @@ interface FlightFormProps {
 const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const [airplane, setAirplane] = useState<Airplane | undefined>(undefined);
   const [origin, setOrigin] = useState<Airport | undefined>(undefined);
+  const [destination, setDestination] = useState<Airport | undefined>(undefined);
   const [calculatingDuration, setCalculatingDuration] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -55,7 +56,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       _id: null,
       groupId: null,
       airplane: null,
-      scheduledDateTime: null,
+      scheduledDepartureDateTime: null,
+      scheduledArrivalDateTime: null,
       estimatedDuration: '',
       handlingDuration: '00:30',
       origin: null,
@@ -78,7 +80,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     },
     validationSchema: Yup.object<FlightFormValues>().shape({
       airplane: Yup.object().required('Airplane is required'),
-      scheduledDateTime: Yup.date().required('Date Time is required'),
+      scheduledDepartureDateTime: Yup.date().required('Date Time is required'),
       estimatedDuration: Yup.string()
         .required('Duration is required')
         .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
@@ -138,14 +140,38 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         destinationAirportId: formik.values.destination.value,
         airplaneId: formik.values.airplane.value,
       })
+        .then((d) => d)
         .then((duration) => {
-          formik.setFieldValue('estimatedDuration', duration ?? '');
+          if (duration) {
+            formik.setFieldValue('estimatedDuration', duration ?? '');
+          }
         })
         .finally(() => {
           setCalculatingDuration(false);
         });
     }
   }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
+
+  useEffect(() => {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledDepartureDateTime, estimatedDuration, handlingDuration } = formik.values;
+    if (scheduledDepartureDateTime && estimatedDuration && handlingDuration) {
+      const arrival = dayjs(scheduledDepartureDateTime)
+        .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
+        .add(parseInt(handlingDuration.split(':')[0]), 'hour')
+        .add(parseInt(handlingDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+
+      formik.setFieldValue('scheduledArrivalDateTime', arrival);
+    }
+  }, [
+    destination,
+    formik.values.scheduledDepartureDateTime,
+    formik.values.estimatedDuration,
+    formik.values.handlingDuration,
+  ]);
 
   useEffect(() => {
     setAirplane(undefined);
@@ -175,6 +201,19 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }
   }, [formik.values.origin]);
 
+  useEffect(() => {
+    setDestination(undefined);
+    if (formik.values.destination) {
+      getOneAirport({ _id: formik.values.destination.value })
+        .then((a) => a)
+        .then((airport) => {
+          if (airport) {
+            setDestination(airport);
+          }
+        });
+    }
+  }, [formik.values.destination]);
+
   const handleSaveAndContinue = async () => {
     const a = await formik.validateForm();
     if (isEmpty(a)) {
@@ -184,8 +223,9 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       if (success) {
         formik.setFieldValue('_id', null);
         formik.setFieldValue('origin', formik.values.destination);
-        formik.setFieldValue('scheduledDateTime', null);
+        formik.setFieldValue('scheduledDepartureDateTime', null);
         formik.setFieldValue('destination', null);
+        formik.setFieldValue('scheduledArrivalDateTime', null);
       }
     }
   };
@@ -269,27 +309,34 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
             />
             <DateTimePicker
               disabled={formik.values.origin === null}
-              label={`Date and Time (${origin?.timezoneName ?? 'UTC'})`}
+              label={`Departure (${origin?.timezoneName ?? 'UTC'})`}
               disablePast
               timezone={origin?.timezoneName ?? 'UTC'}
               shouldDisableDate={(date) => {
                 return !!groupFlights
-                  .map((m) => dayjs(m.scheduledDateTime))
+                  .map((m) => dayjs(m.scheduledDepartureDateTime))
                   .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
               }}
               value={
-                formik.values.scheduledDateTime ? dayjs(formik.values.scheduledDateTime) : null
+                formik.values.scheduledDepartureDateTime
+                  ? dayjs(formik.values.scheduledDepartureDateTime)
+                  : null
               }
               onChange={(value) => {
-                formik.setFieldValue('scheduledDateTime', value?.toDate());
+                formik.setFieldValue('scheduledDepartureDateTime', value?.toDate());
               }}
               onClose={() => {
-                formik.setFieldTouched('scheduledDateTime', true);
+                formik.setFieldTouched('scheduledDepartureDateTime', true);
               }}
               slotProps={{
                 textField: {
-                  error: !!(formik.touched.scheduledDateTime && formik.errors.scheduledDateTime),
-                  helperText: formik.touched.scheduledDateTime && formik.errors.scheduledDateTime,
+                  error: !!(
+                    formik.touched.scheduledDepartureDateTime &&
+                    formik.errors.scheduledDepartureDateTime
+                  ),
+                  helperText:
+                    formik.touched.scheduledDepartureDateTime &&
+                    formik.errors.scheduledDepartureDateTime,
                 },
               }}
             />
@@ -316,6 +363,16 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               value={formik.values.handlingDuration}
               error={!!(formik.touched.handlingDuration && formik.errors.handlingDuration)}
               helperText={formik.touched.handlingDuration && formik.errors.handlingDuration}
+            />
+            <DateTimePicker
+              readOnly
+              label={`Arrival (${destination?.timezoneName ?? 'UTC'})`}
+              timezone={destination?.timezoneName ?? 'UTC'}
+              value={
+                formik.values.scheduledArrivalDateTime
+                  ? dayjs(formik.values.scheduledArrivalDateTime)
+                  : null
+              }
             />
             <UserSelect
               fullWidth

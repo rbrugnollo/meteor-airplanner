@@ -11,7 +11,7 @@ export const update = createMethod({
   schema: z.custom<Omit<Airport, IdBaseCollectionTypes>>(),
   async run(airport) {
     const { _id, ...data } = airport;
-    const result = AirportsCollection.updateAsync(
+    const result = await AirportsCollection.updateAsync(
       { _id },
       {
         $set: {
