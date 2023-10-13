@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import { AirplanesCollection } from '../../airplanes/collection';
 import { IdBaseCollectionTypes } from '../../common/BaseCollection';
 import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
 import { FlightsCollection } from '../../flights/collection';
@@ -28,6 +29,10 @@ export const update = createMethod({
     });
 
     await updateFlightsCollection({
+      airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
+    });
+
+    await updateAirplanesCollection({
       airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
     });
 
@@ -73,6 +78,24 @@ export const updateUsersCollection = createMethod({
       {
         $set: {
           'profile.base.label': airport.label,
+        },
+      },
+      { multi: true },
+    );
+  },
+});
+
+export const updateAirplanesCollection = createMethod({
+  name: 'airports.updateAirplanesCollection',
+  schema: z.object({
+    airport: ValueLabelTypeSchema,
+  }),
+  async run({ airport }) {
+    await AirplanesCollection.updateAsync(
+      { 'base.value': airport.value },
+      {
+        $set: {
+          'base.label': airport.label,
         },
       },
       { multi: true },

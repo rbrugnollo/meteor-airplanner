@@ -18,9 +18,10 @@ import { useSnackbar } from 'notistack';
 import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
 import { Meteor } from 'meteor/meteor';
 import UserSelect from '../../shared/selects/UserSelect';
-import { BaseCollectionTypes } from '/imports/api/common/BaseCollection';
+import { BaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
+import AirportSelect from '../../shared/selects/AirportSelect';
 
-type AirplaneFormValues = Omit<Airplane, BaseCollectionTypes>;
+type AirplaneFormValues = Nullable<Omit<Airplane, BaseCollectionTypes>>;
 
 interface AirplaneFormProps {
   readonly airplaneId?: string;
@@ -35,6 +36,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
     initialValues: {
       name: '',
       tailNumber: '',
+      base: null,
       icaoCode: null,
       seats: 0,
       manager: null,
@@ -46,6 +48,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
       name: Yup.string().required('Name is required'),
       tailNumber: Yup.string().required('Tail Number is required'),
       seats: Yup.number().required('Seats is required'),
+      base: Yup.object().required('Base Airport is required'),
     }),
     onSubmit: async (values) => {
       if (airplaneId) {
@@ -69,7 +72,8 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
 
   const handleInsert = async (data: AirplaneFormValues) => {
     try {
-      await insert(data);
+      const finalData = data as unknown as Omit<Airplane, BaseCollectionTypes>;
+      await insert(finalData);
       enqueueSnackbar('Airplane successfully created.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
@@ -82,9 +86,10 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
 
   const handleUpdate = async (data: AirplaneFormValues) => {
     try {
+      const finalData = data as unknown as Omit<Airplane, BaseCollectionTypes>;
       await update({
         _id: airplaneId!,
-        ...data,
+        ...finalData,
       });
       enqueueSnackbar('Airplane successfully updated.', { variant: 'success' });
       onClose();
@@ -126,6 +131,18 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
               value={formik.values.tailNumber}
+            />
+            <AirportSelect
+              fullWidth
+              label="Base Airport"
+              name="base"
+              onBlur={formik.handleBlur}
+              value={formik.values.base}
+              onChange={(_e, value) => {
+                formik.setFieldValue('base', value);
+              }}
+              error={!!(formik.touched.base && formik.errors.base)}
+              helperText={formik.touched.base && formik.errors.base}
             />
             <TextField
               fullWidth
