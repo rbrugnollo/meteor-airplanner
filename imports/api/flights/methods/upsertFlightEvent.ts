@@ -2,10 +2,10 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { BaseCollectionTypes } from '../../common/BaseCollection';
 import { FlightEvent, EventsCollection } from '../../events/collection';
-import { FlightsCollection } from '../../flights/collection';
+import { FlightsCollection } from '../collection';
 
-export const upsertEvent = createMethod({
-  name: 'flights.upsertEvent',
+export const upsertFlightEvent = createMethod({
+  name: 'flights.upsertFlightEvent',
   schema: z.string(),
   async run(flightId) {
     const flight = await FlightsCollection.findOneAsync(flightId);

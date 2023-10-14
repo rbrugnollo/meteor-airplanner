@@ -12,6 +12,8 @@ import {
   IconButton,
   CircularProgress,
   Stack,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import { FormikErrors, useFormik } from 'formik';
 import { insert } from '/imports/api/flights/methods/insert';
@@ -34,6 +36,8 @@ import createUuid from '../../shared/functions/createUuid';
 import { list } from '/imports/api/flights/publications/list';
 import { calculateDuration } from '/imports/api/flights/methods/calculateDuration';
 import { Airport } from '/imports/api/airports/collection';
+import { checkAvailability } from '/imports/api/airplanes/methods/checkAvailability';
+import { checkLocation } from '/imports/api/airplanes/methods/checkLocation';
 
 type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
 
@@ -63,19 +67,54 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       origin: null,
       destination: null,
       captain: null,
+      captainInReserve: true,
       firstOfficer: null,
+      firstOfficerInReserve: true,
       passengers: [],
       requesters: [],
       notes: '',
     },
-    validate: (values) => {
+    validate: async (values) => {
       let errors: FormikErrors<FlightFormValues> = {};
+
+      // Validate airplane seats
       if (airplane && (values.passengers?.length ?? 0) > airplane.seats) {
         errors = {
           ...errors,
           passengers: `This airplane can only fit ${airplane.seats} passengers.`,
         };
       }
+
+      // Validate airplane availability
+      if (values.airplane && values.scheduledDepartureDateTime && values.scheduledArrivalDateTime) {
+        const airplaneAvailabilityErrors = await checkAvailability({
+          flightId: values._id ?? '',
+          airplaneId: values.airplane.value,
+          dates: [values.scheduledDepartureDateTime, values.scheduledArrivalDateTime],
+        });
+        if (airplaneAvailabilityErrors) {
+          errors = {
+            ...errors,
+            scheduledDepartureDateTime: airplaneAvailabilityErrors,
+          };
+        }
+      }
+
+      // Validate airplane location
+      if (values.airplane && values.origin && values.scheduledDepartureDateTime) {
+        const airplaneLocationErrors = await checkLocation({
+          airplaneId: values.airplane.value,
+          airportId: values.origin.value,
+          dateToCheck: values.scheduledDepartureDateTime,
+        });
+        if (airplaneLocationErrors) {
+          errors = {
+            ...errors,
+            origin: airplaneLocationErrors,
+          };
+        }
+      }
+
       return errors;
     },
     validationSchema: Yup.object<FlightFormValues>().shape({
@@ -92,10 +131,13 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }),
     onSubmit: async (values) => {
       const success = values._id ? await handleUpdate(values) : await handleInsert(values);
-      if (success) onClose();
+      if (success) {
+        onClose();
+      }
     },
     enableReinitialize: true,
   });
+
   useSubscribe(() => {
     return list({
       selector: {
@@ -390,6 +432,18 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               defaultValue={formik.initialValues.captain ?? null}
               value={formik.values.captain ?? null}
             />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.captainInReserve ?? false}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('captainInReserve', value);
+                  }}
+                  name="captainInReserve"
+                />
+              }
+              label="Captain in Reserve"
+            />
             <UserSelect
               fullWidth
               disabled={formik.values.airplane === null}
@@ -405,6 +459,18 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               }
               defaultValue={formik.initialValues.firstOfficer ?? null}
               value={formik.values.firstOfficer ?? null}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.firstOfficerInReserve ?? false}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('firstOfficerInReserve', value);
+                  }}
+                  name="firstOfficerInReserve"
+                />
+              }
+              label="First Officer in Reserve"
             />
             <UserSelect
               multiple
