@@ -11,7 +11,7 @@ const getCharacterValidationError = (str: string) => {
 };
 
 const ForgotPasswordForm = () => {
-  const match = useMatch('password/:action/:token');
+  const match = useMatch('auth/password/:action/:token');
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -35,6 +35,7 @@ const ForgotPasswordForm = () => {
     }),
     onSubmit: async (values, helpers) => {
       const token = match?.params.token ?? '';
+      console.log('token', token);
       Accounts.resetPassword(token, values.password, function (err) {
         if (err) {
           enqueueSnackbar(err.message, { variant: 'error' });
