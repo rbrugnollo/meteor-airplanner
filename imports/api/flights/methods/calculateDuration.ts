@@ -38,7 +38,7 @@ export const calculateDuration = createMethod({
 
     const hours = Math.floor(flightTimeMin / 60);
     const minutes = Math.ceil(flightTimeMin % 60);
-    const duration = `${hours}:${minutes}`;
+    const duration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     return duration;
   },
 });
