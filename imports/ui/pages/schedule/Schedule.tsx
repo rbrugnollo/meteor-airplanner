@@ -62,7 +62,6 @@ const Schedule = () => {
                 disableGoToDay: true,
               }}
               day={null}
-              week={null}
               getRemoteEvents={fetch}
             />
           </Stack>

@@ -26,7 +26,7 @@ interface UserFormValues {
   name: string;
   email: string;
   roles: string[];
-  base?: ValueLabelType;
+  base?: ValueLabelType | null;
 }
 
 interface UserFormProps {
@@ -46,7 +46,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
       roles: [] as string[],
       name: '',
       email: '',
-      base: undefined,
+      base: null,
     },
     validationSchema: Yup.object({
       roles: Yup.array().of(Yup.string()),
@@ -67,19 +67,20 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
   });
   useEffect(() => {
     if (!isPilot(formik.values.roles)) {
-      formik.setFieldValue('base', undefined);
+      formik.setFieldValue('base', null);
     }
   }, [formik.values.roles]);
   useEffect(() => {
     formik.resetForm();
     if (open && userId) {
       const user = Meteor.users.findOne(userId);
+      console.log(user);
       if (user) {
         formik.setValues({
           name: user.profile?.name ?? '',
           email: user.emails?.[0].address ?? '',
           roles: user.profile?.roles ?? [],
-          base: user.profile?.base ?? undefined,
+          base: user.profile?.base ?? null,
         });
       }
     }
@@ -87,7 +88,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
 
   const handleInsert = async (data: UserFormValues) => {
     try {
-      await insert(data);
+      await insert({ ...data, base: data.base ?? undefined });
       enqueueSnackbar('User successfully created.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
@@ -103,6 +104,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
       await update({
         _id: userId!,
         ...data,
+        base: data.base ?? undefined,
       });
       enqueueSnackbar('User successfully updated.', { variant: 'success' });
       onClose();
