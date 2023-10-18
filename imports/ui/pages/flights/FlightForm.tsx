@@ -50,6 +50,7 @@ interface FlightFormProps {
 const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const [airplane, setAirplane] = useState<Airplane | undefined>(undefined);
   const [origin, setOrigin] = useState<Airport | undefined>(undefined);
+  const [lastSavedFlight, setLastSavedFlight] = useState<Flight | undefined>(undefined);
   const [destination, setDestination] = useState<Airport | undefined>(undefined);
   const [calculatingDuration, setCalculatingDuration] = useState(false);
 
@@ -66,6 +67,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       handlingDuration: '00:30',
       origin: null,
       destination: null,
+      published: false,
       captain: null,
       captainInReserve: true,
       firstOfficer: null,
@@ -165,11 +167,13 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     if (!open) return;
     if (flightId) {
       const flight = FlightsCollection.findOne(flightId);
+      setLastSavedFlight(flight);
       if (flight) {
         formik.setValues(flight);
       }
     } else {
       formik.setFieldValue('groupId', createUuid());
+      setLastSavedFlight(undefined);
     }
   }, [open]);
 
@@ -302,6 +306,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     return false;
   };
 
+  console.log('lastSavedFlight?.published', lastSavedFlight?.published);
+
   return (
     <Dialog
       fullScreen={fullScreen}
@@ -415,6 +421,18 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                   ? dayjs(formik.values.scheduledArrivalDateTime)
                   : null
               }
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.published ?? false}
+                  onChange={(_e, value) => {
+                    if (!lastSavedFlight?.published) formik.setFieldValue('published', value);
+                  }}
+                  name="published"
+                />
+              }
+              label={lastSavedFlight?.published ? 'Flight Published' : 'Publish this Flight'}
             />
             <UserSelect
               fullWidth

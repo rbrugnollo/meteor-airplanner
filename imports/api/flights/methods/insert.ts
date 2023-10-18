@@ -2,6 +2,7 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { BaseCollectionTypes } from '../../common/BaseCollection';
 import { Flight, FlightsCollection } from '../collection';
+import { publishGroup } from './publishGroup';
 import { updateInReserveEvents } from './updateInReserveEvents';
 import { upsertFlightEvent } from './upsertFlightEvent';
 
@@ -24,6 +25,7 @@ export const insert = createMethod({
       flightBeforeUpdate: (await FlightsCollection.findOneAsync(result))!,
       checkPreviousFlight: true,
     });
+    if (flight.published) await publishGroup(flight.groupId);
 
     return result;
   },
