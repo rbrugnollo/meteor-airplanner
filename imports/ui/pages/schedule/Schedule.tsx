@@ -1,22 +1,60 @@
 /* eslint-disable camelcase */
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Scheduler } from '@aldabil/react-scheduler';
-import { ProcessedEvent, RemoteQuery } from '@aldabil/react-scheduler/types';
+import { SchedulerRef, ProcessedEvent, RemoteQuery } from '@aldabil/react-scheduler/types';
 import { RoleName } from '/imports/api/users/collection';
 import { Box, Container, Stack, Typography } from '@mui/material';
 import { getMany } from '/imports/api/events/methods/getMany';
+import ScheduleFilter, { ScheduleFilterValues } from './ScheduleFilter';
 
 export const ScheduleRoles: RoleName[] = ['Admin', 'Captain', 'First Officer'];
 
 const Schedule = () => {
-  const fetch = async (params: RemoteQuery): Promise<ProcessedEvent[]> => {
-    const events = await getMany({ from: params.start, to: params.end });
-    return events.map(({ _id, title, start, end }) => ({
+  const [remoteQuery, setRemoteQuery] = React.useState<RemoteQuery>();
+  const [filters, setFilters] = React.useState<ScheduleFilterValues>({
+    airplanes: [],
+    pilots: [],
+  });
+
+  const calendarRef = useRef<SchedulerRef>(null);
+
+  useEffect(() => {
+    fetch(filters, remoteQuery);
+  }, [remoteQuery, filters]);
+
+  const fetch = async (filters: ScheduleFilterValues, params?: RemoteQuery) => {
+    if (!params) return;
+
+    calendarRef?.current?.scheduler?.handleState(true, 'loading');
+
+    const { start: from, end: to } = params;
+    const { pilots, airplanes } = filters;
+
+    const events = await getMany({
+      from,
+      to,
+      pilots: pilots.map((m) => m.value),
+      airplanes: airplanes.map((m) => m.value),
+    });
+    const processedEvents: ProcessedEvent[] = events.map(({ _id, title, start, end }) => ({
       event_id: _id,
       title,
       start,
       end,
     }));
+    calendarRef?.current?.scheduler?.handleState(processedEvents, 'events');
+    calendarRef?.current?.scheduler?.handleState(false, 'loading');
+  };
+
+  const handleGetRemoteEvents = async (params: RemoteQuery): Promise<ProcessedEvent[]> => {
+    setRemoteQuery(params);
+    return new Promise((res) => {
+      res([]);
+    });
+  };
+
+  const handleFilter = (values: ScheduleFilterValues) => {
+    setFilters(values);
   };
 
   return (
@@ -44,11 +82,12 @@ const Schedule = () => {
               <Typography variant="h5">Schedule</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  {/* <AirportListFilter onFilter={handleFilter} /> */}
+                  <ScheduleFilter onFilter={handleFilter} />
                 </Stack>
               </div>
             </Stack>
             <Scheduler
+              ref={calendarRef}
               view="month"
               editable={false}
               draggable={false}
@@ -62,7 +101,7 @@ const Schedule = () => {
                 disableGoToDay: true,
               }}
               day={null}
-              getRemoteEvents={fetch}
+              getRemoteEvents={handleGetRemoteEvents}
             />
           </Stack>
         </Container>
