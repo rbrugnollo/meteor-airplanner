@@ -23,6 +23,8 @@ export interface Flight extends BaseCollection {
   readonly origin: ValueLabelType;
   readonly destination: ValueLabelType;
   readonly published: boolean;
+  readonly dateConfirmed: boolean;
+  readonly timeConfirmed: boolean;
   readonly captain?: ValueLabelType | null;
   readonly captainInReserve: boolean;
   readonly firstOfficer?: ValueLabelType | null;

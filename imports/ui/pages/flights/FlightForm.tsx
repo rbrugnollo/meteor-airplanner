@@ -68,6 +68,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       origin: null,
       destination: null,
       published: false,
+      dateConfirmed: false,
+      timeConfirmed: false,
       captain: null,
       captainInReserve: true,
       firstOfficer: null,
@@ -168,9 +170,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     if (flightId) {
       const flight = FlightsCollection.findOne(flightId);
       setLastSavedFlight(flight);
-      if (flight) {
-        formik.setValues(flight);
-      }
+      if (flight) formik.setValues(flight);
     } else {
       formik.setFieldValue('groupId', createUuid());
       setLastSavedFlight(undefined);
@@ -263,15 +263,30 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   const handleSaveAndContinue = async () => {
     const a = await formik.validateForm();
     if (isEmpty(a)) {
+      const dateBeforeSave = new Date();
       const success = formik.values._id
         ? await handleUpdate(formik.values)
         : await handleInsert(formik.values);
       if (success) {
-        formik.setFieldValue('_id', null);
-        formik.setFieldValue('origin', formik.values.destination);
-        formik.setFieldValue('scheduledDepartureDateTime', null);
-        formik.setFieldValue('destination', null);
-        formik.setFieldValue('scheduledArrivalDateTime', null);
+        // If there's a following flight for the groupId, load it
+        // otherwise, start a new flight
+        const followingFlight = FlightsCollection.findOne(
+          {
+            groupId: formik.values.groupId ?? '',
+            createdAt: { $gt: lastSavedFlight?.createdAt ?? dateBeforeSave },
+          },
+          { sort: { createdAt: 1 } },
+        );
+        if (followingFlight) {
+          setLastSavedFlight(followingFlight);
+          if (followingFlight) formik.setValues(followingFlight);
+        } else {
+          formik.setFieldValue('_id', null);
+          formik.setFieldValue('origin', formik.values.destination);
+          formik.setFieldValue('scheduledDepartureDateTime', null);
+          formik.setFieldValue('destination', null);
+          formik.setFieldValue('scheduledArrivalDateTime', null);
+        }
       }
     }
   };
@@ -433,6 +448,30 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 />
               }
               label={lastSavedFlight?.published ? 'Flight Published' : 'Publish this Flight'}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.dateConfirmed ?? false}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('dateConfirmed', value);
+                  }}
+                  name="dateConfirmed"
+                />
+              }
+              label="Date Confirmed"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.timeConfirmed ?? false}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('timeConfirmed', value);
+                  }}
+                  name="timeConfirmed"
+                />
+              }
+              label="Time Confirmed"
             />
             <UserSelect
               fullWidth
