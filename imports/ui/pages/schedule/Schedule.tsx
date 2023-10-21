@@ -1,15 +1,21 @@
 /* eslint-disable camelcase */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Scheduler } from '@aldabil/react-scheduler';
 import { SchedulerRef, ProcessedEvent, RemoteQuery } from '@aldabil/react-scheduler/types';
 import { RoleName } from '/imports/api/users/collection';
-import { Box, Container, Stack, Typography } from '@mui/material';
+import { Box, Button, Container, Stack, Typography } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { getMany } from '/imports/api/events/methods/getMany';
 import ScheduleFilter, { ScheduleFilterValues } from './ScheduleFilter';
+import ScheduleForm from './ScheduleForm';
 
 export const ScheduleRoles: RoleName[] = ['Admin', 'Captain', 'First Officer'];
 
 const Schedule = () => {
+  const [modalProps, setModalProps] = useState<{ open: boolean; eventId?: string }>({
+    open: false,
+    eventId: undefined,
+  });
   const [remoteQuery, setRemoteQuery] = React.useState<RemoteQuery>();
   const [filters, setFilters] = React.useState<ScheduleFilterValues>({
     airplanes: [],
@@ -36,11 +42,12 @@ const Schedule = () => {
       pilots: pilots.map((m) => m.value),
       airplanes: airplanes.map((m) => m.value),
     });
-    const processedEvents: ProcessedEvent[] = events.map(({ _id, title, start, end }) => ({
+    const processedEvents: ProcessedEvent[] = events.map(({ _id, type, title, start, end }) => ({
       event_id: _id,
       title,
       start,
       end,
+      editable: type === 'Vacation',
     }));
     calendarRef?.current?.scheduler?.handleState(processedEvents, 'events');
     calendarRef?.current?.scheduler?.handleState(false, 'loading');
@@ -82,6 +89,13 @@ const Schedule = () => {
               <Typography variant="h5">Schedule</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
+                  <Button
+                    startIcon={<AddIcon />}
+                    variant="contained"
+                    onClick={() => setModalProps({ open: true, eventId: undefined })}
+                  >
+                    Add
+                  </Button>
                   <ScheduleFilter onFilter={handleFilter} />
                 </Stack>
               </div>
@@ -92,6 +106,9 @@ const Schedule = () => {
               editable={false}
               draggable={false}
               deletable={false}
+              // viewerExtraComponent={(fields, event) => {
+              //   return <div>oi</div>;
+              // }}
               month={{
                 weekDays: [0, 1, 2, 3, 4, 5],
                 weekStartOn: 6,
@@ -102,6 +119,11 @@ const Schedule = () => {
               }}
               day={null}
               getRemoteEvents={handleGetRemoteEvents}
+            />
+            <ScheduleForm
+              {...modalProps}
+              onClose={() => setModalProps({ open: false, eventId: undefined })}
+              onSuccess={() => fetch(filters, remoteQuery)}
             />
           </Stack>
         </Container>
