@@ -67,6 +67,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       handlingDuration: '00:30',
       origin: null,
       destination: null,
+      maintenance: false,
       published: false,
       dateConfirmed: false,
       timeConfirmed: false,
@@ -449,6 +450,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               }
               label={lastSavedFlight?.published ? 'Flight Published' : 'Publish this Flight'}
             />
+
             <FormControlLabel
               control={
                 <Switch
@@ -544,6 +546,18 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               value={formik.values.passengers ?? undefined}
               error={!!(formik.touched.passengers && formik.errors.passengers)}
               helperText={formik.touched.passengers && formik.errors.passengers}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.maintenance ?? false}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('maintenance', value);
+                  }}
+                  name="maintenance"
+                />
+              }
+              label="Maintenance"
             />
             <TextField
               fullWidth

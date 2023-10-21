@@ -20,6 +20,18 @@ export interface FlightEvent extends BaseEvent {
   readonly flight: Flight;
 }
 
+// Airplane Events
+export interface AirplaneEvent extends BaseEvent {
+  readonly airplane: ValueLabelType;
+}
+
+export interface AirplaneMaintenanceEvent extends AirplaneEvent {
+  readonly type: 'Maintenance';
+  readonly flightId: string;
+}
+
+export type AirplaneEvets = AirplaneMaintenanceEvent;
+
 // Pilot Events
 export interface PilotEvent extends BaseEvent {
   readonly pilot: ValueLabelType;
@@ -37,7 +49,7 @@ export interface PilotVacationEvent extends PilotEvent {
 export type PilotEvents = PilotInReserveEvent | PilotVacationEvent;
 
 // All Events
-export type Event = FlightEvent | PilotEvents;
+export type Event = FlightEvent | PilotEvents | AirplaneEvets;
 
 export const EventsCollection = new Mongo.Collection<Event>(COLLECTION_NAME);
 

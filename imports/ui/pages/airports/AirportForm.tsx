@@ -40,6 +40,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
       lat: '',
       lon: '',
       timezone: '',
+      timezoneName: '',
     },
     validationSchema: Yup.object<AirportFormValues>().shape({
       name: Yup.string().required('Name is required'),
@@ -50,6 +51,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
       lat: Yup.string().required('Latitute is required'),
       lon: Yup.string().required('Longitude is required'),
       timezone: Yup.string().required('Timezone is required'),
+      timezoneName: Yup.string().required('Timezone Name is required'),
     }),
     onSubmit: async (values) => {
       if (airportId) {
@@ -190,6 +192,16 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
               value={formik.values.timezone}
+            />
+            <TextField
+              error={!!(formik.touched.timezoneName && formik.errors.timezoneName)}
+              fullWidth
+              helperText={formik.touched.timezoneName && formik.errors.timezoneName}
+              label="Timezone Name"
+              name="timezoneName"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              value={formik.values.timezoneName}
             />
           </Stack>
         </form>

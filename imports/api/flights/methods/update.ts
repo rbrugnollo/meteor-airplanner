@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { IdBaseCollectionTypes } from '../../common/BaseCollection';
 import { Flight, FlightsCollection } from '../collection';
 import { publishGroup } from './publishGroup';
-import { updateInReserveEvents } from './updateInReserveEvents';
+import { upsertInReserveEvents } from './upsertInReserveEvents';
 import { upsertFlightEvent } from './upsertFlightEvent';
+import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 
 export const update = createMethod({
   name: 'flights.update',
@@ -25,10 +26,11 @@ export const update = createMethod({
 
     // Update dependent collections
     await upsertFlightEvent(_id);
-    await updateInReserveEvents({
+    await upsertInReserveEvents({
       flightBeforeUpdate: flightBeforeUpdate,
       checkPreviousFlight: true,
     });
+    await upsertMaintenanceEvent({ flightId: _id, checkPreviousFlight: true });
     if (!flightBeforeUpdate.published && flight.published) await publishGroup(flight.groupId);
 
     return result;

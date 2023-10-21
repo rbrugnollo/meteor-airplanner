@@ -5,13 +5,14 @@ import { ValueLabelType } from '../../common/ValueLabelType';
 import { EventsCollection } from '../../events/collection';
 import { Flight, FlightsCollection } from '../collection';
 
-export const updateInReserveEvents = createMethod({
-  name: 'flights.updateInReserveEvents',
+export const upsertInReserveEvents = createMethod({
+  name: 'flights.upsertInReserveEvents',
   schema: z.object({
     flightBeforeUpdate: z.custom<Flight>(),
     checkPreviousFlight: z.boolean(),
+    pilotId: z.string().optional(),
   }),
-  async run({ flightBeforeUpdate, checkPreviousFlight }) {
+  async run({ flightBeforeUpdate, checkPreviousFlight, pilotId }) {
     const flightAfterUpdate = (await FlightsCollection.findOneAsync(flightBeforeUpdate._id))!;
 
     // Update In Reserve events for pilots:
@@ -84,18 +85,22 @@ export const updateInReserveEvents = createMethod({
 
       // If Pilot has previous flights, process then to create In Reserve events
       if (previousFlight && checkPreviousFlight) {
-        await updateInReserveEvents({
+        await upsertInReserveEvents({
           flightBeforeUpdate: previousFlight,
           checkPreviousFlight: false,
+          pilotId,
         });
       }
     };
 
-    await upsertEvent(flightAfterUpdate.captainInReserve, flightAfterUpdate.captain?.value);
-    await upsertEvent(
-      flightAfterUpdate.firstOfficerInReserve,
-      flightAfterUpdate.firstOfficer?.value,
-    );
+    if (!pilotId || pilotId == flightAfterUpdate.captain?.value)
+      await upsertEvent(flightAfterUpdate.captainInReserve, flightAfterUpdate.captain?.value);
+
+    if (!pilotId || pilotId == flightAfterUpdate.firstOfficer?.value)
+      await upsertEvent(
+        flightAfterUpdate.firstOfficerInReserve,
+        flightAfterUpdate.firstOfficer?.value,
+      );
 
     // Delete Events and reprocess previous flight if the pilot changed
     const deleteAndUpdatePreviousFlight = async (
@@ -120,7 +125,7 @@ export const updateInReserveEvents = createMethod({
         { sort: { scheduledArrivalDateTime: -1 } },
       );
       if (previousFlight && checkPreviousFlight) {
-        await updateInReserveEvents({
+        await upsertInReserveEvents({
           flightBeforeUpdate: previousFlight,
           checkPreviousFlight: false,
         });

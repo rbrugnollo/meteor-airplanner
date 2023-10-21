@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { BaseCollectionTypes } from '../../common/BaseCollection';
 import { Flight, FlightsCollection } from '../collection';
 import { publishGroup } from './publishGroup';
-import { updateInReserveEvents } from './updateInReserveEvents';
+import { upsertInReserveEvents } from './upsertInReserveEvents';
 import { upsertFlightEvent } from './upsertFlightEvent';
+import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 
 export const insert = createMethod({
   name: 'flights.insert',
@@ -21,10 +22,11 @@ export const insert = createMethod({
 
     // Update dependent collections
     await upsertFlightEvent(result);
-    await updateInReserveEvents({
+    await upsertInReserveEvents({
       flightBeforeUpdate: (await FlightsCollection.findOneAsync(result))!,
       checkPreviousFlight: true,
     });
+    await upsertMaintenanceEvent({ flightId: result, checkPreviousFlight: true });
     if (flight.published) await publishGroup(flight.groupId);
 
     return result;
