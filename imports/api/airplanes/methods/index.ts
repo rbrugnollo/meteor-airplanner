@@ -6,3 +6,4 @@ import './fetchPositions';
 import './updateInfo';
 import './checkAvailability';
 import './checkLocation';
+import './validateIcaoCode';

@@ -23,7 +23,7 @@ interface AircraftInfo {
 
 export const fetchAircraftInfo = async (icaoCode: string) => {
   const { baseUrl } = Meteor.settings.private.greatCircleMapper;
-  const result = await cachedFetch<AircraftInfo>(`${baseUrl}/aircraft/read/${icaoCode}`, {
+  const result = await cachedFetch<AircraftInfo | Error>(`${baseUrl}/aircraft/read/${icaoCode}`, {
     method: 'GET',
     headers: defaultHeaders,
   });

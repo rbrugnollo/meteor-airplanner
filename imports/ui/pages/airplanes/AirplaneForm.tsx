@@ -11,7 +11,8 @@ import {
   TextField,
   Stack,
 } from '@mui/material';
-import { useFormik } from 'formik';
+import { debounce } from 'lodash';
+import { FormikErrors, useFormik } from 'formik';
 import { insert } from '/imports/api/airplanes/methods/insert';
 import { update } from '/imports/api/airplanes/methods/update';
 import { useSnackbar } from 'notistack';
@@ -20,7 +21,7 @@ import { Meteor } from 'meteor/meteor';
 import UserSelect from '../../shared/selects/UserSelect';
 import { BaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
 import AirportSelect from '../../shared/selects/AirportSelect';
-
+import { validateIcaoCode } from '/imports/api/airplanes/methods/validateIcaoCode';
 type AirplaneFormValues = Nullable<Omit<Airplane, BaseCollectionTypes>>;
 
 interface AirplaneFormProps {
@@ -69,6 +70,21 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
       }
     }
   }, [open]);
+
+  const validateIcaoCodeOnServer = async (icaoCode: string) => {
+    // Validate airplane Icao Code
+    if (icaoCode) {
+      const validateIcaoCodeError = await validateIcaoCode({ icaoCode });
+      if (validateIcaoCodeError) {
+        formik.setErrors({
+          ...formik.errors,
+          icaoCode: validateIcaoCodeError,
+        });
+      }
+    }
+  };
+
+  const dvalidateIcaoCodeOnServer = debounce(validateIcaoCodeOnServer, 500);
 
   const handleInsert = async (data: AirplaneFormValues) => {
     try {
@@ -145,10 +161,15 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               helperText={formik.touched.base && formik.errors.base}
             />
             <TextField
+              error={!!(formik.touched.icaoCode && formik.errors.icaoCode)}
+              helperText={formik.touched.icaoCode && formik.errors.icaoCode}
               fullWidth
               label="Icao Code"
               name="icaoCode"
-              onBlur={formik.handleBlur}
+              onBlur={(e) => {
+                dvalidateIcaoCodeOnServer(e.target.value);
+                formik.handleBlur(e);
+              }}
               onChange={formik.handleChange}
               value={formik.values.icaoCode}
             />
