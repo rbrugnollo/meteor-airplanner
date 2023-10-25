@@ -15,7 +15,7 @@ declare module 'meteor/meteor' {
     export interface UserProfile {
       name: string;
       roles: RoleName[];
-      base?: ValueLabelType | undefined;
+      base?: ValueLabelType | null;
     }
     const roleAssignment: Mongo.Collection<Roles.Role>;
   }
