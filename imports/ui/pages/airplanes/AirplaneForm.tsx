@@ -12,7 +12,7 @@ import {
   Stack,
 } from '@mui/material';
 import { debounce } from 'lodash';
-import { FormikErrors, useFormik } from 'formik';
+import { useFormik } from 'formik';
 import { insert } from '/imports/api/airplanes/methods/insert';
 import { update } from '/imports/api/airplanes/methods/update';
 import { useSnackbar } from 'notistack';

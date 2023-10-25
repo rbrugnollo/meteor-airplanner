@@ -134,12 +134,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       origin: Yup.object().required('Origin is required'),
       destination: Yup.object().required('Destination is required'),
     }),
-    onSubmit: async (values) => {
-      const success = values._id ? await handleUpdate(values) : await handleInsert(values);
-      if (success) {
-        onClose();
-      }
-    },
+    onSubmit: handleSaveAndClose,
     enableReinitialize: true,
   });
 
@@ -151,6 +146,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       options: {},
     });
   });
+
   const groupFlights = useFind(
     () =>
       FlightsCollection.find(
@@ -261,38 +257,66 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }
   }, [formik.values.destination]);
 
-  const handleSaveAndContinue = async () => {
-    const a = await formik.validateForm();
-    if (isEmpty(a)) {
-      const dateBeforeSave = new Date();
+  function goToNextFlight(createdAtAfter: Date) {
+    // If there's a following flight for the groupId, load it
+    // otherwise, start a new flight
+    const followingFlight = FlightsCollection.findOne(
+      {
+        groupId: formik.values.groupId ?? '',
+        createdAt: { $gt: createdAtAfter },
+      },
+      { sort: { createdAt: 1 } },
+    );
+    if (followingFlight) {
+      setLastSavedFlight(followingFlight);
+      if (followingFlight) formik.setValues(followingFlight);
+    } else {
+      formik.setFieldValue('_id', null);
+      formik.setFieldValue('origin', formik.values.destination);
+      formik.setFieldValue('scheduledDepartureDateTime', null);
+      formik.setFieldValue('destination', null);
+      formik.setFieldValue('scheduledArrivalDateTime', null);
+    }
+  }
+
+  async function handleSaveAndClose(values: FlightFormValues) {
+    const success = values._id ? await handleUpdate(values) : await handleInsert(values);
+    if (success) {
+      const airplaneBaseId = airplane?.base?.value;
+      const lastFlight = FlightsCollection.findOne(
+        {
+          groupId: formik.values.groupId ?? '',
+        },
+        { sort: { createdAt: -1 } },
+      );
+
+      if (airplaneBaseId !== lastFlight?.destination?.value) {
+        // eslint-disable-next-line quotes
+        enqueueSnackbar("The last flight must go back to the airplane's base.", {
+          variant: 'warning',
+        });
+        goToNextFlight(values._id && lastSavedFlight ? lastSavedFlight.createdAt : new Date());
+      } else {
+        onClose();
+      }
+    }
+  }
+
+  async function handleSaveAndContinue() {
+    const validationResult = await formik.validateForm();
+    if (isEmpty(validationResult)) {
       const success = formik.values._id
         ? await handleUpdate(formik.values)
         : await handleInsert(formik.values);
       if (success) {
-        // If there's a following flight for the groupId, load it
-        // otherwise, start a new flight
-        const followingFlight = FlightsCollection.findOne(
-          {
-            groupId: formik.values.groupId ?? '',
-            createdAt: { $gt: lastSavedFlight?.createdAt ?? dateBeforeSave },
-          },
-          { sort: { createdAt: 1 } },
+        goToNextFlight(
+          formik.values._id && lastSavedFlight ? lastSavedFlight.createdAt : new Date(),
         );
-        if (followingFlight) {
-          setLastSavedFlight(followingFlight);
-          if (followingFlight) formik.setValues(followingFlight);
-        } else {
-          formik.setFieldValue('_id', null);
-          formik.setFieldValue('origin', formik.values.destination);
-          formik.setFieldValue('scheduledDepartureDateTime', null);
-          formik.setFieldValue('destination', null);
-          formik.setFieldValue('scheduledArrivalDateTime', null);
-        }
       }
     }
-  };
+  }
 
-  const handleInsert = async (data: FlightFormValues) => {
+  async function handleInsert(data: FlightFormValues) {
     try {
       const { _id, ...finalData } = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
       await insert(finalData);
@@ -305,31 +329,31 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       }
     }
     return false;
-  };
+  }
 
-  const handleUpdate = async (data: FlightFormValues) => {
+  async function handleUpdate(data: FlightFormValues) {
     try {
       const finalData = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
       await update(finalData);
       enqueueSnackbar('Flight successfully updated.', { variant: 'success' });
       return true;
     } catch (e: unknown) {
-      console.log(e);
       if (e instanceof Meteor.Error) {
         enqueueSnackbar(e.message, { variant: 'error' });
       }
     }
     return false;
-  };
-
-  console.log('lastSavedFlight?.published', lastSavedFlight?.published);
+  }
 
   return (
     <Dialog
       fullScreen={fullScreen}
       PaperProps={{ sx: { width: 450 } }}
       open={open}
-      onClose={onClose}
+      onClose={() => {
+        return;
+      }}
+      disableEscapeKeyDown
     >
       <DialogTitle>{formik.values._id ? 'Update' : 'Add new'} Flight</DialogTitle>
       <DialogContent>
