@@ -53,7 +53,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
       name: Yup.string().required('Name is required'),
       email: Yup.string().email('Must be a valid email').required('Email is required'),
       base: Yup.object().when('roles', ([val], schema) =>
-        isPilot(val) ? schema.required('Base is required') : schema.optional(),
+        isPilot(val) ? schema.required('Base is required') : schema.nullable().optional(),
       ),
     }),
     onSubmit: async (values) => {
