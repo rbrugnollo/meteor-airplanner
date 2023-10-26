@@ -72,6 +72,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       published: false,
       dateConfirmed: false,
       timeConfirmed: false,
+      authorized: false,
       captain: null,
       captainInReserve: true,
       firstOfficer: null,
@@ -530,6 +531,18 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 />
               }
               label="Time Confirmed"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formik.values.authorized ?? false}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('authorized', value);
+                  }}
+                  name="authorized"
+                />
+              }
+              label="Authorized"
             />
             <UserSelect
               fullWidth
