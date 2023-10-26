@@ -1,29 +1,36 @@
-import { Select, Props, GroupBase } from 'chakra-react-select';
 import React, { useEffect, useState } from 'react';
-import { RefCallBack } from 'react-hook-form';
+import { Autocomplete, TextField, CircularProgress, AutocompleteProps } from '@mui/material';
 import { searchByText } from '/imports/api/costCenters/methods/searchByText';
+import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 
-export interface CostCenterOption {
-  value: string;
-  label: string;
+interface CostCenterSelectProps<Multiple extends boolean | undefined = false>
+  extends Omit<
+    AutocompleteProps<ValueLabelType, Multiple, false, false>,
+    'options' | 'renderInput'
+  > {
+  readonly label?: React.ReactNode;
+  readonly name: string;
+  readonly helperText?: React.ReactNode;
+  readonly error?: boolean;
 }
 
-interface CostCenterSelectProps
-  extends Props<CostCenterOption, false, GroupBase<CostCenterOption>> {
-  readonly selectRef: RefCallBack;
-}
-
-const CostCenterSelect = (props: CostCenterSelectProps) => {
-  const [options, setOptions] = useState<CostCenterOption[]>([]);
+const CostCenterSelect = <Multiple extends boolean | undefined = false>({
+  name,
+  label,
+  error,
+  helperText,
+  ...rest
+}: CostCenterSelectProps<Multiple>) => {
+  const [options, setOptions] = useState<ValueLabelType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     searchByText()
-      .then((costCenters) => {
+      .then((items) => {
         setOptions(
-          costCenters.map((costCenter) => ({
-            value: costCenter._id!,
-            label: costCenter.name,
+          items.map((item) => ({
+            value: item._id!,
+            label: item.name,
           })),
         );
       })
@@ -32,21 +39,31 @@ const CostCenterSelect = (props: CostCenterSelectProps) => {
       });
   }, []);
 
-  const {
-    selectRef,
-    isLoading: _isLoading,
-    isSearchable: _isSearchable,
-    options: _options,
-    ...rest
-  } = props;
-
   return (
-    <Select<CostCenterOption>
-      isSearchable
-      isLoading={isLoading}
-      options={options}
-      ref={selectRef}
+    <Autocomplete<ValueLabelType, Multiple>
       {...rest}
+      isOptionEqualToValue={(option, value) => option.value === value.value}
+      getOptionLabel={(option) => option.label}
+      options={options}
+      loading={isLoading}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          name={name}
+          error={error}
+          helperText={helperText}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
+        />
+      )}
     />
   );
 };
