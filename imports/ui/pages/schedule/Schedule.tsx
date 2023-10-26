@@ -106,15 +106,24 @@ const Schedule = () => {
               editable={false}
               draggable={false}
               deletable={false}
-              // viewerExtraComponent={(fields, event) => {
-              //   return <div>oi</div>;
-              // }}
+              viewerExtraComponent={(fields, event) => {
+                return <div>oi</div>;
+              }}
               month={{
-                weekDays: [0, 1, 2, 3, 4, 5],
-                weekStartOn: 6,
+                weekDays: [0, 1, 2, 3, 4, 5, 6],
+                weekStartOn: 0,
                 navigation: true,
-                startHour: 9,
-                endHour: 17,
+                startHour: 0,
+                endHour: 24,
+                disableGoToDay: true,
+              }}
+              week={{
+                step: 60,
+                weekDays: [0, 1, 2, 3, 4, 5, 6],
+                weekStartOn: 0,
+                navigation: true,
+                startHour: 0,
+                endHour: 24,
                 disableGoToDay: true,
               }}
               day={null}
