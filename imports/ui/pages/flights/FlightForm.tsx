@@ -38,6 +38,7 @@ import { calculateDuration } from '/imports/api/flights/methods/calculateDuratio
 import { Airport } from '/imports/api/airports/collection';
 import { checkAvailability } from '/imports/api/airplanes/methods/checkAvailability';
 import { checkLocation } from '/imports/api/airplanes/methods/checkLocation';
+import { checkPilotAvailability } from '/imports/api/users/methods/checkPilotAvailability';
 
 type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
 
@@ -90,18 +91,49 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         };
       }
 
-      // Validate airplane availability
-      if (values.airplane && values.scheduledDepartureDateTime && values.scheduledArrivalDateTime) {
-        const airplaneAvailabilityErrors = await checkAvailability({
-          flightId: values._id ?? '',
-          airplaneId: values.airplane.value,
-          dates: [values.scheduledDepartureDateTime, values.scheduledArrivalDateTime],
-        });
-        if (airplaneAvailabilityErrors) {
-          errors = {
-            ...errors,
-            scheduledDepartureDateTime: airplaneAvailabilityErrors,
-          };
+      // Validate availability
+      if (values.scheduledDepartureDateTime && values.scheduledArrivalDateTime) {
+        // Validate airplane availability
+        if (values.airplane) {
+          const airplaneAvailabilityErrors = await checkAvailability({
+            flightId: values._id ?? '',
+            airplaneId: values.airplane.value,
+            dates: [values.scheduledDepartureDateTime, values.scheduledArrivalDateTime],
+          });
+          if (airplaneAvailabilityErrors) {
+            errors = {
+              ...errors,
+              scheduledDepartureDateTime: airplaneAvailabilityErrors,
+            };
+          }
+        }
+        // Validate captain availability
+        if (values.captain) {
+          const availabilityErrors = await checkPilotAvailability({
+            flightId: values._id ?? '',
+            userId: values.captain.value,
+            dates: [values.scheduledDepartureDateTime, values.scheduledArrivalDateTime],
+          });
+          if (availabilityErrors) {
+            errors = {
+              ...errors,
+              captain: availabilityErrors,
+            };
+          }
+        }
+        // Validate firstOfficer availability
+        if (values.firstOfficer) {
+          const availabilityErrors = await checkPilotAvailability({
+            flightId: values._id ?? '',
+            userId: values.firstOfficer.value,
+            dates: [values.scheduledDepartureDateTime, values.scheduledArrivalDateTime],
+          });
+          if (availabilityErrors) {
+            errors = {
+              ...errors,
+              firstOfficer: availabilityErrors,
+            };
+          }
         }
       }
 
@@ -514,6 +546,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               }
               defaultValue={formik.initialValues.captain ?? null}
               value={formik.values.captain ?? null}
+              error={!!formik.errors.captain}
+              helperText={formik.errors.captain}
             />
             <FormControlLabel
               control={
@@ -542,6 +576,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               }
               defaultValue={formik.initialValues.firstOfficer ?? null}
               value={formik.values.firstOfficer ?? null}
+              error={!!formik.errors.firstOfficer}
+              helperText={formik.errors.firstOfficer}
             />
             <FormControlLabel
               control={

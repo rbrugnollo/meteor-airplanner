@@ -3,3 +3,4 @@ import './update';
 import './removeDefault';
 import './getOne';
 import './searchByText';
+import './checkPilotAvailability';
