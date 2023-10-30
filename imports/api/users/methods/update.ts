@@ -4,6 +4,7 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { AirplanesCollection } from '../../airplanes/collection';
 import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
+import { EventsCollection } from '../../events/collection';
 import { FlightsCollection } from '../../flights/collection';
 import { removeDefault } from './removeDefault';
 
@@ -36,6 +37,7 @@ export const update = createMethod({
     // Update dependent collections
     await updateAirplanesCollection({ user: { value: _id, label: name } });
     await updateFlightsCollection({ user: { value: _id, label: name } });
+    await updateEventsCollection({ user: { value: _id, label: name } });
   },
 });
 
@@ -91,7 +93,7 @@ export const updateFlightsCollection = createMethod({
   }),
   async run({ user }) {
     await FlightsCollection.updateAsync(
-      { 'captain.value': user.value },
+      { 'captain.value': user.value, scheduledDepartureDateTime: { $gte: new Date() } },
       {
         $set: {
           'captain.label': user.label,
@@ -100,7 +102,7 @@ export const updateFlightsCollection = createMethod({
       { multi: true },
     );
     await FlightsCollection.updateAsync(
-      { 'firstOfficer.value': user.value },
+      { 'firstOfficer.value': user.value, scheduledDepartureDateTime: { $gte: new Date() } },
       {
         $set: {
           'firstOfficer.value': user.label,
@@ -109,7 +111,7 @@ export const updateFlightsCollection = createMethod({
       { multi: true },
     );
     await FlightsCollection.updateAsync(
-      { 'passengers.value': user.value },
+      { 'passengers.value': user.value, scheduledDepartureDateTime: { $gte: new Date() } },
       {
         $set: {
           'passengers.$.label': user.label,
@@ -118,10 +120,73 @@ export const updateFlightsCollection = createMethod({
       { multi: true },
     );
     await FlightsCollection.updateAsync(
-      { 'requesters.requester.value': user.value },
+      {
+        'requesters.requester.value': user.value,
+        scheduledDepartureDateTime: { $gte: new Date() },
+      },
       {
         $set: {
           'requesters.$.requester.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+  },
+});
+
+export const updateEventsCollection = createMethod({
+  name: 'users.updateEventsCollection',
+  schema: z.object({
+    user: ValueLabelTypeSchema,
+  }),
+  async run({ user }) {
+    await EventsCollection.updateAsync(
+      { 'flight.captain.value': user.value, start: { $gte: new Date() } },
+      {
+        $set: {
+          'flight.captain.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await EventsCollection.updateAsync(
+      { 'flight.firstOfficer.value': user.value, start: { $gte: new Date() } },
+      {
+        $set: {
+          'flight.firstOfficer.value': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await EventsCollection.updateAsync(
+      { 'flight.passengers.value': user.value, start: { $gte: new Date() } },
+      {
+        $set: {
+          'flight.passengers.$.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await EventsCollection.updateAsync(
+      {
+        'flight.requesters.requester.value': user.value,
+        start: { $gte: new Date() },
+      },
+      {
+        $set: {
+          'flight.requesters.$.requester.label': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await EventsCollection.updateAsync(
+      {
+        'pilot.value': user.value,
+        start: { $gte: new Date() },
+      },
+      {
+        $set: {
+          'pilot.label': user.label,
         },
       },
       { multi: true },

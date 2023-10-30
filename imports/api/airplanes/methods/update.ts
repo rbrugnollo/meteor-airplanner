@@ -3,6 +3,7 @@ import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { IdBaseCollectionTypes } from '../../common/BaseCollection';
 import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
+import { EventsCollection } from '../../events/collection';
 import { FlightsCollection } from '../../flights/collection';
 import { Airplane, AirplanesCollection } from '../collection';
 import { updateInfo } from './updateInfo';
@@ -40,6 +41,9 @@ export const update = createMethod({
     await updateFlightsCollection({
       airplane: { value: _id, label: `(${data.tailNumber}) ${data.name}` },
     });
+    await updateEventsCollection({
+      airplane: { value: _id, label: `(${data.tailNumber}) ${data.name}` },
+    });
 
     return result;
   },
@@ -52,10 +56,38 @@ export const updateFlightsCollection = createMethod({
   }),
   async run({ airplane }) {
     await FlightsCollection.updateAsync(
-      { 'airplane.value': airplane.value },
+      { 'airplane.value': airplane.value, scheduledDepartureDateTime: { $gte: new Date() } },
       {
         $set: {
           'airplane.label': airplane.label,
+        },
+      },
+      { multi: true },
+    );
+  },
+});
+
+export const updateEventsCollection = createMethod({
+  name: 'airplanes.updateEventsCollection',
+  schema: z.object({
+    airplane: ValueLabelTypeSchema,
+  }),
+  async run({ airplane }) {
+    await EventsCollection.updateAsync(
+      { 'airplane.value': airplane.value, start: { $gte: new Date() } },
+      {
+        $set: {
+          'airplane.label': airplane.label,
+        },
+      },
+      { multi: true },
+    );
+
+    await EventsCollection.updateAsync(
+      { 'flight.airplane.value': airplane.value, start: { $gte: new Date() } },
+      {
+        $set: {
+          'flight.airplane.label': airplane.label,
         },
       },
       { multi: true },
