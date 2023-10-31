@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { getMany } from '/imports/api/events/methods/getMany';
 import ScheduleFilter, { ScheduleFilterValues } from './ScheduleFilter';
 import ScheduleForm from './ScheduleForm';
+import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 
 const Schedule = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; eventId?: string }>({
@@ -86,13 +87,15 @@ const Schedule = () => {
               <Typography variant="h5">Schedule</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button
-                    startIcon={<AddIcon />}
-                    variant="contained"
-                    onClick={() => setModalProps({ open: true, eventId: undefined })}
-                  >
-                    Add
-                  </Button>
+                  <AuthorizedComponent permission="schedule.insert">
+                    <Button
+                      startIcon={<AddIcon />}
+                      variant="contained"
+                      onClick={() => setModalProps({ open: true, eventId: undefined })}
+                    >
+                      Add
+                    </Button>
+                  </AuthorizedComponent>
                   <ScheduleFilter onFilter={handleFilter} />
                 </Stack>
               </div>

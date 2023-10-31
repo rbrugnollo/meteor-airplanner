@@ -24,6 +24,7 @@ import { list } from '/imports/api/airplanes/publications/list';
 import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
 import AirplaneForm from './AirplaneForm';
 import { fetchPositions } from '/imports/api/airplanes/methods/fetchPositions';
+import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 
 const AirplaneList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; airplaneId?: string }>({
@@ -98,24 +99,26 @@ const AirplaneList = () => {
             >
               <Typography variant="h5">Airplanes</Typography>
               <div>
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    startIcon={<AddIcon />}
-                    variant="contained"
-                    onClick={() => setModalProps({ open: true, airplaneId: undefined })}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    startIcon={<AddIcon />}
-                    variant="contained"
-                    onClick={() => {
-                      fetchPositions();
-                    }}
-                  >
-                    Refresh Status
-                  </Button>
-                </Stack>
+                <AuthorizedComponent permission="airplanes.insert">
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      startIcon={<AddIcon />}
+                      variant="contained"
+                      onClick={() => setModalProps({ open: true, airplaneId: undefined })}
+                    >
+                      Add
+                    </Button>
+                    <Button
+                      startIcon={<AddIcon />}
+                      variant="contained"
+                      onClick={() => {
+                        fetchPositions();
+                      }}
+                    >
+                      Refresh Status
+                    </Button>
+                  </Stack>
+                </AuthorizedComponent>
               </div>
             </Stack>
             <MaterialReactTable<Airplane>

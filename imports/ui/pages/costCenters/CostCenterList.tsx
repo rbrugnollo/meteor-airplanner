@@ -18,6 +18,7 @@ import { list } from '/imports/api/costCenters/publications/list';
 import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/collection';
 import { Edit, Delete } from '@mui/icons-material';
 import CostCenterForm from './CostCenterForm';
+import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 
 const CostCenterList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; costCenterId?: string }>({
@@ -61,15 +62,17 @@ const CostCenterList = () => {
             >
               <Typography variant="h5">Cost Centers</Typography>
               <div>
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    startIcon={<AddIcon />}
-                    onClick={() => setModalProps({ open: true, costCenterId: undefined })}
-                    variant="contained"
-                  >
-                    Add
-                  </Button>
-                </Stack>
+                <AuthorizedComponent permission="costCenters.insert">
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      startIcon={<AddIcon />}
+                      onClick={() => setModalProps({ open: true, costCenterId: undefined })}
+                      variant="contained"
+                    >
+                      Add
+                    </Button>
+                  </Stack>
+                </AuthorizedComponent>
               </div>
             </Stack>
             <MaterialReactTable<CostCenter>

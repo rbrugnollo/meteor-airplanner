@@ -8,7 +8,7 @@ export const hasPermission = createMethod({
   schema: z.object({
     permission: z.custom<Permission>(),
   }),
-  async run({ permission }) {
+  run({ permission }) {
     const userId = this.userId!;
 
     const roles = Roles.getRolesForUser(userId) as unknown as RoleName[];

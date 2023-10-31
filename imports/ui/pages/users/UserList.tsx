@@ -21,6 +21,7 @@ import { Mongo } from 'meteor/mongo';
 import { list } from '/imports/api/users/publications/list';
 import UserListFilter, { UserListFilterValues } from './UserListFilter';
 import UserForm from './UserForm';
+import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 
 const UserList = () => {
   const [selector, setSelector] = useState<Mongo.Selector<Meteor.User>>({ role: null });
@@ -82,13 +83,15 @@ const UserList = () => {
               <Typography variant="h5">Users</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button
-                    onClick={() => setModalProps({ open: true, userId: undefined })}
-                    startIcon={<AddIcon />}
-                    variant="contained"
-                  >
-                    Add
-                  </Button>
+                  <AuthorizedComponent permission="users.insert">
+                    <Button
+                      onClick={() => setModalProps({ open: true, userId: undefined })}
+                      startIcon={<AddIcon />}
+                      variant="contained"
+                    >
+                      Add
+                    </Button>
+                  </AuthorizedComponent>
                   <UserListFilter onFilter={handleFilter} />
                 </Stack>
               </div>

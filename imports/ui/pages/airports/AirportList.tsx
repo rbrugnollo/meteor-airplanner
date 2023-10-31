@@ -23,6 +23,7 @@ import { Airport, AirportsCollection } from '/imports/api/airports/collection';
 import AirportListFilter, { AirportListFilterValues } from './AirportListFilter';
 import { Mongo } from 'meteor/mongo';
 import AirportForm from './AirportForm';
+import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 
 const AirportList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; airportId?: string }>({
@@ -120,13 +121,15 @@ const AirportList = () => {
               <Typography variant="h5">Airports</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button
-                    startIcon={<Add />}
-                    onClick={() => setModalProps({ open: true, airportId: undefined })}
-                    variant="contained"
-                  >
-                    Add
-                  </Button>
+                  <AuthorizedComponent permission="airports.insert">
+                    <Button
+                      startIcon={<Add />}
+                      onClick={() => setModalProps({ open: true, airportId: undefined })}
+                      variant="contained"
+                    >
+                      Add
+                    </Button>
+                  </AuthorizedComponent>
                   <AirportListFilter onFilter={handleFilter} />
                 </Stack>
               </div>

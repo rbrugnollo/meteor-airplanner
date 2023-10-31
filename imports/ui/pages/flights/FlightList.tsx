@@ -25,6 +25,7 @@ import { Mongo } from 'meteor/mongo';
 import { NpmModuleMongodb } from 'meteor/npm-mongo';
 import FlightForm from './FlightForm';
 import FlightRouteModal from './FlightRouteModal';
+import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 
 const FlightList = () => {
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
@@ -151,13 +152,15 @@ const FlightList = () => {
               <Typography variant="h5">Flights</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
-                  <Button
-                    startIcon={<Add />}
-                    onClick={() => setFormModalProps({ open: true, flightId: undefined })}
-                    variant="contained"
-                  >
-                    Add
-                  </Button>
+                  <AuthorizedComponent permission="flights.insert">
+                    <Button
+                      startIcon={<Add />}
+                      onClick={() => setFormModalProps({ open: true, flightId: undefined })}
+                      variant="contained"
+                    >
+                      Add
+                    </Button>
+                  </AuthorizedComponent>
                   <FlightListFilter onFilter={handleFilter} />
                 </Stack>
               </div>
