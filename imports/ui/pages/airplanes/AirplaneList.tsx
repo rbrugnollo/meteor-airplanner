@@ -25,12 +25,15 @@ import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection
 import AirplaneForm from './AirplaneForm';
 import { fetchPositions } from '/imports/api/airplanes/methods/fetchPositions';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
+import useHasPermission from '../../shared/hooks/useHasPermission';
 
 const AirplaneList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; airplaneId?: string }>({
     open: false,
     airplaneId: undefined,
   });
+  const [_canUpdateLoading, canUpdate] = useHasPermission('airplanes.update');
+  const [_canRemoveLoading, canRemove] = useHasPermission('airplanes.remove');
   const isLoading = useSubscribe(list);
   const airplanes = useFind(() => AirplanesCollection.find());
   const columns = useMemo<MrtColumnDef<Airplane>[]>(
@@ -138,6 +141,7 @@ const AirplaneList = () => {
               renderRowActionMenuItems={({ row, closeMenu }) => [
                 <MenuItem
                   key={3}
+                  disabled={!canUpdate}
                   onClick={() => {
                     closeMenu();
                     setModalProps({ open: true, airplaneId: row.original._id });
@@ -150,6 +154,7 @@ const AirplaneList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={2}
+                  disabled={!canRemove}
                   onClick={() => {
                     console.info('Remove', row);
                     closeMenu();

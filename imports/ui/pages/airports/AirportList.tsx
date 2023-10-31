@@ -24,12 +24,15 @@ import AirportListFilter, { AirportListFilterValues } from './AirportListFilter'
 import { Mongo } from 'meteor/mongo';
 import AirportForm from './AirportForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
+import useHasPermission from '../../shared/hooks/useHasPermission';
 
 const AirportList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; airportId?: string }>({
     open: false,
     airportId: undefined,
   });
+  const [_canUpdateLoading, canUpdate] = useHasPermission('airports.update');
+  const [_canRemoveLoading, canRemove] = useHasPermission('airports.remove');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -163,6 +166,7 @@ const AirportList = () => {
               renderRowActionMenuItems={({ row, closeMenu }) => [
                 <MenuItem
                   key={3}
+                  disabled={!canUpdate}
                   onClick={() => {
                     closeMenu();
                     setModalProps({ open: true, airportId: row.original._id });
@@ -175,6 +179,7 @@ const AirportList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={2}
+                  disabled={!canRemove}
                   onClick={() => {
                     console.info('Remove', row);
                     closeMenu();

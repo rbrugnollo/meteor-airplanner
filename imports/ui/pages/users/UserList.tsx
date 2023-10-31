@@ -22,6 +22,7 @@ import { list } from '/imports/api/users/publications/list';
 import UserListFilter, { UserListFilterValues } from './UserListFilter';
 import UserForm from './UserForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
+import useHasPermission from '../../shared/hooks/useHasPermission';
 
 const UserList = () => {
   const [selector, setSelector] = useState<Mongo.Selector<Meteor.User>>({ role: null });
@@ -29,7 +30,8 @@ const UserList = () => {
     open: false,
     userId: undefined,
   });
-
+  const [_canUpdateLoading, canUpdate] = useHasPermission('users.update');
+  const [_canRemoveLoading, canRemove] = useHasPermission('users.remove');
   const isLoading = useSubscribe(() => list(selector));
   const users = useFind(() => Meteor.users.find(selector), [selector]);
   const columns = useMemo<MrtColumnDef<Meteor.User>[]>(
@@ -112,6 +114,7 @@ const UserList = () => {
               renderRowActionMenuItems={({ row, closeMenu }) => [
                 <MenuItem
                   key={3}
+                  disabled={!canUpdate}
                   onClick={() => {
                     closeMenu();
                     setModalProps({ open: true, userId: row.original._id });
@@ -124,6 +127,7 @@ const UserList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={2}
+                  disabled={!canRemove}
                   onClick={() => {
                     console.info('Remove', row);
                     closeMenu();

@@ -26,6 +26,7 @@ import { NpmModuleMongodb } from 'meteor/npm-mongo';
 import FlightForm from './FlightForm';
 import FlightRouteModal from './FlightRouteModal';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
+import useHasPermission from '../../shared/hooks/useHasPermission';
 
 const FlightList = () => {
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
@@ -38,6 +39,8 @@ const FlightList = () => {
       flightGroupId: undefined,
     },
   );
+  const [_canUpdateLoading, canUpdate] = useHasPermission('flights.update');
+  const [_canRemoveLoading, canRemove] = useHasPermission('flights.remove');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -196,6 +199,7 @@ const FlightList = () => {
               renderRowActionMenuItems={({ row, closeMenu }) => [
                 <MenuItem
                   key={4}
+                  disabled={!canUpdate}
                   onClick={() => {
                     closeMenu();
                     setFormModalProps({ open: true, flightId: row.original._id });
@@ -208,6 +212,7 @@ const FlightList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={3}
+                  disabled={!canRemove}
                   onClick={() => {
                     closeMenu();
                     setRouteModalProps({ open: true, flightGroupId: row.original.groupId });

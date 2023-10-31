@@ -19,12 +19,15 @@ import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/coll
 import { Edit, Delete } from '@mui/icons-material';
 import CostCenterForm from './CostCenterForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
+import useHasPermission from '../../shared/hooks/useHasPermission';
 
 const CostCenterList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; costCenterId?: string }>({
     open: false,
     costCenterId: undefined,
   });
+  const [_canUpdateLoading, canUpdate] = useHasPermission('costCenters.update');
+  const [_canRemoveLoading, canRemove] = useHasPermission('costCenters.remove');
   const isLoading = useSubscribe(list);
   const costCenters = useFind(() => CostCentersCollection.find());
   const columns = useMemo<MrtColumnDef<CostCenter>[]>(
@@ -92,6 +95,7 @@ const CostCenterList = () => {
               renderRowActionMenuItems={({ row, closeMenu }) => [
                 <MenuItem
                   key={3}
+                  disabled={!canUpdate}
                   onClick={() => {
                     closeMenu();
                     setModalProps({ open: true, costCenterId: row.original._id });
@@ -104,6 +108,7 @@ const CostCenterList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={2}
+                  disabled={!canRemove}
                   onClick={() => {
                     console.info('Remove', row);
                     closeMenu();
