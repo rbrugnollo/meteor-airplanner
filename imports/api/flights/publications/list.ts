@@ -20,13 +20,13 @@ export const list = createPublication({
       ...andFilters,
     ];
 
-    const airplanes = await AirplanesCollection.find({
-      $or: [{ 'captain.value': userId }, { 'manager.value': userId }],
-    }).fetchAsync();
-    const airplaneIds = airplanes.map((m) => m._id);
-
     const roles = Roles.getRolesForUser(userId) as unknown as RoleName[];
     if (!roles.includes('Admin')) {
+      const airplanes = await AirplanesCollection.find({
+        $or: [{ 'captain.value': userId }, { 'manager.value': userId }],
+      }).fetchAsync();
+      const airplaneIds = airplanes.map((m) => m._id);
+
       userAndFilters = [
         ...userAndFilters,
         {
