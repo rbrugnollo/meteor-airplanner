@@ -41,15 +41,17 @@ const FlightList = () => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
-  const [selector, setSelector] = useState<Mongo.Selector<Flight>>({});
+  const [andFilters, setAndFilters] = useState<
+    NpmModuleMongodb.Filter<NpmModuleMongodb.WithId<Flight>>[]
+  >([]);
   const [options, setOptions] = useState<Mongo.Options<Flight>>({
     sort: { scheduledDepartureDateTime: -1 },
     limit: 50,
   });
   const isLoading = useSubscribe(() => {
-    return list({ selector, options });
+    return list({ andFilters, options });
   });
-  const flights = useFind(() => FlightsCollection.find(), [selector, options]);
+  const flights = useFind(() => FlightsCollection.find(), [andFilters, options]);
   const columns = useMemo<MrtColumnDef<Flight>[]>(
     () => [
       {
@@ -114,9 +116,9 @@ const FlightList = () => {
     }
 
     if (selectors.length === 0) {
-      setSelector({});
+      setAndFilters([]);
     } else {
-      setSelector({ $and: selectors });
+      setAndFilters(selectors);
     }
 
     // Scroll to the top of the table when the filter changes
