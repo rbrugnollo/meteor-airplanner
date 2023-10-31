@@ -21,12 +21,9 @@ import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/airplanes/publications/list';
-import { RoleName } from '/imports/api/users/collection';
 import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection';
 import AirplaneForm from './AirplaneForm';
 import { fetchPositions } from '/imports/api/airplanes/methods/fetchPositions';
-
-export const AirplaneListRoles: RoleName[] = ['Admin'];
 
 const AirplaneList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; airplaneId?: string }>({

@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
-import { RoleName } from '/imports/api/users/collection';
 import { list } from '/imports/api/flights/publications/list';
 import { Flight, FlightsCollection } from '/imports/api/flights/collection';
 import FlightListFilter, { FlightListFilterValues } from './FlightListFilter';
@@ -26,15 +25,6 @@ import { Mongo } from 'meteor/mongo';
 import { NpmModuleMongodb } from 'meteor/npm-mongo';
 import FlightForm from './FlightForm';
 import FlightRouteModal from './FlightRouteModal';
-
-export const FlightListRoles: RoleName[] = [
-  'Admin',
-  'Captain',
-  'First Officer',
-  'Flight Requester',
-  'Flight Authorizer',
-  'Secretary',
-];
 
 const FlightList = () => {
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({

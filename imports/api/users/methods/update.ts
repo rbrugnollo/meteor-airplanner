@@ -18,7 +18,6 @@ export const update = createMethod({
     base: ValueLabelTypeSchema.optional(),
   }),
   async run({ _id, name, email, roles, base }) {
-    // const currentEmail = await Meteor.users.findOneAsync({ _id });
     const userProps = {
       username: email,
       profile: {

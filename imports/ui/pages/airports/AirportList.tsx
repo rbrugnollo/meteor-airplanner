@@ -18,14 +18,11 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
-import { RoleName } from '/imports/api/users/collection';
 import { list } from '/imports/api/airports/publications/list';
 import { Airport, AirportsCollection } from '/imports/api/airports/collection';
 import AirportListFilter, { AirportListFilterValues } from './AirportListFilter';
 import { Mongo } from 'meteor/mongo';
 import AirportForm from './AirportForm';
-
-export const AirportListRoles: RoleName[] = ['Admin'];
 
 const AirportList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; airportId?: string }>({

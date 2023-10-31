@@ -8,18 +8,13 @@ import {
   FaMoneyBillTransfer,
 } from 'react-icons/fa6';
 import { CiAirportSign1 } from 'react-icons/ci';
-import { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
-import { UserListRoles } from '/imports/ui/pages/users/UserList';
-import { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
-import { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
-import { FlightListRoles } from '/imports/ui/pages/flights/FlightList';
-import { ScheduleRoles } from '/imports/ui/pages/schedule/Schedule';
+import { Permission } from '/imports/api/users/collection';
 
 export interface Link {
   label: string;
   href: string;
   Icon: IconType;
-  roles?: string[];
+  permission?: Permission;
   end: boolean;
 }
 
@@ -29,36 +24,36 @@ const links: Link[] = [
     label: 'Flights',
     Icon: FaCalendarDays,
     href: 'flights',
-    roles: FlightListRoles,
+    permission: 'flights.list',
     end: false,
   },
   {
     label: 'Airplanes',
     Icon: FaPlane,
     href: 'airplanes',
-    roles: AirplaneListRoles,
+    permission: 'airplanes.list',
     end: false,
   },
   {
     label: 'Airports',
     Icon: CiAirportSign1,
     href: 'airports',
-    roles: AirportListRoles,
+    permission: 'airports.list',
     end: false,
   },
-  { label: 'Users', Icon: FaUsers, href: 'users', roles: UserListRoles, end: false },
+  { label: 'Users', Icon: FaUsers, href: 'users', permission: 'users.list', end: false },
   {
     label: 'Cost Centers',
     Icon: FaMoneyBillTransfer,
     href: 'costCenters',
-    roles: CostCenterListRoles,
+    permission: 'costCenters.list',
     end: false,
   },
   {
     label: 'Schedule',
     Icon: FaCalendarDays,
     href: 'schedule',
-    roles: ScheduleRoles,
+    permission: 'schedule.list',
     end: false,
   },
   { label: 'Settings', Icon: FaGear, href: 'settings', end: false },

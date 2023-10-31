@@ -1,10 +1,10 @@
 import React from 'react';
 import { Skeleton, Box, Divider, Drawer, Stack, useMediaQuery, Theme } from '@mui/material';
-import { Roles } from 'meteor/alanning:roles';
 import { useLoggedUser } from 'meteor/quave:logged-user-react';
 import links from './links';
 import SideNavItem from './SideNavItem';
 import UserProfile from './UserProfile';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 interface SideNavProps {
   readonly onClose: () => void;
@@ -13,7 +13,7 @@ interface SideNavProps {
 
 const SideNav = (props: SideNavProps) => {
   const { open, onClose } = props;
-  const { loggedUser, isLoadingLoggedUser } = useLoggedUser();
+  const { isLoadingLoggedUser } = useLoggedUser();
   const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
 
   const content = (
@@ -48,7 +48,7 @@ const SideNav = (props: SideNavProps) => {
           {isLoadingLoggedUser
             ? links.map((_link, i) => <Skeleton key={i} />)
             : links
-                .filter((f) => !f.roles || Roles.userIsInRole(loggedUser?._id, f.roles))
+                .filter((f) => !f.permission || hasPermission({ permission: f.permission }))
                 .map((link, i) => <SideNavItem key={i} link={link} />)}
         </Stack>
       </Box>

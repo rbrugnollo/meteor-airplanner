@@ -16,14 +16,11 @@ import AddIcon from '@mui/icons-material/Add';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
-import { RoleName } from '/imports/api/users/collection';
 import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { list } from '/imports/api/users/publications/list';
 import UserListFilter, { UserListFilterValues } from './UserListFilter';
 import UserForm from './UserForm';
-
-export const UserListRoles: RoleName[] = ['Admin'];
 
 const UserList = () => {
   const [selector, setSelector] = useState<Mongo.Selector<Meteor.User>>({ role: null });

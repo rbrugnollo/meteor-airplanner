@@ -15,12 +15,9 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/costCenters/publications/list';
-import { RoleName } from '/imports/api/users/collection';
 import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/collection';
 import { Edit, Delete } from '@mui/icons-material';
 import CostCenterForm from './CostCenterForm';
-
-export const CostCenterListRoles: RoleName[] = ['Admin'];
 
 const CostCenterList = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; costCenterId?: string }>({

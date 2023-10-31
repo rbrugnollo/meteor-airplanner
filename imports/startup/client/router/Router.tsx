@@ -8,12 +8,12 @@ import ForgotPasswordForm from '/imports/ui/pages/login/ForgotPasswordForm';
 import PasswordResetForm from '/imports/ui/pages/login/PasswordResetForm';
 import MainLayout from '/imports/ui/layouts/main/MainLayout';
 import Authorized from './Authorized';
-import UserList, { UserListRoles } from '/imports/ui/pages/users/UserList';
-import AirportList, { AirportListRoles } from '/imports/ui/pages/airports/AirportList';
-import AirplaneList, { AirplaneListRoles } from '/imports/ui/pages/airplanes/AirplaneList';
-import CostCenterList, { CostCenterListRoles } from '/imports/ui/pages/costCenters/CostCenterList';
-import FlightList, { FlightListRoles } from '/imports/ui/pages/flights/FlightList';
-import Schedule, { ScheduleRoles } from '/imports/ui/pages/schedule/Schedule';
+import UserList from '/imports/ui/pages/users/UserList';
+import AirportList from '/imports/ui/pages/airports/AirportList';
+import AirplaneList from '/imports/ui/pages/airplanes/AirplaneList';
+import CostCenterList from '/imports/ui/pages/costCenters/CostCenterList';
+import FlightList from '/imports/ui/pages/flights/FlightList';
+import Schedule from '/imports/ui/pages/schedule/Schedule';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
@@ -77,27 +77,27 @@ const Router = createBrowserRouter([
         children: [
           {
             path: 'flights',
-            element: <Authorized Component={FlightList} roles={FlightListRoles} />,
+            element: <Authorized Component={FlightList} permission="flights.list" />,
           },
           {
             path: 'airports',
-            element: <Authorized Component={AirportList} roles={AirportListRoles} />,
+            element: <Authorized Component={AirportList} permission="airports.list" />,
           },
           {
             path: 'airplanes',
-            element: <Authorized Component={AirplaneList} roles={AirplaneListRoles} />,
+            element: <Authorized Component={AirplaneList} permission="airplanes.list" />,
           },
           {
             path: 'costCenters',
-            element: <Authorized Component={CostCenterList} roles={CostCenterListRoles} />,
+            element: <Authorized Component={CostCenterList} permission="costCenters.list" />,
           },
           {
             path: 'users',
-            element: <Authorized Component={UserList} roles={UserListRoles} />,
+            element: <Authorized Component={UserList} permission="users.list" />,
           },
           {
             path: 'schedule',
-            element: <Authorized Component={Schedule} roles={ScheduleRoles} />,
+            element: <Authorized Component={Schedule} permission="schedule.list" />,
           },
         ],
       },

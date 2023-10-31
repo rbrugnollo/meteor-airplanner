@@ -2,14 +2,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Scheduler } from '@aldabil/react-scheduler';
 import { SchedulerRef, ProcessedEvent, RemoteQuery } from '@aldabil/react-scheduler/types';
-import { RoleName } from '/imports/api/users/collection';
 import { Box, Button, Container, Stack, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { getMany } from '/imports/api/events/methods/getMany';
 import ScheduleFilter, { ScheduleFilterValues } from './ScheduleFilter';
 import ScheduleForm from './ScheduleForm';
-
-export const ScheduleRoles: RoleName[] = ['Admin', 'Captain', 'First Officer'];
 
 const Schedule = () => {
   const [modalProps, setModalProps] = useState<{ open: boolean; eventId?: string }>({

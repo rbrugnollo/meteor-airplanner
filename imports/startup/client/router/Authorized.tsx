@@ -1,18 +1,16 @@
 import React from 'react';
-import { Roles } from 'meteor/alanning:roles';
 import { useNavigate } from 'react-router';
-import { Meteor } from 'meteor/meteor';
-import { RoleName } from '/imports/api/users/collection';
+import { Permission } from '/imports/api/users/collection';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 interface AuthorizedProps {
-  readonly roles: RoleName[];
+  readonly permission: Permission;
   readonly Component: () => JSX.Element;
 }
 
-const Authorized = ({ Component, roles }: AuthorizedProps) => {
+const Authorized = ({ Component, permission }: AuthorizedProps) => {
   const navigate = useNavigate();
-  const loggedUserId = Meteor.userId();
-  if (!Roles.userIsInRole(loggedUserId, roles)) navigate('/app');
+  if (!hasPermission({ permission })) navigate('/app');
   return <Component />;
 };
 
