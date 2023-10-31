@@ -196,9 +196,10 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
 
   useSubscribe(() => {
     return list({
-      selector: {
-        $and: [{ groupId: formik.values.groupId ?? '' }, { _id: { $ne: formik.values._id ?? '' } }],
-      },
+      andFilters: [
+        { groupId: formik.values.groupId ?? '' },
+        { _id: { $ne: formik.values._id ?? '' } },
+      ],
       options: {},
     });
   });

@@ -54,7 +54,10 @@ const FlightList = () => {
   const isLoading = useSubscribe(() => {
     return list({ andFilters, options });
   });
-  const flights = useFind(() => FlightsCollection.find(), [andFilters, options]);
+  const flights = useFind(
+    () => FlightsCollection.find(andFilters.length ? { $and: andFilters } : {}, options),
+    [andFilters, options],
+  );
   const columns = useMemo<MrtColumnDef<Flight>[]>(
     () => [
       {

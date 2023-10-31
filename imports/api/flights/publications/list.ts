@@ -62,6 +62,6 @@ export const list = createPublication({
       ];
     }
 
-    return FlightsCollection.find({ $and: userAndFilters }, options);
+    return FlightsCollection.find(userAndFilters.length ? { $and: userAndFilters } : {}, options);
   },
 });
