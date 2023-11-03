@@ -17,10 +17,11 @@ import { update } from '/imports/api/events/methods/update';
 import { useSnackbar } from 'notistack';
 import { Meteor } from 'meteor/meteor';
 import { BaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
-import { EventsCollection, PilotVacationEvent } from '/imports/api/events/collection';
+import { PilotVacationEvent } from '/imports/api/events/collection';
 import UserSelect from '../../shared/selects/UserSelect';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import { getOne } from '/imports/api/events/methods/getOne';
 
 type ScheduleFormValues = Nullable<Omit<PilotVacationEvent, BaseCollectionTypes>>;
 
@@ -59,21 +60,23 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
   });
   useEffect(() => {
     formik.resetForm();
-    if (open && eventId) {
-      const event = EventsCollection.findOne(eventId);
-      if (event) {
-        const pilotVacationEvent = event as PilotVacationEvent;
-        const { _id, ...values } = pilotVacationEvent;
-        formik.setValues(values);
-      }
-    }
+    if (open && eventId) loadEvent();
   }, [open]);
+
+  const loadEvent = async () => {
+    const event = await getOne({ _id: eventId! });
+    if (event) {
+      const pilotVacationEvent = event as PilotVacationEvent;
+      const { _id, ...values } = pilotVacationEvent;
+      formik.setValues(values);
+    }
+  };
 
   const handleInsert = async (data: ScheduleFormValues) => {
     try {
       const notNullData = data as Omit<PilotVacationEvent, BaseCollectionTypes>;
       await insert(notNullData);
-      enqueueSnackbar('event successfully created.', { variant: 'success' });
+      enqueueSnackbar('Event successfully created.', { variant: 'success' });
       onSuccess();
       onClose();
     } catch (e: unknown) {
@@ -91,7 +94,7 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
         _id: eventId!,
         ...notNullData,
       });
-      enqueueSnackbar('event successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Event successfully updated.', { variant: 'success' });
       onSuccess();
       onClose();
     } catch (e: unknown) {
