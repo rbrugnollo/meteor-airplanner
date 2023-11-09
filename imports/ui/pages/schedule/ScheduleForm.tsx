@@ -33,7 +33,6 @@ interface ScheduleFormProps {
 }
 
 const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) => {
-  const { enqueueSnackbar } = useSnackbar();
   const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
   const formik = useFormik<ScheduleFormValues>({
     initialValues: {
@@ -58,6 +57,7 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
     },
     enableReinitialize: true,
   });
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     formik.resetForm();
     if (open && eventId) loadEvent();
