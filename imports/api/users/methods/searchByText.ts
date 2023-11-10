@@ -9,11 +9,14 @@ export const searchByText = createMethod({
     roles: z.array(z.string()),
   }),
   run({ roles }) {
-    const selector: Mongo.Selector<Meteor.User> = roles.length
-      ? {
-          'profile.roles': { $in: roles },
-        }
-      : {};
+    let selector: Mongo.Selector<Meteor.User> = {
+      'profile.disabled': { $ne: true },
+    };
+    if (roles.length)
+      selector = {
+        ...selector,
+        'profile.roles': { $in: roles },
+      };
     return Meteor.users.find(selector, { sort: { 'profile.name': 1 } }).fetch();
   },
 });

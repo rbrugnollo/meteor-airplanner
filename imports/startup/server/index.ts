@@ -1,5 +1,5 @@
-// This file configures the Accounts email properties
-import './email';
+// This file configures the Accounts properties
+import './accounts';
 
 // Set up some rate limiting and other important security settings.
 import './security';

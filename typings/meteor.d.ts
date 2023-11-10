@@ -16,6 +16,7 @@ declare module 'meteor/meteor' {
       name: string;
       roles: RoleName[];
       base?: ValueLabelType | null;
+      disabled?: boolean;
     }
     const roleAssignment: Mongo.Collection<Roles.Role>;
   }
