@@ -13,5 +13,11 @@
       "apiKey": "17dd7aebf0msh8df971b8c56119ap1e00e2jsn8c2ac6f98f91",
       "baseUrl": "https://greatcirclemapper.p.rapidapi.com"
     }
+  },
+  "packages": {
+    "quave:email-postmark": {
+      "from": "rafael@english4life.com.br",
+      "apiToken": "b9bef7ab-cca9-4440-8e9e-f9b7d714f243"
+    }
   }
 }

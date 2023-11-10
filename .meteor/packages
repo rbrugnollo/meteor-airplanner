@@ -29,3 +29,4 @@ quave:logged-user-react
 email
 zodern:relay
 fetch
+quave:email-postmark@=1.0.1

@@ -6,18 +6,6 @@
     }
   },
   "private": {
-      "packages": {
-        "mongo": {
-          "options": {
-            "tlsAllowInvalidCertificates": true
-          }
-        }
-      },
-      "galaxy.meteor.com": {
-        "env": {
-          "MONGO_URL": "mongodb://rbrugnollo:bqJ2m5xmmPj49qwwZ@SG-galaxycluster-38726.servers.mongodirector.com:27017,SG-galaxycluster-38727.servers.mongodirector.com:27017/airplanner-meteorapp-com?replicaSet=RS-galaxycluster-0&ssl=true"
-        }
-      },
     "adsbExchange": {
       "apiKey": "17dd7aebf0msh8df971b8c56119ap1e00e2jsn8c2ac6f98f91",
       "baseUrl": "https://adsbexchange-com1.p.rapidapi.com/v2"
@@ -25,6 +13,12 @@
     "greatCircleMapper": {
       "apiKey": "17dd7aebf0msh8df971b8c56119ap1e00e2jsn8c2ac6f98f91",
       "baseUrl": "https://greatcirclemapper.p.rapidapi.com"
+    }
+  },
+  "packages": {
+    "quave:email-postmark": {
+      "from": "rafael@english4life.com.br",
+      "apiToken": "b9bef7ab-cca9-4440-8e9e-f9b7d714f243"
     }
   }
 }

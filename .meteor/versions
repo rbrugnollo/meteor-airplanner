@@ -58,7 +58,9 @@ mongo-id@1.0.8
 npm-mongo@4.16.0
 ordered-dict@1.1.0
 promise@0.12.2
+quave:email-postmark@1.0.1
 quave:logged-user-react@1.0.0
+quave:settings@1.0.0
 raix:eventemitter@1.0.0
 random@1.2.1
 rate-limit@1.1.1
