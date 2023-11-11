@@ -150,6 +150,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       // Validate airplane location
       if (values.airplane && values.origin && values.scheduledDepartureDateTime) {
         const airplaneLocationErrors = await checkLocation({
+          flightId: values._id ?? '',
           airplaneId: values.airplane.value,
           airportId: values.origin.value,
           dateToCheck: values.scheduledDepartureDateTime,

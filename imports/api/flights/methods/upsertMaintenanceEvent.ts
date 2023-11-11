@@ -40,8 +40,8 @@ export const upsertMaintenanceEvent = createMethod({
         type: 'Maintenance',
         title: 'Airplane Maintenance',
         flightId,
-        start: flight.scheduledDepartureDateTime,
-        end: flight.scheduledArrivalDateTime,
+        start: flight.scheduledArrivalDateTime,
+        end: followingFlight.scheduledDepartureDateTime,
         airplane: flight.airplane,
       };
       if (existingEvent) {

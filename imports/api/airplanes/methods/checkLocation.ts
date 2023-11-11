@@ -5,14 +5,16 @@ import { FlightsCollection } from '../../flights/collection';
 export const checkLocation = createMethod({
   name: 'airplanes.checkLocation',
   schema: z.object({
+    flightId: z.string(),
     airplaneId: z.string(),
     airportId: z.string(),
     dateToCheck: z.date(),
   }),
-  async run({ airplaneId, airportId, dateToCheck }) {
+  async run({ flightId, airplaneId, airportId, dateToCheck }) {
     // Get Last Flight Before Date
     const flight = await FlightsCollection.findOneAsync(
       {
+        _id: { $ne: flightId },
         'airplane.value': airplaneId,
         scheduledArrivalDateTime: { $lte: dateToCheck },
       },
