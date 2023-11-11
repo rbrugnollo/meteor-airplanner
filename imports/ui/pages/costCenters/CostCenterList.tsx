@@ -12,6 +12,7 @@ import {
   ListItemText,
   MenuItem,
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import AddIcon from '@mui/icons-material/Add';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/costCenters/publications/list';
@@ -20,8 +21,12 @@ import { Edit, Delete } from '@mui/icons-material';
 import CostCenterForm from './CostCenterForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 import useHasPermission from '../../shared/hooks/useHasPermission';
+import { disable } from '/imports/api/costCenters/methods/disable';
+import { enable } from '/imports/api/costCenters/methods/enable';
+import { Meteor } from 'meteor/meteor';
 
 const CostCenterList = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [modalProps, setModalProps] = useState<{ open: boolean; costCenterId?: string }>({
     open: false,
     costCenterId: undefined,
@@ -109,8 +114,37 @@ const CostCenterList = () => {
                 <MenuItem
                   key={2}
                   disabled={!canRemove}
-                  onClick={() => {
-                    console.info('Remove', row);
+                  onClick={async () => {
+                    try {
+                      await disable({ _id: row.original._id });
+                      enqueueSnackbar('Cost Center successfully removed.', {
+                        variant: 'success',
+                        action: () => (
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={async () => {
+                              try {
+                                await enable({ _id: row.original._id });
+                                enqueueSnackbar('Cost Center removal reverted.');
+                              } catch (e: unknown) {
+                                console.log(e);
+                                if (e instanceof Meteor.Error) {
+                                  enqueueSnackbar(e.message, { variant: 'error' });
+                                }
+                              }
+                            }}
+                          >
+                            Undo
+                          </Button>
+                        ),
+                      });
+                    } catch (e: unknown) {
+                      console.log(e);
+                      if (e instanceof Meteor.Error) {
+                        enqueueSnackbar(e.message, { variant: 'error' });
+                      }
+                    }
                     closeMenu();
                   }}
                 >

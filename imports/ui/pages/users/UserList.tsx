@@ -135,7 +135,7 @@ const UserList = () => {
                   onClick={async () => {
                     try {
                       await disable({ _id: row.original._id });
-                      enqueueSnackbar('User successfully remove.', {
+                      enqueueSnackbar('User successfully removed.', {
                         variant: 'success',
                         action: () => (
                           <Button
@@ -163,7 +163,6 @@ const UserList = () => {
                         enqueueSnackbar(e.message, { variant: 'error' });
                       }
                     }
-                    console.info('Remove', row);
                     closeMenu();
                   }}
                 >

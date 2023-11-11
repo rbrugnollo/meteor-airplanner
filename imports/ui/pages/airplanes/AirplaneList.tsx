@@ -16,6 +16,7 @@ import {
   ListItemText,
   ListItemIcon,
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import AddIcon from '@mui/icons-material/Add';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
@@ -26,8 +27,12 @@ import AirplaneForm from './AirplaneForm';
 import { fetchPositions } from '/imports/api/airplanes/methods/fetchPositions';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 import useHasPermission from '../../shared/hooks/useHasPermission';
+import { enable } from '/imports/api/airplanes/methods/enable';
+import { disable } from '/imports/api/airplanes/methods/disable';
+import { Meteor } from 'meteor/meteor';
 
 const AirplaneList = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [modalProps, setModalProps] = useState<{ open: boolean; airplaneId?: string }>({
     open: false,
     airplaneId: undefined,
@@ -155,8 +160,37 @@ const AirplaneList = () => {
                 <MenuItem
                   key={2}
                   disabled={!canRemove}
-                  onClick={() => {
-                    console.info('Remove', row);
+                  onClick={async () => {
+                    try {
+                      await disable({ _id: row.original._id });
+                      enqueueSnackbar('Airplane successfully removed.', {
+                        variant: 'success',
+                        action: () => (
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={async () => {
+                              try {
+                                await enable({ _id: row.original._id });
+                                enqueueSnackbar('Airplane removal reverted.');
+                              } catch (e: unknown) {
+                                console.log(e);
+                                if (e instanceof Meteor.Error) {
+                                  enqueueSnackbar(e.message, { variant: 'error' });
+                                }
+                              }
+                            }}
+                          >
+                            Undo
+                          </Button>
+                        ),
+                      });
+                    } catch (e: unknown) {
+                      console.log(e);
+                      if (e instanceof Meteor.Error) {
+                        enqueueSnackbar(e.message, { variant: 'error' });
+                      }
+                    }
                     closeMenu();
                   }}
                 >

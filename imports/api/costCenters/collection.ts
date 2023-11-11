@@ -7,6 +7,7 @@ export const COLLECTION_NAME = 'costCenters';
 
 export interface CostCenter extends BaseCollection {
   readonly name: string;
+  readonly disabled?: boolean;
 }
 
 export const CostCentersCollection = new Mongo.Collection<CostCenter>(COLLECTION_NAME);

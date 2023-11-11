@@ -50,6 +50,7 @@ export interface Airplane extends BaseCollection {
   readonly seats: number;
   readonly position?: AirplanePosition | null;
   readonly info?: AirplaneInfo | null;
+  readonly disabled?: boolean;
 }
 
 export const AirplanesCollection = new Mongo.Collection<Airplane>(COLLECTION_NAME);

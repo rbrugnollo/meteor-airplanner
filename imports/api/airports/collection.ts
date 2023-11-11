@@ -15,6 +15,7 @@ export interface Airport extends BaseCollection {
   readonly lon: string;
   readonly timezone: string;
   readonly timezoneName: string;
+  readonly disabled?: boolean;
 }
 
 export const AirportsCollection = new Mongo.Collection<Airport>(COLLECTION_NAME);
