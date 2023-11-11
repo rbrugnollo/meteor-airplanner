@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import React, { useEffect, useState, useRef } from 'react';
 import { Scheduler } from '@aldabil/react-scheduler';
 import { SchedulerRef, ProcessedEvent, RemoteQuery } from '@aldabil/react-scheduler/types';
@@ -11,6 +10,12 @@ import AuthorizedComponent from '/imports/startup/client/router/AuthorizedCompon
 import { useSnackbar } from 'notistack';
 import { remove } from '/imports/api/events/methods/delete';
 import { Meteor } from 'meteor/meteor';
+import { Event } from '/imports/api/events/collection';
+import ExtraContent from './extraContent/ExtraContent';
+
+interface ScheduleEvent extends ProcessedEvent {
+  event: Event;
+}
 
 const Schedule = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -44,13 +49,14 @@ const Schedule = () => {
       pilots: pilots.map((m) => m.value),
       airplanes: airplanes.map((m) => m.value),
     });
-    const processedEvents: ProcessedEvent[] = events.map(({ _id, type, title, start, end }) => ({
-      event_id: _id,
-      title,
-      start,
-      end,
+    const processedEvents: ScheduleEvent[] = events.map((event) => ({
+      // eslint-disable-next-line camelcase
+      event_id: event._id,
+      title: event.title,
+      start: event.start,
+      end: event.end,
       editable: false,
-      type,
+      event,
     }));
     calendarRef?.current?.scheduler?.handleState(processedEvents, 'events');
     calendarRef?.current?.scheduler?.handleState(false, 'loading');
@@ -111,37 +117,24 @@ const Schedule = () => {
               editable={false}
               draggable={false}
               deletable={false}
-              viewerExtraComponent={(_fields, event) => {
-                return event.type === 'Vacation' ? (
-                  <div>
-                    <Button
-                      variant="outlined"
-                      onClick={() =>
-                        setModalProps({ open: true, eventId: event.event_id!.toString() })
-                      }
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      onClick={async () => {
-                        try {
-                          await remove({ _id: event.event_id!.toString() });
-                          fetch(filters, remoteQuery);
-                          enqueueSnackbar('Event successfully removed.', { variant: 'success' });
-                        } catch (e: unknown) {
-                          console.log(e);
-                          if (e instanceof Meteor.Error) {
-                            enqueueSnackbar(e.message, { variant: 'error' });
-                          }
+              viewerExtraComponent={(_fields, { event }) => {
+                return (
+                  <ExtraContent
+                    event={event}
+                    onEdit={(eventId) => setModalProps({ open: true, eventId })}
+                    onDelete={async (eventId) => {
+                      try {
+                        await remove({ _id: eventId });
+                        fetch(filters, remoteQuery);
+                        enqueueSnackbar('Event successfully removed.', { variant: 'success' });
+                      } catch (e: unknown) {
+                        console.log(e);
+                        if (e instanceof Meteor.Error) {
+                          enqueueSnackbar(e.message, { variant: 'error' });
                         }
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                ) : (
-                  <span />
+                      }
+                    }}
+                  />
                 );
               }}
               month={{
