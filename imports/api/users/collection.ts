@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { AuditLogsCollection } from '../auditLogs/collection';
 
+// Roles
 export const RoleNames = {
   ADMIN: 'Admin',
   CAPTAIN: 'Captain',
@@ -26,6 +27,7 @@ export type RoleName =
   | 'Flight Authorizer'
   | 'Passenger';
 
+// Permissions
 export const PermissionTypes = [
   'airplanes.list',
   'airplanes.view',
@@ -57,6 +59,7 @@ export const PermissionTypes = [
   'schedule.insert',
   'schedule.update',
   'schedule.remove',
+  'settings',
 ] as const;
 
 export type Permission = (typeof PermissionTypes)[number];
@@ -73,6 +76,13 @@ export const PermissionsByRole: { readonly role: RoleName; readonly permissions:
     { role: 'Flight Authorizer', permissions: [] },
     { role: 'Passenger', permissions: [] },
   ];
+
+// Notifications
+export const NotificationIds = ['flight-created', 'flight-updated'] as const;
+export type NotificationId = (typeof NotificationIds)[number];
+
+export const NotificationTypes = ['email', 'push'] as const;
+export type NotificationType = (typeof NotificationTypes)[number];
 
 if (Meteor.isServer) {
   AuditLogsCollection.addLogger(Meteor.users);

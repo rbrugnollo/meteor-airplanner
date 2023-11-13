@@ -1,7 +1,7 @@
 import { Roles } from 'meteor/alanning:roles';
 import { Mongo } from 'meteor/mongo';
 import { ValueLabelType } from '/imports/api/common/ValueLabelType';
-import { RoleName } from '/imports/api/users/collection';
+import { NotificationId, NotificationType, RoleName } from '/imports/api/users/collection';
 
 declare module 'meteor/meteor' {
   namespace Meteor {
@@ -17,6 +17,11 @@ declare module 'meteor/meteor' {
       roles: RoleName[];
       base?: ValueLabelType | null;
       disabled?: boolean;
+      notifications?: {
+        [key in NotificationId]: {
+          [key in NotificationType]: boolean;
+        };
+      };
     }
     const roleAssignment: Mongo.Collection<Roles.Role>;
   }

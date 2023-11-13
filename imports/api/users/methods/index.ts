@@ -7,3 +7,4 @@ import './checkPilotAvailability';
 import './hasPermission';
 import './disable';
 import './enable';
+import './updateNotification';
