@@ -45,18 +45,19 @@ export interface Flight extends BaseCollection {
       readonly pounds: number;
       readonly liters: number;
       readonly unitPrice: number;
-      readonly totalPrice: number;
+      readonly subTotal: number;
     };
     readonly hangar?: {
       readonly stopover?: number;
       readonly ramp?: number;
       readonly price?: number;
+      readonly subTotal: number;
     };
     readonly maintenance?: {
       readonly maintenancePrice: number;
       readonly duration: number;
       readonly dolarPrice: number;
-      readonly totalPrice: number;
+      readonly subTotal: number;
     };
     readonly crew?: {
       readonly flightAttendant?: number;
@@ -64,8 +65,10 @@ export interface Flight extends BaseCollection {
       readonly transportation?: number;
       readonly hotel?: number;
       readonly food?: number;
+      readonly subTotal: number;
     };
     readonly landings?: number;
+    readonly landingsPrice?: number;
     readonly decea?: number;
     readonly other?: number;
     readonly grandTotal: number;
