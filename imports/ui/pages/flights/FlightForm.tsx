@@ -75,7 +75,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       scheduledDepartureDateTime: null,
       scheduledArrivalDateTime: null,
       estimatedDuration: '',
-      handlingDuration: '00:30',
+      estimatedHandlingDuration: '00:30',
       origin: null,
       destination: null,
       maintenance: false,
@@ -83,6 +83,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       dateConfirmed: false,
       timeConfirmed: false,
       authorized: false,
+      cancelled: false,
       captain: null,
       captainInReserve: true,
       firstOfficer: null,
@@ -171,7 +172,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       estimatedDuration: Yup.string()
         .required('Duration is required')
         .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
-      handlingDuration: Yup.string()
+      estimatedHandlingDuration: Yup.string()
         .required('Handling is required')
         .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
       origin: Yup.object().required('Origin is required'),
@@ -255,13 +256,14 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
 
   useEffect(() => {
     formik.setFieldValue('scheduledArrivalDateTime', '');
-    const { scheduledDepartureDateTime, estimatedDuration, handlingDuration } = formik.values;
-    if (scheduledDepartureDateTime && estimatedDuration && handlingDuration) {
+    const { scheduledDepartureDateTime, estimatedDuration, estimatedHandlingDuration } =
+      formik.values;
+    if (scheduledDepartureDateTime && estimatedDuration && estimatedHandlingDuration) {
       const arrival = dayjs(scheduledDepartureDateTime)
         .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
         .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
-        .add(parseInt(handlingDuration.split(':')[0]), 'hour')
-        .add(parseInt(handlingDuration.split(':')[1]), 'minute')
+        .add(parseInt(estimatedHandlingDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedHandlingDuration.split(':')[1]), 'minute')
         .tz(destination?.timezoneName ?? 'UTC')
         .toDate();
 
@@ -271,7 +273,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     destination,
     formik.values.scheduledDepartureDateTime,
     formik.values.estimatedDuration,
-    formik.values.handlingDuration,
+    formik.values.estimatedHandlingDuration,
   ]);
 
   useEffect(() => {
@@ -505,12 +507,20 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               <TextField
                 fullWidth
                 label="Handling"
-                name="handlingDuration"
+                name="estimatedHandlingDuration"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.handlingDuration}
-                error={!!(formik.touched.handlingDuration && formik.errors.handlingDuration)}
-                helperText={formik.touched.handlingDuration && formik.errors.handlingDuration}
+                value={formik.values.estimatedHandlingDuration}
+                error={
+                  !!(
+                    formik.touched.estimatedHandlingDuration &&
+                    formik.errors.estimatedHandlingDuration
+                  )
+                }
+                helperText={
+                  formik.touched.estimatedHandlingDuration &&
+                  formik.errors.estimatedHandlingDuration
+                }
               />
               <DateTimePicker
                 readOnly

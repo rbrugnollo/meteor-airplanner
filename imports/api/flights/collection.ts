@@ -19,7 +19,7 @@ export interface Flight extends BaseCollection {
   readonly scheduledDepartureDateTime: Date;
   readonly scheduledArrivalDateTime: Date;
   readonly estimatedDuration: string;
-  readonly handlingDuration: string;
+  readonly estimatedHandlingDuration: string;
   readonly origin: ValueLabelType;
   readonly destination: ValueLabelType;
   readonly maintenance: boolean;
@@ -27,6 +27,7 @@ export interface Flight extends BaseCollection {
   readonly dateConfirmed: boolean;
   readonly timeConfirmed: boolean;
   readonly authorized: boolean;
+  readonly cancelled: boolean;
   readonly captain?: ValueLabelType | null;
   readonly captainInReserve: boolean;
   readonly firstOfficer?: ValueLabelType | null;
@@ -34,6 +35,41 @@ export interface Flight extends BaseCollection {
   readonly passengers?: ValueLabelType[] | null;
   readonly requesters?: FlightRequester[] | null;
   readonly notes?: string | null;
+  // review
+  readonly departureDateTime?: Date;
+  readonly arrivalDateTime?: Date;
+  readonly duration?: string;
+  readonly handlingDuration?: string;
+  readonly expensenses?: {
+    readonly fuel?: {
+      readonly pounds: number;
+      readonly liters: number;
+      readonly unitPrice: number;
+      readonly totalPrice: number;
+    };
+    readonly hangar?: {
+      readonly stopover?: number;
+      readonly ramp?: number;
+      readonly price?: number;
+    };
+    readonly maintenance?: {
+      readonly maintenancePrice: number;
+      readonly duration: number;
+      readonly dolarPrice: number;
+      readonly totalPrice: number;
+    };
+    readonly crew?: {
+      readonly flightAttendant?: number;
+      readonly security?: number;
+      readonly transportation?: number;
+      readonly hotel?: number;
+      readonly food?: number;
+    };
+    readonly landings?: number;
+    readonly decea?: number;
+    readonly other?: number;
+    readonly grandTotal: number;
+  };
 }
 
 export const FlightsCollection = new Mongo.Collection<Flight>(COLLECTION_NAME);
