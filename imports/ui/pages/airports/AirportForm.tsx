@@ -43,15 +43,15 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
       timezoneName: '',
     },
     validationSchema: Yup.object<AirportFormValues>().shape({
-      name: Yup.string().required('Name is required'),
-      city: Yup.string().required('City is required'),
-      country: Yup.string().required('Country is required'),
-      iata: Yup.string().required('Iata is required'),
-      icao: Yup.string().required('Icao is required'),
-      lat: Yup.string().required('Latitute is required'),
-      lon: Yup.string().required('Longitude is required'),
-      timezone: Yup.string().required('Timezone is required'),
-      timezoneName: Yup.string().required('Timezone Name is required'),
+      name: Yup.string().required('Nome é obrigatório'),
+      city: Yup.string().required('Cidade é obrigatório'),
+      country: Yup.string().required('País é obrigatório'),
+      iata: Yup.string().required('IATA é obrigatório'),
+      icao: Yup.string().required('ICAO é obrigatório'),
+      lat: Yup.string().required('Latitute é obrigatório'),
+      lon: Yup.string().required('Longitude é obrigatório'),
+      timezone: Yup.string().required('Timezone é obrigatório'),
+      timezoneName: Yup.string().required('Timezone Nome é obrigatório'),
     }),
     onSubmit: async (values) => {
       if (airportId) {
@@ -76,7 +76,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
   const handleInsert = async (data: AirportFormValues) => {
     try {
       await insert(data);
-      enqueueSnackbar('Airport successfully created.', { variant: 'success' });
+      enqueueSnackbar('Aeroporto criado com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -92,7 +92,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
         _id: airportId!,
         ...data,
       });
-      enqueueSnackbar('Airport successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Aeroporto atualizado com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -109,7 +109,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
       open={open}
       onClose={onClose}
     >
-      <DialogTitle>{airportId ? 'Update' : 'Add new'} Airport</DialogTitle>
+      <DialogTitle>{airportId ? 'Editar' : 'Adicionar'} Aeroporto</DialogTitle>
       <DialogContent>
         <form id="airport-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
@@ -117,7 +117,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.name && formik.errors.name)}
               helperText={formik.touched.name && formik.errors.name}
               fullWidth
-              label="Name"
+              label="Nome"
               name="name"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -127,7 +127,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.city && formik.errors.city)}
               fullWidth
               helperText={formik.touched.city && formik.errors.city}
-              label="City"
+              label="Cidade"
               name="city"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -137,7 +137,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.country && formik.errors.country)}
               fullWidth
               helperText={formik.touched.country && formik.errors.country}
-              label="Country"
+              label="País"
               name="country"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -147,7 +147,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.iata && formik.errors.iata)}
               fullWidth
               helperText={formik.touched.iata && formik.errors.iata}
-              label="Iata"
+              label="IATA"
               name="iata"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -157,7 +157,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.icao && formik.errors.icao)}
               fullWidth
               helperText={formik.touched.icao && formik.errors.icao}
-              label="Icao"
+              label="ICAO"
               name="icao"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -187,7 +187,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.timezone && formik.errors.timezone)}
               fullWidth
               helperText={formik.touched.timezone && formik.errors.timezone}
-              label="Timezone"
+              label="Fuso Horário"
               name="timezone"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -197,7 +197,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               error={!!(formik.touched.timezoneName && formik.errors.timezoneName)}
               fullWidth
               helperText={formik.touched.timezoneName && formik.errors.timezoneName}
-              label="Timezone Name"
+              label="Descrição Fuso Horário"
               name="timezoneName"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -207,9 +207,9 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit" form="airport-form" autoFocus>
-          Save
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button type="submit" form="airport-form" autoFocus variant="contained">
+          Salvar
         </Button>
       </DialogActions>
     </Dialog>

@@ -16,7 +16,7 @@ const ForgotPasswordForm = () => {
       submit: null,
     },
     validationSchema: Yup.object({
-      email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+      email: Yup.string().email('Email inválido').max(255).required('Email é obrigatório'),
     }),
     onSubmit: async (values, helpers) => {
       Accounts.forgotPassword({ email: values.email }, (error) => {
@@ -24,7 +24,7 @@ const ForgotPasswordForm = () => {
           enqueueSnackbar(error.message, { variant: 'error' });
           helpers.setSubmitting(false);
         } else {
-          enqueueSnackbar(`Please follow the instructions sent to ${values.email}.`, {
+          enqueueSnackbar(`Favor seguir as instruções enviadas para ${values.email}.`, {
             variant: 'success',
           });
           navigate('/auth/login');
@@ -62,7 +62,7 @@ const ForgotPasswordForm = () => {
             >
               <img style={{ maxWidth: 128, height: '100%' }} src="/logo.png" />
               <Typography fontWeight="bold" variant="h4">
-                Forgot Password
+                Recuperação de Senha
               </Typography>
             </Stack>
             <form noValidate onSubmit={formik.handleSubmit}>
@@ -71,7 +71,7 @@ const ForgotPasswordForm = () => {
                   error={!!(formik.touched.email && formik.errors.email)}
                   fullWidth
                   helperText={formik.touched.email && formik.errors.email}
-                  label="Email Address"
+                  label="Email"
                   name="email"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
@@ -80,7 +80,7 @@ const ForgotPasswordForm = () => {
                 />
               </Stack>
               <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
-                Send Email
+                Recuperar Senha
               </Button>
               <Button
                 fullWidth
@@ -91,7 +91,7 @@ const ForgotPasswordForm = () => {
                   to: '/auth/login',
                 }}
               >
-                Login
+                Entrar
               </Button>
             </form>
           </div>

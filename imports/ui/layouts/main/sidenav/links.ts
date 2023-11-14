@@ -19,44 +19,44 @@ export interface Link {
 }
 
 const links: Link[] = [
-  { label: 'Home', Icon: FaHouse, href: '/app', end: true },
+  { label: 'Início', Icon: FaHouse, href: '/app', end: true },
   {
-    label: 'Flights',
+    label: 'Vôos',
     Icon: FaCalendarDays,
     href: 'flights',
     permission: 'flights.list',
     end: false,
   },
   {
-    label: 'Airplanes',
+    label: 'Aeronaves',
     Icon: FaPlane,
     href: 'airplanes',
     permission: 'airplanes.list',
     end: false,
   },
   {
-    label: 'Airports',
+    label: 'Aeroportos',
     Icon: CiAirportSign1,
     href: 'airports',
     permission: 'airports.list',
     end: false,
   },
-  { label: 'Users', Icon: FaUsers, href: 'users', permission: 'users.list', end: false },
+  { label: 'Usuários', Icon: FaUsers, href: 'users', permission: 'users.list', end: false },
   {
-    label: 'Cost Centers',
+    label: 'Centros de Custo',
     Icon: FaMoneyBillTransfer,
     href: 'costCenters',
     permission: 'costCenters.list',
     end: false,
   },
   {
-    label: 'Schedule',
+    label: 'Agenda',
     Icon: FaCalendarDays,
     href: 'schedule',
     permission: 'schedule.list',
     end: false,
   },
-  { label: 'Settings', Icon: FaGear, href: 'settings', end: false },
+  { label: 'Configurações', Icon: FaGear, href: 'settings', end: false },
 ];
 
 export default links;

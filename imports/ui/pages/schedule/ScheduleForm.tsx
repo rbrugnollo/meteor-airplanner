@@ -43,10 +43,10 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
       end: null,
     },
     validationSchema: Yup.object<ScheduleFormValues>().shape({
-      title: Yup.string().required('Title is required'),
-      pilot: Yup.object().required('Pilot is required'),
-      start: Yup.date().required('Start is required'),
-      end: Yup.date().required('End is required'),
+      title: Yup.string().required('Title é obrigatório'),
+      pilot: Yup.object().required('Pilot é obrigatório'),
+      start: Yup.date().required('Start é obrigatório'),
+      end: Yup.date().required('End é obrigatório'),
     }),
     onSubmit: async (values) => {
       if (eventId) {
@@ -76,7 +76,7 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
     try {
       const notNullData = data as Omit<PilotVacationEvent, BaseCollectionTypes>;
       await insert(notNullData);
-      enqueueSnackbar('Event successfully created.', { variant: 'success' });
+      enqueueSnackbar('Event criado com sucesso.', { variant: 'success' });
       onSuccess();
       onClose();
     } catch (e: unknown) {
@@ -94,7 +94,7 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
         _id: eventId!,
         ...notNullData,
       });
-      enqueueSnackbar('Event successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Event atualizado com sucesso.', { variant: 'success' });
       onSuccess();
       onClose();
     } catch (e: unknown) {
@@ -112,7 +112,7 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
       open={open}
       onClose={onClose}
     >
-      <DialogTitle>{eventId ? 'Update' : 'Add new'} Event</DialogTitle>
+      <DialogTitle>{eventId ? 'Update' : 'Adicionar'} Event</DialogTitle>
       <DialogContent>
         <form id="schedule-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
@@ -139,7 +139,7 @@ const ScheduleForm = ({ eventId, open, onClose, onSuccess }: ScheduleFormProps) 
               fullWidth
               label="Pilot"
               name="pilot"
-              roles={['Captain', 'First Officer']}
+              roles={['Comandante', 'Co-Piloto']}
               onBlur={formik.handleBlur}
               onChange={(_e, value) => {
                 formik.setFieldValue('pilot', value);

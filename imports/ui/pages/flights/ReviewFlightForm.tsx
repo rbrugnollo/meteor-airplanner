@@ -118,22 +118,22 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
       return errors;
     },
     validationSchema: Yup.object<ReviewFlightFormValues>().shape({
-      airplane: Yup.object().required('Airplane is required'),
-      departureDateTime: Yup.date().required('Date Time is required'),
+      airplane: Yup.object().required('Airplane é obrigatório'),
+      departureDateTime: Yup.date().required('Date Time é obrigatório'),
       duration: Yup.string()
-        .required('Duration is required')
+        .required('Duration é obrigatório')
         .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
       handlingDuration: Yup.string()
-        .required('Handling is required')
+        .required('Handling é obrigatório')
         .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
-      origin: Yup.object().required('Origin is required'),
-      destination: Yup.object().required('Destination is required'),
+      origin: Yup.object().required('Origin é obrigatório'),
+      destination: Yup.object().required('Destination é obrigatório'),
       requesters: Yup.array().of(
         Yup.object().shape({
-          requester: Yup.object().required('Requester is required'),
-          costCenter: Yup.object().required('Cost Center is required'),
+          requester: Yup.object().required('Requester é obrigatório'),
+          costCenter: Yup.object().required('Cost Center é obrigatório'),
           percentage: Yup.number()
-            .required('Percentage is required')
+            .required('Percentage é obrigatório')
             .test('sum', 'Sum must be 100%', function (_v) {
               const values = this.from?.[1]?.value as ReviewFlightFormValues;
               if (!values || !values.requesters) return true;
@@ -288,7 +288,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
     try {
       const finalData = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
       await update(finalData);
-      enqueueSnackbar('Flight successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Flight atualizado com sucesso.', { variant: 'success' });
       return true;
     } catch (e: unknown) {
       if (e instanceof Meteor.Error) {
@@ -405,7 +405,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 disabled={formik.values.airplane === null}
                 label="Captain"
                 name="captain"
-                roles={['Captain']}
+                roles={['Comandante']}
                 onBlur={formik.handleBlur}
                 onChange={(_e, value) => {
                   formik.setFieldValue('captain', value);
@@ -435,7 +435,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 disabled={formik.values.airplane === null}
                 label="First Officer"
                 name="firstOfficer"
-                roles={['Captain', 'First Officer']}
+                roles={['Comandante', 'Co-Piloto']}
                 onBlur={formik.handleBlur}
                 onChange={(_e, value) => {
                   formik.setFieldValue('firstOfficer', value);

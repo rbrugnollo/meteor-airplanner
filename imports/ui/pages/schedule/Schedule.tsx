@@ -126,7 +126,7 @@ const Schedule = () => {
                       try {
                         await remove({ _id: eventId });
                         fetch(filters, remoteQuery);
-                        enqueueSnackbar('Event successfully removed.', { variant: 'success' });
+                        enqueueSnackbar('Event removido com sucesso.', { variant: 'success' });
                       } catch (e: unknown) {
                         console.log(e);
                         if (e instanceof Meteor.Error) {

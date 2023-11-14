@@ -45,19 +45,19 @@ const AirplaneList = () => {
     () => [
       {
         accessorKey: 'name',
-        header: 'Name',
+        header: 'Nome',
       },
       {
         accessorKey: 'tailNumber',
-        header: 'Tail Number',
+        header: 'Registro',
       },
       {
         accessorKey: 'seats',
-        header: 'Seats',
+        header: 'No de Assentos',
       },
       {
         id: 'status',
-        header: 'Status',
+        header: 'Em vôo?',
         Cell: ({ row }: { row: MrtRow<Airplane> }) => {
           return row.original?.position?.isFlying ? (
             <a
@@ -105,7 +105,7 @@ const AirplaneList = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Typography variant="h5">Airplanes</Typography>
+              <Typography variant="h5">Aeronaves</Typography>
               <div>
                 <AuthorizedComponent permission="airplanes.insert">
                   <Stack direction="row" spacing={2}>
@@ -114,7 +114,7 @@ const AirplaneList = () => {
                       variant="contained"
                       onClick={() => setModalProps({ open: true, airplaneId: undefined })}
                     >
-                      Add
+                      Adicionar
                     </Button>
                     <Button
                       startIcon={<AddIcon />}
@@ -123,7 +123,7 @@ const AirplaneList = () => {
                         fetchPositions();
                       }}
                     >
-                      Refresh Status
+                      Verificar Posições
                     </Button>
                   </Stack>
                 </AuthorizedComponent>
@@ -155,7 +155,7 @@ const AirplaneList = () => {
                   <ListItemIcon>
                     <Edit color="primary" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
+                  <ListItemText>Editar</ListItemText>
                 </MenuItem>,
                 <MenuItem
                   key={2}
@@ -163,7 +163,7 @@ const AirplaneList = () => {
                   onClick={async () => {
                     try {
                       await disable({ _id: row.original._id });
-                      enqueueSnackbar('Airplane successfully removed.', {
+                      enqueueSnackbar('Aeronave removida com sucesso.', {
                         variant: 'success',
                         action: () => (
                           <Button
@@ -172,7 +172,7 @@ const AirplaneList = () => {
                             onClick={async () => {
                               try {
                                 await enable({ _id: row.original._id });
-                                enqueueSnackbar('Airplane removal reverted.');
+                                enqueueSnackbar('Remoção cancelada.');
                               } catch (e: unknown) {
                                 console.log(e);
                                 if (e instanceof Meteor.Error) {
@@ -181,7 +181,7 @@ const AirplaneList = () => {
                               }
                             }}
                           >
-                            Undo
+                            Defazer
                           </Button>
                         ),
                       });
@@ -197,7 +197,7 @@ const AirplaneList = () => {
                   <ListItemIcon>
                     <Delete color="error" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Delete</ListItemText>
+                  <ListItemText>Remover</ListItemText>
                 </MenuItem>,
               ]}
             />

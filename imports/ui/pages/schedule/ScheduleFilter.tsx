@@ -100,7 +100,7 @@ const ScheduleFilter = ({ onFilter }: ScheduleFilterProps) => {
                   fullWidth
                   label="Pilots"
                   name="pilots"
-                  roles={['Captain', 'First Officer']}
+                  roles={['Comandante', 'Co-Piloto']}
                   onBlur={formik.handleBlur}
                   value={formik.values.pilots}
                   onChange={(_e, value) => {

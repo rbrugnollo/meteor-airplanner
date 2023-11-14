@@ -24,13 +24,13 @@ const ForgotPasswordForm = () => {
     validationSchema: Yup.object({
       password: Yup.string()
         .max(255)
-        .required('Password is required')
+        .required('Password é obrigatório')
         .matches(/[0-9]/, getCharacterValidationError('digit'))
         .matches(/[a-z]/, getCharacterValidationError('lowercase'))
         .matches(/[A-Z]/, getCharacterValidationError('uppercase')),
       confirm: Yup.string()
         .max(255)
-        .required('Confirm is required')
+        .required('Confirm é obrigatório')
         .oneOf([Yup.ref('password')], 'Passwords does not match'),
     }),
     onSubmit: async (values, helpers) => {

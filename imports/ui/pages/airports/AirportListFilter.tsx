@@ -81,7 +81,7 @@ const AirportListFilter = ({ onFilter }: AirportListFilterProps) => {
               spacing={4}
             >
               <Typography variant="h6" sx={{ pl: 1 }}>
-                Filter Airports
+                Filtrar Aeroportos
               </Typography>
               <IconButton aria-label="close" size="large" onClick={() => setOpen(false)}>
                 <Close fontSize="inherit" />
@@ -90,7 +90,7 @@ const AirportListFilter = ({ onFilter }: AirportListFilterProps) => {
             <form id="airport-list-filter-form" noValidate onSubmit={formik.handleSubmit}>
               <TextField
                 fullWidth
-                label="Search"
+                label="Procurar"
                 name="search"
                 InputProps={{
                   startAdornment: (
@@ -108,13 +108,13 @@ const AirportListFilter = ({ onFilter }: AirportListFilterProps) => {
           <Box>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button onClick={() => setOpen(false)} variant="text">
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleReset} variant="outlined">
-                Reset
+                Resetar
               </Button>
               <Button form="airport-list-filter-form" type="submit" variant="contained">
-                Filter
+                Filtrar
               </Button>
             </Stack>
           </Box>
