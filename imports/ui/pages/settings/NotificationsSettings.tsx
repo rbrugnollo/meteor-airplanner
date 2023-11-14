@@ -38,8 +38,13 @@ const NotificationsSettings = () => {
   };
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <TableContainer
+      component={Paper}
+      sx={{
+        py: 2,
+      }}
+    >
+      <Table aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell>Mensagem</TableCell>
