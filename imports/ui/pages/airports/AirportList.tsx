@@ -59,11 +59,11 @@ const AirportList = () => {
       },
       {
         accessorKey: 'city',
-        header: 'City',
+        header: 'Cidade',
       },
       {
         accessorKey: 'country',
-        header: 'Country',
+        header: 'País',
       },
       {
         accessorKey: 'timezone',
@@ -126,7 +126,7 @@ const AirportList = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Typography variant="h5">Airports</Typography>
+              <Typography variant="h5">Aeroportos</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
                   <AuthorizedComponent permission="airports.insert">
@@ -135,7 +135,7 @@ const AirportList = () => {
                       onClick={() => setModalProps({ open: true, airportId: undefined })}
                       variant="contained"
                     >
-                      Add
+                      Adicionar
                     </Button>
                   </AuthorizedComponent>
                   <AirportListFilter onFilter={handleFilter} />
@@ -180,7 +180,7 @@ const AirportList = () => {
                   <ListItemIcon>
                     <Edit color="primary" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
+                  <ListItemText>Editar</ListItemText>
                 </MenuItem>,
                 <MenuItem
                   key={2}
@@ -188,7 +188,7 @@ const AirportList = () => {
                   onClick={async () => {
                     try {
                       await disable({ _id: row.original._id });
-                      enqueueSnackbar('Airport successfully removed.', {
+                      enqueueSnackbar('Aeroporto removido com sucesso.', {
                         variant: 'success',
                         action: () => (
                           <Button
@@ -197,7 +197,7 @@ const AirportList = () => {
                             onClick={async () => {
                               try {
                                 await enable({ _id: row.original._id });
-                                enqueueSnackbar('Airport removal reverted.');
+                                enqueueSnackbar('Remoção cancelada.');
                               } catch (e: unknown) {
                                 console.log(e);
                                 if (e instanceof Meteor.Error) {
@@ -206,7 +206,7 @@ const AirportList = () => {
                               }
                             }}
                           >
-                            Undo
+                            Defazer
                           </Button>
                         ),
                       });
@@ -222,7 +222,7 @@ const AirportList = () => {
                   <ListItemIcon>
                     <Delete color="error" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Delete</ListItemText>
+                  <ListItemText>Remover</ListItemText>
                 </MenuItem>,
               ]}
             />

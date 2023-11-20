@@ -22,7 +22,7 @@ export const checkLocation = createMethod({
     );
 
     if (flight && flight.destination?.value !== airportId) {
-      return `The airplane is going to be at ${flight.destination?.label} at this date and time.`;
+      return `A aeronave estará em ${flight.destination?.label} nesta data e hora.`;
     }
 
     return null;

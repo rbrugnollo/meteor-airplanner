@@ -27,9 +27,17 @@ import FlightForm from './FlightForm';
 import FlightRouteModal from './FlightRouteModal';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 import useHasPermission from '../../shared/hooks/useHasPermission';
+import ReviewFlightForm from './ReviewFlightForm';
 
 const FlightList = () => {
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
+    open: false,
+    flightId: undefined,
+  });
+  const [reviewFormModalProps, setReviewFormModalProps] = useState<{
+    open: boolean;
+    flightId?: string;
+  }>({
     open: false,
     flightId: undefined,
   });
@@ -41,6 +49,7 @@ const FlightList = () => {
   );
   const [_canUpdateLoading, canUpdate] = useHasPermission('flights.update');
   const [_canRemoveLoading, canRemove] = useHasPermission('flights.remove');
+  const [_canReviewLoading, canReview] = useHasPermission('flights.review');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -215,6 +224,19 @@ const FlightList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={3}
+                  disabled={!canReview}
+                  onClick={() => {
+                    closeMenu();
+                    setReviewFormModalProps({ open: true, flightId: row.original._id });
+                  }}
+                >
+                  <ListItemIcon>
+                    <Edit color="primary" fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Review</ListItemText>
+                </MenuItem>,
+                <MenuItem
+                  key={2}
                   disabled={!canRemove}
                   onClick={() => {
                     closeMenu();
@@ -245,6 +267,10 @@ const FlightList = () => {
         <FlightForm
           {...formModalProps}
           onClose={() => setFormModalProps({ open: false, flightId: undefined })}
+        />
+        <ReviewFlightForm
+          {...reviewFormModalProps}
+          onClose={() => setReviewFormModalProps({ open: false, flightId: undefined })}
         />
         <FlightRouteModal
           {...routeModalProps}

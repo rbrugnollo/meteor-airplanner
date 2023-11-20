@@ -19,11 +19,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && children}
     </div>
   );
 }
@@ -64,13 +60,13 @@ const Settings = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Typography variant="h5">User Settings</Typography>
+              <Typography variant="h5">Configurações</Typography>
             </Stack>
           </Stack>
-          <Box sx={{ width: '100%' }}>
+          <Box>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={tabValue} onChange={handleChange} aria-label="basic tabs example">
-                <Tab label="Notifications" {...a11yProps(0)} />
+                <Tab label="Notificações" {...a11yProps(0)} />
               </Tabs>
             </Box>
             <CustomTabPanel value={tabValue} index={0}>

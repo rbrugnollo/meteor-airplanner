@@ -4,28 +4,24 @@ import { AuditLogsCollection } from '../auditLogs/collection';
 // Roles
 export const RoleNames = {
   ADMIN: 'Admin',
-  CAPTAIN: 'Captain',
-  FIRST_OFFICER: 'First Officer',
-  SECRETARY: 'Secretary',
-  SCHEDULE_EDITOR: 'Schedule Editor',
-  AIRPLANE_MANAGER: 'Airplane Manager',
-  FLIGHT_REQUESTER: 'Flight Requester',
-  FLIGHT_AUTHORIZER: 'Flight Authorizer',
-  PASSENGER: 'Passenger',
+  CAPTAIN: 'Comandante',
+  FIRST_OFFICER: 'Co-Piloto',
+  SECRETARY: 'Secretário',
+  AIRPLANE_MANAGER: 'Responsável Aeronave',
+  FLIGHT_REQUESTER: 'Solicitante',
+  PASSENGER: 'Passageiro',
 };
 
 export const Pilots = [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER];
 
 export type RoleName =
   | 'Admin'
-  | 'Captain'
-  | 'First Officer'
-  | 'Secretary'
-  | 'Schedule Editor'
-  | 'Airplane Manager'
-  | 'Flight Requester'
-  | 'Flight Authorizer'
-  | 'Passenger';
+  | 'Comandante'
+  | 'Co-Piloto'
+  | 'Secretário'
+  | 'Responsável Aeronave'
+  | 'Solicitante'
+  | 'Passageiro';
 
 // Permissions
 export const PermissionTypes = [
@@ -54,6 +50,7 @@ export const PermissionTypes = [
   'flights.insert',
   'flights.update',
   'flights.remove',
+  'flights.review',
   'schedule.list',
   'schedule.view',
   'schedule.insert',
@@ -67,14 +64,12 @@ export type Permission = (typeof PermissionTypes)[number];
 export const PermissionsByRole: { readonly role: RoleName; readonly permissions: Permission[] }[] =
   [
     { role: 'Admin', permissions: PermissionTypes.map((m) => m) },
-    { role: 'Captain', permissions: PermissionTypes.map((m) => m) },
-    { role: 'First Officer', permissions: PermissionTypes.map((m) => m) },
-    { role: 'Secretary', permissions: [] },
-    { role: 'Schedule Editor', permissions: [] },
-    { role: 'Airplane Manager', permissions: [] },
-    { role: 'Flight Requester', permissions: [] },
-    { role: 'Flight Authorizer', permissions: [] },
-    { role: 'Passenger', permissions: [] },
+    { role: 'Comandante', permissions: PermissionTypes.map((m) => m) },
+    { role: 'Co-Piloto', permissions: PermissionTypes.map((m) => m) },
+    { role: 'Secretário', permissions: [] },
+    { role: 'Responsável Aeronave', permissions: [] },
+    { role: 'Solicitante', permissions: [] },
+    { role: 'Passageiro', permissions: [] },
   ];
 
 // Notifications

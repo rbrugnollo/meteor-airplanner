@@ -46,10 +46,10 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
       pilots: [],
     },
     validationSchema: Yup.object<AirplaneFormValues>().shape({
-      name: Yup.string().required('Name is required'),
-      tailNumber: Yup.string().required('Tail Number is required'),
-      seats: Yup.number().required('Seats is required'),
-      base: Yup.object().required('Base Airport is required'),
+      name: Yup.string().required('Nome é obrigatório'),
+      tailNumber: Yup.string().required('Registro é obrigatório'),
+      seats: Yup.number().required('No de Assentos é obrigatório'),
+      base: Yup.object().required('Base é obrigatório'),
     }),
     onSubmit: async (values) => {
       if (airplaneId) {
@@ -90,7 +90,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
     try {
       const finalData = data as unknown as Omit<Airplane, BaseCollectionTypes>;
       await insert(finalData);
-      enqueueSnackbar('Airplane successfully created.', { variant: 'success' });
+      enqueueSnackbar('Aeronave criada com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -107,7 +107,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
         _id: airplaneId!,
         ...finalData,
       });
-      enqueueSnackbar('Airplane successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Aeronave atualizada com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -124,7 +124,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
       open={open}
       onClose={onClose}
     >
-      <DialogTitle>{airplaneId ? 'Update' : 'Add new'} Airplane</DialogTitle>
+      <DialogTitle>{airplaneId ? 'Editar' : 'Adicionar'} Aeronave</DialogTitle>
       <DialogContent>
         <form id="airplane-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
@@ -132,7 +132,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               error={!!(formik.touched.name && formik.errors.name)}
               fullWidth
               helperText={formik.touched.name && formik.errors.name}
-              label="Name"
+              label="Nome"
               name="name"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -142,7 +142,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               error={!!(formik.touched.tailNumber && formik.errors.tailNumber)}
               fullWidth
               helperText={formik.touched.tailNumber && formik.errors.tailNumber}
-              label="Tail Number"
+              label="Registro"
               name="tailNumber"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -150,7 +150,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
             />
             <AirportSelect
               fullWidth
-              label="Base Airport"
+              label="Base"
               name="base"
               onBlur={formik.handleBlur}
               value={formik.values.base}
@@ -164,7 +164,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               error={!!(formik.touched.icaoCode && formik.errors.icaoCode)}
               helperText={formik.touched.icaoCode && formik.errors.icaoCode}
               fullWidth
-              label="Icao Code"
+              label="Código ICAO"
               name="icaoCode"
               onBlur={(e) => {
                 dvalidateIcaoCodeOnServer(e.target.value);
@@ -177,7 +177,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               error={!!(formik.touched.seats && formik.errors.seats)}
               fullWidth
               helperText={formik.touched.seats && formik.errors.seats}
-              label="Seats"
+              label="No de Assentos"
               name="seats"
               type="number"
               InputLabelProps={{
@@ -189,9 +189,9 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
             />
             <UserSelect
               fullWidth
-              label="Manager"
+              label="Responsável"
               name="manager"
-              roles={['Airplane Manager']}
+              roles={['Responsável Aeronave']}
               onBlur={formik.handleBlur}
               onChange={(_e, value) => {
                 formik.setFieldValue('manager', value);
@@ -201,9 +201,9 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
             />
             <UserSelect
               fullWidth
-              label="Captain"
+              label="Comandante"
               name="captain"
-              roles={['Captain']}
+              roles={['Comandante']}
               onBlur={formik.handleBlur}
               onChange={(_e, value) => {
                 formik.setFieldValue('captain', value);
@@ -213,9 +213,9 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
             />
             <UserSelect
               fullWidth
-              label="First Officer"
+              label="Co-Piloto"
               name="firstOfficer"
-              roles={['First Officer']}
+              roles={['Co-Piloto']}
               onBlur={formik.handleBlur}
               onChange={(_e, value) => {
                 formik.setFieldValue('firstOfficer', value);
@@ -226,9 +226,9 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
             <UserSelect
               multiple
               fullWidth
-              label="Pilots"
+              label="Pilotos"
               name="pilots"
-              roles={['Captain', 'First Officer']}
+              roles={['Comandante', 'Co-Piloto']}
               onBlur={formik.handleBlur}
               onChange={(_e, value) => {
                 formik.setFieldValue('pilots', value);

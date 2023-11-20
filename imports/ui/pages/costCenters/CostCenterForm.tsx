@@ -35,7 +35,7 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
       name: '',
     },
     validationSchema: Yup.object<CostCenterFormValues>().shape({
-      name: Yup.string().required('Name is required'),
+      name: Yup.string().required('Nome é obrigatório'),
     }),
     onSubmit: async (values) => {
       if (costCenterId) {
@@ -60,7 +60,7 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
   const handleInsert = async (data: CostCenterFormValues) => {
     try {
       await insert(data);
-      enqueueSnackbar('Cost Center successfully created.', { variant: 'success' });
+      enqueueSnackbar('Centro de Custo criado com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -76,7 +76,7 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
         _id: costCenterId!,
         ...data,
       });
-      enqueueSnackbar('Cost Center successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Centro de Custo atualizado com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -93,7 +93,7 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
       open={open}
       onClose={onClose}
     >
-      <DialogTitle>{costCenterId ? 'Update' : 'Add new'} Cost Center</DialogTitle>
+      <DialogTitle>{costCenterId ? 'Editar' : 'Adicionar'} Centro de Custo</DialogTitle>
       <DialogContent>
         <form id="costCenter-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
@@ -101,7 +101,7 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
               error={!!(formik.touched.name && formik.errors.name)}
               fullWidth
               helperText={formik.touched.name && formik.errors.name}
-              label="Name"
+              label="Nome"
               name="name"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -111,9 +111,9 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit" form="costCenter-form" autoFocus>
-          Save
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button type="submit" form="costCenter-form" autoFocus variant="contained">
+          Salvar
         </Button>
       </DialogActions>
     </Dialog>

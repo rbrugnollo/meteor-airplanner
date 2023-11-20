@@ -21,3 +21,6 @@ import '../../api/flights/publications';
 // Events
 import '../../api/events/methods';
 import '../../api/events/publications';
+
+// Messages
+import '../../api/messages/methods';

@@ -42,13 +42,13 @@ const UserList = () => {
     () => [
       {
         accessorKey: 'profile.name',
-        header: 'Name',
+        header: 'Nome',
         size: 150,
       },
       {
         accessorKey: 'profile.roles',
         accessorFn: (user) => user.profile?.roles?.join(', '),
-        header: 'Roles',
+        header: 'Funções',
         size: 150,
       },
     ],
@@ -86,7 +86,7 @@ const UserList = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Typography variant="h5">Users</Typography>
+              <Typography variant="h5">Usuários</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
                   <AuthorizedComponent permission="users.insert">
@@ -95,7 +95,7 @@ const UserList = () => {
                       startIcon={<AddIcon />}
                       variant="contained"
                     >
-                      Add
+                      Adicionar
                     </Button>
                   </AuthorizedComponent>
                   <UserListFilter onFilter={handleFilter} />
@@ -127,7 +127,7 @@ const UserList = () => {
                   <ListItemIcon>
                     <Edit color="primary" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
+                  <ListItemText>Editar</ListItemText>
                 </MenuItem>,
                 <MenuItem
                   key={2}
@@ -135,7 +135,7 @@ const UserList = () => {
                   onClick={async () => {
                     try {
                       await disable({ _id: row.original._id });
-                      enqueueSnackbar('User successfully removed.', {
+                      enqueueSnackbar('Usuário removido com sucesso.', {
                         variant: 'success',
                         action: () => (
                           <Button
@@ -144,7 +144,7 @@ const UserList = () => {
                             onClick={async () => {
                               try {
                                 await enable({ _id: row.original._id });
-                                enqueueSnackbar('User removal reverted.');
+                                enqueueSnackbar('Remoção cancelada.');
                               } catch (e: unknown) {
                                 console.log(e);
                                 if (e instanceof Meteor.Error) {
@@ -153,7 +153,7 @@ const UserList = () => {
                               }
                             }}
                           >
-                            Undo
+                            Desfazer
                           </Button>
                         ),
                       });
@@ -169,7 +169,7 @@ const UserList = () => {
                   <ListItemIcon>
                     <Delete color="error" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Delete</ListItemText>
+                  <ListItemText>Remover</ListItemText>
                 </MenuItem>,
               ]}
             />

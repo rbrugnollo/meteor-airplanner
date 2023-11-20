@@ -17,8 +17,8 @@ const LoginForm = () => {
       submit: null,
     },
     validationSchema: Yup.object({
-      email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-      password: Yup.string().max(255).required('Password is required'),
+      email: Yup.string().email('Email inválido').max(255).required('Email é obrigatório'),
+      password: Yup.string().max(255).required('Senha é obrigatório'),
     }),
     onSubmit: async (values, helpers) => {
       Meteor.loginWithPassword(values.email, values.password, (error) => {
@@ -60,7 +60,7 @@ const LoginForm = () => {
             >
               <img width={128} src="/logo.png" />
               <Typography fontWeight="bold" variant="h4">
-                Login
+                Entrar
               </Typography>
             </Stack>
             <form noValidate onSubmit={formik.handleSubmit}>
@@ -69,7 +69,7 @@ const LoginForm = () => {
                   error={!!(formik.touched.email && formik.errors.email)}
                   fullWidth
                   helperText={formik.touched.email && formik.errors.email}
-                  label="Email Address"
+                  label="Email"
                   name="email"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
@@ -80,7 +80,7 @@ const LoginForm = () => {
                   error={!!(formik.touched.password && formik.errors.password)}
                   fullWidth
                   helperText={formik.touched.password && formik.errors.password}
-                  label="Password"
+                  label="Senha"
                   name="password"
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
@@ -89,7 +89,7 @@ const LoginForm = () => {
                 />
               </Stack>
               <Button fullWidth size="large" sx={{ mt: 3 }} type="submit" variant="contained">
-                Continue
+                Entrar
               </Button>
               <Button
                 fullWidth
@@ -100,7 +100,7 @@ const LoginForm = () => {
                   to: '/auth/forgot',
                 }}
               >
-                Forgot password?
+                Esqueceu a senha?
               </Button>
             </form>
           </div>

@@ -50,10 +50,10 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
     },
     validationSchema: Yup.object({
       roles: Yup.array().of(Yup.string()),
-      name: Yup.string().required('Name is required'),
-      email: Yup.string().email('Must be a valid email').required('Email is required'),
+      name: Yup.string().required('Nome é obrigatório'),
+      email: Yup.string().email('Email inválido').required('Email é obrigatório'),
       base: Yup.object().when('roles', ([val], schema) =>
-        isPilot(val) ? schema.required('Base is required') : schema.nullable().optional(),
+        isPilot(val) ? schema.required('Base é obrigatório') : schema.nullable().optional(),
       ),
     }),
     onSubmit: async (values) => {
@@ -89,7 +89,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
   const handleInsert = async (data: UserFormValues) => {
     try {
       await insert({ ...data, base: data.base ?? undefined });
-      enqueueSnackbar('User successfully created.', { variant: 'success' });
+      enqueueSnackbar('Usuário criado com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -106,7 +106,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
         ...data,
         base: data.base ?? undefined,
       });
-      enqueueSnackbar('User successfully updated.', { variant: 'success' });
+      enqueueSnackbar('Usuário atualizado com sucesso.', { variant: 'success' });
       onClose();
     } catch (e: unknown) {
       console.log(e);
@@ -123,7 +123,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
       open={open}
       onClose={onClose}
     >
-      <DialogTitle>{userId ? 'Update' : 'Add new'} User</DialogTitle>
+      <DialogTitle>{userId ? 'Editar' : 'Adicionar'} Usuário</DialogTitle>
       <DialogContent>
         <form id="user-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
@@ -131,7 +131,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
               error={!!(formik.touched.name && formik.errors.name)}
               fullWidth
               helperText={formik.touched.name && formik.errors.name}
-              label="Name"
+              label="Nome"
               name="name"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -141,7 +141,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
               error={!!(formik.touched.email && formik.errors.email)}
               fullWidth
               helperText={formik.touched.email && formik.errors.email}
-              label="Email Address"
+              label="Email"
               name="email"
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}
@@ -159,7 +159,7 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
               disableCloseOnSelect
               getOptionLabel={(option) => option}
               options={Object.entries(RoleNames).map(([_, roleName]) => roleName)}
-              renderInput={(params) => <TextField name="roles" {...params} label="Roles" />}
+              renderInput={(params) => <TextField name="roles" {...params} label="Funções" />}
             />
             <AirportSelect
               fullWidth
@@ -178,9 +178,9 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit" form="user-form" autoFocus>
-          Save
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button type="submit" form="user-form" autoFocus variant="contained">
+          Salvar
         </Button>
       </DialogActions>
     </Dialog>

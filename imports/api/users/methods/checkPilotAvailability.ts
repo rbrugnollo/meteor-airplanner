@@ -28,7 +28,7 @@ export const checkPilotAvailability = createMethod({
       }).fetchAsync();
 
       if (pilotFlights.length > 0) {
-        return 'There is a flight scheduled for this pilot at this date and time.';
+        return 'O piloto tem um vôo agendado para esta data e hora.';
       }
 
       // Check Vacation
@@ -40,7 +40,7 @@ export const checkPilotAvailability = createMethod({
       }).fetchAsync();
 
       if (maintenanceEvents.length > 0) {
-        return 'The pilot is not available at this date and time.';
+        return 'O piloto não está disponível nesta data e hora.';
       }
     }
     return null;

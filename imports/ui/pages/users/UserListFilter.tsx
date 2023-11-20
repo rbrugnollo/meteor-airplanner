@@ -83,7 +83,7 @@ const UserListFilter = ({ onFilter }: UserListFilterProps) => {
               spacing={4}
             >
               <Typography variant="h6" sx={{ pl: 1 }}>
-                Filter Users
+                Filtrar Usuários
               </Typography>
               <IconButton aria-label="close" size="large" onClick={() => setOpen(false)}>
                 <Close fontSize="inherit" />
@@ -91,7 +91,7 @@ const UserListFilter = ({ onFilter }: UserListFilterProps) => {
             </Stack>
             <form id="user-list-filter-form" noValidate onSubmit={formik.handleSubmit}>
               <FormControl fullWidth variant="filled">
-                <InputLabel id="user-filter-role-label">Role</InputLabel>
+                <InputLabel id="user-filter-role-label">Função</InputLabel>
                 <Select
                   labelId="user-filter-role-label"
                   name="role"
@@ -112,13 +112,13 @@ const UserListFilter = ({ onFilter }: UserListFilterProps) => {
           <Box>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button onClick={() => setOpen(false)} variant="text">
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleReset} variant="outlined">
-                Reset
+                Resetar
               </Button>
               <Button form="user-list-filter-form" type="submit" variant="contained">
-                Filter
+                Filtrar
               </Button>
             </Stack>
           </Box>

@@ -39,7 +39,7 @@ const CostCenterList = () => {
     () => [
       {
         accessorKey: 'name',
-        header: 'Name',
+        header: 'Nome',
       },
     ],
     [],
@@ -68,7 +68,7 @@ const CostCenterList = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Typography variant="h5">Cost Centers</Typography>
+              <Typography variant="h5">Centros de Custo</Typography>
               <div>
                 <AuthorizedComponent permission="costCenters.insert">
                   <Stack direction="row" spacing={2}>
@@ -77,7 +77,7 @@ const CostCenterList = () => {
                       onClick={() => setModalProps({ open: true, costCenterId: undefined })}
                       variant="contained"
                     >
-                      Add
+                      Adicionar
                     </Button>
                   </Stack>
                 </AuthorizedComponent>
@@ -109,7 +109,7 @@ const CostCenterList = () => {
                   <ListItemIcon>
                     <Edit color="primary" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
+                  <ListItemText>Editar</ListItemText>
                 </MenuItem>,
                 <MenuItem
                   key={2}
@@ -117,7 +117,7 @@ const CostCenterList = () => {
                   onClick={async () => {
                     try {
                       await disable({ _id: row.original._id });
-                      enqueueSnackbar('Cost Center successfully removed.', {
+                      enqueueSnackbar('Centro de Custo removido com sucesso.', {
                         variant: 'success',
                         action: () => (
                           <Button
@@ -126,7 +126,7 @@ const CostCenterList = () => {
                             onClick={async () => {
                               try {
                                 await enable({ _id: row.original._id });
-                                enqueueSnackbar('Cost Center removal reverted.');
+                                enqueueSnackbar('Remoção cancelada.');
                               } catch (e: unknown) {
                                 console.log(e);
                                 if (e instanceof Meteor.Error) {
@@ -135,7 +135,7 @@ const CostCenterList = () => {
                               }
                             }}
                           >
-                            Undo
+                            Desfazer
                           </Button>
                         ),
                       });
@@ -151,7 +151,7 @@ const CostCenterList = () => {
                   <ListItemIcon>
                     <Delete color="error" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Delete</ListItemText>
+                  <ListItemText>Remover</ListItemText>
                 </MenuItem>,
               ]}
             />

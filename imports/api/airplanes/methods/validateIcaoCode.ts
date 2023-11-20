@@ -10,7 +10,7 @@ export const validateIcaoCode = createMethod({
 
     const result = await fetchAircraftInfo(icaoCode);
     if (!result || 'error' in result) {
-      return result.error ?? 'Invalid ICAO code';
+      return result.error ?? 'Código ICAO inválido';
     }
 
     return null;

@@ -21,7 +21,7 @@ export const checkAvailability = createMethod({
       }).fetchAsync();
 
       if (airplaneFlights.length > 0) {
-        return 'There is a flight scheduled for this airplane at this date and time.';
+        return 'Já existe um vôo agendado para essa aeronave nesta data e hora.';
       }
 
       // Check Maintenance
@@ -33,7 +33,7 @@ export const checkAvailability = createMethod({
       }).fetchAsync();
 
       if (maintenanceEvents.length > 0) {
-        return 'The airplane will be on maintenance at this date and time.';
+        return 'A aeronave estará em manutenção nesta data e hora.';
       }
     }
     return null;
