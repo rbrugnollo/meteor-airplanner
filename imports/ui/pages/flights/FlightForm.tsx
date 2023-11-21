@@ -255,20 +255,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
 
   useEffect(() => {
-    formik.setFieldValue('scheduledArrivalDateTime', '');
-    const { scheduledDepartureDateTime, estimatedDuration, estimatedHandlingDuration } =
-      formik.values;
-    if (scheduledDepartureDateTime && estimatedDuration && estimatedHandlingDuration) {
-      const arrival = dayjs(scheduledDepartureDateTime)
-        .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
-        .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
-        .add(parseInt(estimatedHandlingDuration.split(':')[0]), 'hour')
-        .add(parseInt(estimatedHandlingDuration.split(':')[1]), 'minute')
-        .tz(destination?.timezoneName ?? 'UTC')
-        .toDate();
-
-      formik.setFieldValue('scheduledArrivalDateTime', arrival);
-    }
+    setScheduledArrivalDateTime();
   }, [
     destination,
     formik.values.scheduledDepartureDateTime,
@@ -317,6 +304,32 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }
   }, [formik.values.destination]);
 
+  function setScheduledArrivalDateTime() {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledDepartureDateTime, estimatedDuration } = formik.values;
+    if (scheduledDepartureDateTime && estimatedDuration) {
+      const arrival = dayjs(scheduledDepartureDateTime)
+        .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+      formik.setFieldValue('scheduledArrivalDateTime', arrival);
+    }
+  }
+
+  function setNextScheduledDepartureDateTime() {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledArrivalDateTime, estimatedHandlingDuration } = formik.values;
+    if (scheduledArrivalDateTime && estimatedHandlingDuration) {
+      const departure = dayjs(scheduledArrivalDateTime)
+        .add(parseInt(estimatedHandlingDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedHandlingDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+      formik.setFieldValue('scheduledDepartureDateTime', departure);
+    }
+  }
+
   function goToNextFlight(createdAtAfter: Date) {
     // If there's a following flight for the groupId, load it
     // otherwise, start a new flight
@@ -333,9 +346,10 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     } else {
       formik.setFieldValue('_id', null);
       formik.setFieldValue('origin', formik.values.destination);
-      formik.setFieldValue('scheduledDepartureDateTime', null);
       formik.setFieldValue('destination', null);
-      formik.setFieldValue('scheduledArrivalDateTime', null);
+      setNextScheduledDepartureDateTime();
+      setScheduledArrivalDateTime();
+      formik.validateForm();
     }
   }
 
@@ -464,7 +478,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 timezone={origin?.timezoneName ?? 'UTC'}
                 shouldDisableDate={(date) => {
                   return !!groupFlights
-                    .map((m) => dayjs(m.scheduledDepartureDateTime))
+                    .map((m) => dayjs(m.scheduledArrivalDateTime))
                     .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
                 }}
                 value={
@@ -782,11 +796,11 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         </FormikProvider>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Cancelar</Button>
         <Button onClick={handleSaveAndContinue} autoFocus>
           Salvar e Continuar
         </Button>
-        <Button type="submit" form="flight-form" autoFocus>
+        <Button type="submit" form="flight-form">
           Salvar e Finalizar
         </Button>
       </DialogActions>
