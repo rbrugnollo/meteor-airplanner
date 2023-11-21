@@ -13,6 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
 import timezonePlugin from 'dayjs/plugin/timezone';
+import 'dayjs/locale/pt-br';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 dayjs.extend(utcPlugin);
@@ -28,7 +29,7 @@ Meteor.startup(() => {
   root.render(
     <React.StrictMode>
       <ThemeProvider theme={theme}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
           <CssBaseline />
           <SnackbarProvider>
             <RouterProvider router={Router} />
