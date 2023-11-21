@@ -177,6 +177,7 @@ const UserList = () => {
         </Container>
         <UserForm
           {...modalProps}
+          onSuccess={() => setModalProps({ open: false, userId: undefined })}
           onClose={() => setModalProps({ open: false, userId: undefined })}
         />
       </Box>

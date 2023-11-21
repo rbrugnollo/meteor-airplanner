@@ -22,23 +22,25 @@ import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 import AirportSelect from '../../shared/selects/AirportSelect';
 import { intersection } from 'lodash';
 
-interface UserFormValues {
+export interface UserFormValues {
   name: string;
   email: string;
   roles: string[];
   base?: ValueLabelType | null;
 }
 
-interface UserFormProps {
+export interface UserFormProps {
   readonly userId?: string;
+  readonly newUser?: UserFormValues;
   readonly open: boolean;
   readonly onClose: () => void;
+  readonly onSuccess: (userId: string) => void;
 }
 
 const isPilot = (roles: string[]) =>
   intersection(roles, [RoleNames.CAPTAIN, RoleNames.FIRST_OFFICER]).length > 0;
 
-const UserForm = ({ userId, open, onClose }: UserFormProps) => {
+const UserForm = ({ userId, newUser, open, onClose, onSuccess }: UserFormProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
   const formik = useFormik<UserFormValues>({
@@ -72,25 +74,29 @@ const UserForm = ({ userId, open, onClose }: UserFormProps) => {
   }, [formik.values.roles]);
   useEffect(() => {
     formik.resetForm();
-    if (open && userId) {
-      const user = Meteor.users.findOne(userId);
-      console.log(user);
-      if (user) {
-        formik.setValues({
-          name: user.profile?.name ?? '',
-          email: user.emails?.[0].address ?? '',
-          roles: user.profile?.roles ?? [],
-          base: user.profile?.base ?? null,
-        });
+    if (open) {
+      if (userId) {
+        const user = Meteor.users.findOne(userId);
+        if (user) {
+          formik.setValues({
+            name: user.profile?.name ?? '',
+            email: user.emails?.[0].address ?? '',
+            roles: user.profile?.roles ?? [],
+            base: user.profile?.base ?? null,
+          });
+        }
+      }
+      if (newUser) {
+        formik.setValues(newUser);
       }
     }
   }, [open]);
 
   const handleInsert = async (data: UserFormValues) => {
     try {
-      await insert({ ...data, base: data.base ?? undefined });
+      const userId = await insert({ ...data, base: data.base ?? undefined });
       enqueueSnackbar('Usuário criado com sucesso.', { variant: 'success' });
-      onClose();
+      onSuccess(userId);
     } catch (e: unknown) {
       console.log(e);
       if (e instanceof Meteor.Error) {

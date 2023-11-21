@@ -656,6 +656,10 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 label="Co-Piloto em Reserva"
               />
               <UserSelect
+                selectOnFocus
+                clearOnBlur
+                handleHomeEndKeys
+                freeSolo
                 multiple
                 fullWidth
                 disabled={formik.values.airplane === null}
