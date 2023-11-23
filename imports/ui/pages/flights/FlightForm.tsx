@@ -473,39 +473,67 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 error={!!(formik.touched.destination && formik.errors.destination)}
                 helperText={formik.touched.destination && formik.errors.destination}
               />
-              <DateTimePicker
-                disabled={formik.values.origin === null}
-                label={`Decolagem (${origin?.timezoneName ?? 'UTC'})`}
-                disablePast
-                timezone={origin?.timezoneName ?? 'UTC'}
-                shouldDisableDate={(date) => {
-                  return !!groupFlights
-                    .map((m) => dayjs(m.scheduledArrivalDateTime))
-                    .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
-                }}
-                value={
-                  formik.values.scheduledDepartureDateTime
-                    ? dayjs(formik.values.scheduledDepartureDateTime)
-                    : null
-                }
-                onChange={(value) => {
-                  formik.setFieldValue('scheduledDepartureDateTime', value?.toDate());
-                }}
-                onClose={() => {
-                  formik.setFieldTouched('scheduledDepartureDateTime', true);
-                }}
-                slotProps={{
-                  textField: {
-                    error: !!(
-                      formik.touched.scheduledDepartureDateTime &&
-                      formik.errors.scheduledDepartureDateTime
-                    ),
-                    helperText:
-                      formik.touched.scheduledDepartureDateTime &&
-                      formik.errors.scheduledDepartureDateTime,
-                  },
-                }}
-              />
+              <Stack direction="row" spacing={2}>
+                <DateTimePicker
+                  disabled={formik.values.origin === null}
+                  label={`Decolagem (${origin?.timezoneName ?? 'UTC'})`}
+                  disablePast
+                  timezone={origin?.timezoneName ?? 'UTC'}
+                  shouldDisableDate={(date) => {
+                    return !!groupFlights
+                      .map((m) => dayjs(m.scheduledArrivalDateTime))
+                      .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
+                  }}
+                  value={
+                    formik.values.scheduledDepartureDateTime
+                      ? dayjs(formik.values.scheduledDepartureDateTime)
+                      : null
+                  }
+                  onChange={(value) => {
+                    formik.setFieldValue('scheduledDepartureDateTime', value?.toDate());
+                  }}
+                  onClose={() => {
+                    formik.setFieldTouched('scheduledDepartureDateTime', true);
+                  }}
+                  slotProps={{
+                    textField: {
+                      error: !!(
+                        formik.touched.scheduledDepartureDateTime &&
+                        formik.errors.scheduledDepartureDateTime
+                      ),
+                      helperText:
+                        formik.touched.scheduledDepartureDateTime &&
+                        formik.errors.scheduledDepartureDateTime,
+                    },
+                  }}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.dateConfirmed ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Data ${value ? '' : 'NÃO'} Confirmada`);
+                        formik.setFieldValue('dateConfirmed', value);
+                      }}
+                      name="dateConfirmed"
+                    />
+                  }
+                  label=""
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.timeConfirmed ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Hora ${value ? '' : 'NÃO'} Confirmada`);
+                        formik.setFieldValue('timeConfirmed', value);
+                      }}
+                      name="timeConfirmed"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
               <TextField
                 InputProps={{
                   readOnly: true,
@@ -548,55 +576,32 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                     : null
                 }
               />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.published ?? false}
-                    onChange={(_e, value) => {
-                      if (!lastSavedFlight?.published) formik.setFieldValue('published', value);
-                    }}
-                    name="published"
-                  />
-                }
-                label={lastSavedFlight?.published ? 'Publicar Vôo' : 'Vôo Publicado'}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.dateConfirmed ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('dateConfirmed', value);
-                    }}
-                    name="dateConfirmed"
-                  />
-                }
-                label="Data Confirmada"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.timeConfirmed ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('timeConfirmed', value);
-                    }}
-                    name="timeConfirmed"
-                  />
-                }
-                label="Horário Confirmado"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.authorized ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('authorized', value);
-                    }}
-                    name="authorized"
-                  />
-                }
-                label="Vôo Autorizado"
-              />
+              <Stack direction="row" spacing={2}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formik.values.published ?? false}
+                      onChange={(_e, value) => {
+                        if (!lastSavedFlight?.published) formik.setFieldValue('published', value);
+                      }}
+                      name="published"
+                    />
+                  }
+                  label={lastSavedFlight?.published ? 'Vôo Publicado' : 'Publicar Vôo'}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formik.values.maintenance ?? false}
+                      onChange={(_e, value) => {
+                        formik.setFieldValue('maintenance', value);
+                      }}
+                      name="maintenance"
+                    />
+                  }
+                  label="Manutenção"
+                />
+              </Stack>
               <Stack direction="row" spacing={2}>
                 <UserSelect
                   fullWidth
@@ -683,18 +688,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 error={!!(formik.touched.passengers && formik.errors.passengers)}
                 helperText={formik.touched.passengers && formik.errors.passengers}
               />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.maintenance ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('maintenance', value);
-                    }}
-                    name="maintenance"
-                  />
-                }
-                label="Manutenção"
-              />
+
               <TextField
                 fullWidth
                 label="Observações"
