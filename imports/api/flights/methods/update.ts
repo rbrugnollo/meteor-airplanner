@@ -1,6 +1,6 @@
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
-import { IdBaseCollectionTypes } from '../../common/BaseCollection';
+import { IdBaseCollectionTypes, BaseCollectionTypes } from '../../common/BaseCollection';
 import { Flight, FlightsCollection } from '../collection';
 import { publishGroup } from './publishGroup';
 import { upsertInReserveEvents } from './upsertInReserveEvents';
@@ -13,11 +13,28 @@ export const update = createMethod({
   async run(flight) {
     const { _id, ...data } = flight;
     const flightBeforeUpdate = (await FlightsCollection.findOneAsync(_id))!;
+    let setFlight: Omit<Flight, BaseCollectionTypes> = { ...data };
+    let sendAuthorizationMessage = false;
+
+    // If the flight was authorized and the scheduled departure date or airplane changed, then the flight is no longer authorized
+    if (
+      flightBeforeUpdate.authorized &&
+      (flightBeforeUpdate.scheduledDepartureDateTime !== flight.scheduledArrivalDateTime ||
+        flightBeforeUpdate.airplane?.value !== flight.airplane?.value)
+    ) {
+      setFlight = {
+        ...setFlight,
+        authorized: false,
+      };
+      sendAuthorizationMessage = true;
+    }
+
+    // Update
     const result = await FlightsCollection.updateAsync(
       { _id },
       {
         $set: {
-          ...data,
+          ...setFlight,
           updatedAt: new Date(),
           updatedBy: this.userId!,
         },
@@ -32,6 +49,11 @@ export const update = createMethod({
     });
     await upsertMaintenanceEvent({ flightId: _id, checkPreviousFlight: true });
     if (!flightBeforeUpdate.published && flight.published) await publishGroup(flight.groupId);
+
+    if (sendAuthorizationMessage) {
+      // TODO send message
+    }
+    // TODO send change message
 
     return result;
   },
