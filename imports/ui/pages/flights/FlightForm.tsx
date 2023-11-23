@@ -16,6 +16,8 @@ import {
   FormControlLabel,
   List,
   ListItem,
+  Divider,
+  Checkbox,
 } from '@mui/material';
 import {
   FormikErrors,
@@ -595,66 +597,72 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 }
                 label="Vôo Autorizado"
               />
-              <UserSelect
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="Comandante"
-                name="captain"
-                roles={['Comandante']}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('captain', value);
-                }}
-                filter={(o) =>
-                  airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
-                }
-                defaultValue={formik.initialValues.captain ?? null}
-                value={formik.values.captain ?? null}
-                error={!!formik.errors.captain}
-                helperText={formik.errors.captain}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.captainInReserve ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('captainInReserve', value);
-                    }}
-                    name="captainInReserve"
-                  />
-                }
-                label="Comandante em Reserva"
-              />
-              <UserSelect
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="Co-Piloto"
-                name="firstOfficer"
-                roles={['Comandante', 'Co-Piloto']}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('firstOfficer', value);
-                }}
-                filter={(o) =>
-                  airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
-                }
-                defaultValue={formik.initialValues.firstOfficer ?? null}
-                value={formik.values.firstOfficer ?? null}
-                error={!!formik.errors.firstOfficer}
-                helperText={formik.errors.firstOfficer}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.firstOfficerInReserve ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('firstOfficerInReserve', value);
-                    }}
-                    name="firstOfficerInReserve"
-                  />
-                }
-                label="Co-Piloto em Reserva"
-              />
+              <Stack direction="row" spacing={2}>
+                <UserSelect
+                  fullWidth
+                  disabled={formik.values.airplane === null}
+                  label="Comandante"
+                  name="captain"
+                  roles={['Comandante']}
+                  onBlur={formik.handleBlur}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('captain', value);
+                  }}
+                  filter={(o) =>
+                    airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
+                  }
+                  defaultValue={formik.initialValues.captain ?? null}
+                  value={formik.values.captain ?? null}
+                  error={!!formik.errors.captain}
+                  helperText={formik.errors.captain}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.captainInReserve ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Comandante ${value ? 'em' : 'fora de'} Reserva`);
+                        formik.setFieldValue('captainInReserve', value);
+                      }}
+                      name="captainInReserve"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
+              <Stack direction="row" spacing={2}>
+                <UserSelect
+                  fullWidth
+                  disabled={formik.values.airplane === null}
+                  label="Co-Piloto"
+                  name="firstOfficer"
+                  roles={['Comandante', 'Co-Piloto']}
+                  onBlur={formik.handleBlur}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('firstOfficer', value);
+                  }}
+                  filter={(o) =>
+                    airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
+                  }
+                  defaultValue={formik.initialValues.firstOfficer ?? null}
+                  value={formik.values.firstOfficer ?? null}
+                  error={!!formik.errors.firstOfficer}
+                  helperText={formik.errors.firstOfficer}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.firstOfficerInReserve ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Co-Piloto ${value ? 'em' : 'fora de'} Reserva`);
+                        formik.setFieldValue('firstOfficerInReserve', value);
+                      }}
+                      name="firstOfficerInReserve"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
               <UserSelect
                 selectOnFocus
                 clearOnBlur
@@ -697,7 +705,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
               />
-
+              <Divider textAlign="left">Solicitantes</Divider>
               <FieldArray name="requesters">
                 {({
                   remove,
