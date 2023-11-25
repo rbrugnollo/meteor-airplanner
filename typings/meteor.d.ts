@@ -17,6 +17,7 @@ declare module 'meteor/meteor' {
       roles: RoleName[];
       base?: ValueLabelType | null;
       disabled?: boolean;
+      notificationCount?: number;
       notifications?: {
         [key in NotificationId]: {
           [key in NotificationType]: boolean;
