@@ -1,6 +1,7 @@
 import React from 'react';
 import { FiMenu } from 'react-icons/fi';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
+import Notifications from '../Notifications';
 
 const TOP_NAV_HEIGHT = 54;
 
@@ -42,6 +43,7 @@ export const TopNav = ({ onNavOpen }: TopNavProps) => {
               Airplanner
             </Typography>
           </Stack>
+          <Notifications />
         </Stack>
       </Box>
     </>

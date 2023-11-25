@@ -5,6 +5,7 @@ import links from './links';
 import SideNavItem from './SideNavItem';
 import UserProfile from './UserProfile';
 import { hasPermission } from '/imports/api/users/methods/hasPermission';
+import Notifications from '../Notifications';
 
 interface SideNavProps {
   readonly onClose: () => void;
@@ -25,7 +26,10 @@ const SideNav = (props: SideNavProps) => {
       }}
     >
       <Box sx={{ p: 3 }}>
-        <img style={{ maxWidth: 128, height: '100%' }} src="/logo.png" />
+        <Stack alignItems="center" direction="row" justifyContent="space-between" spacing={2}>
+          <img style={{ maxWidth: 128, height: '100%' }} src="/logo.png" />
+          <Notifications />
+        </Stack>
       </Box>
       <Divider sx={{ borderColor: 'neutral.700' }} />
       <Box
