@@ -23,6 +23,7 @@ import '../../api/events/methods';
 import '../../api/events/publications';
 
 // Notifications
+import '../../api/notifications/methods';
 import '../../api/notifications/publications';
 
 // Messages

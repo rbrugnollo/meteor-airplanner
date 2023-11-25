@@ -4,15 +4,14 @@ import {
   type MRT_ColumnDef as MrtColumnDef,
   MRT_Virtualizer as MrtVirtualizer,
 } from 'material-react-table';
-import { Box, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
-import { useSnackbar } from 'notistack';
+import { Box, Container, Stack, Typography, Divider, useMediaQuery, Theme } from '@mui/material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/notifications/publications/list';
 import { Notification, NotificationsCollection } from '/imports/api/notifications/collection';
 import { Mongo } from 'meteor/mongo';
+import SetAllAsReadButton from './SetAllAsReadButton';
 
 const NotificationList = () => {
-  const { enqueueSnackbar } = useSnackbar();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -29,6 +28,20 @@ const NotificationList = () => {
       {
         accessorKey: '_id',
         header: '',
+        Cell: (cell) => {
+          const { title, message } = cell?.row?.original;
+          return (
+            <Box>
+              <Typography variant="h6" component="h6">
+                {title}
+              </Typography>
+              <Divider variant="inset" />
+              <Typography variant="body1" component="p">
+                {message}
+              </Typography>
+            </Box>
+          );
+        },
       },
     ],
     [],
@@ -68,6 +81,7 @@ const NotificationList = () => {
               spacing={4}
             >
               <Typography variant="h5">Notificações</Typography>
+              <SetAllAsReadButton />
             </Stack>
             <MaterialReactTable<Notification>
               enablePagination={false}
@@ -77,6 +91,7 @@ const NotificationList = () => {
               enableSorting={false}
               enableFilters={false}
               enableHiding={false}
+              enableTableHead={false}
               enableColumnActions={false}
               enableRowVirtualization
               rowVirtualizerProps={{ overscan: 4 }}
