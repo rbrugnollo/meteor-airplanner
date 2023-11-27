@@ -4,21 +4,9 @@ import {
   type MRT_ColumnDef as MrtColumnDef,
   MRT_Virtualizer as MrtVirtualizer,
 } from 'material-react-table';
-import {
-  Box,
-  Button,
-  Container,
-  Stack,
-  Typography,
-  useMediaQuery,
-  Theme,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-} from '@mui/material';
+import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
 import dayjs from 'dayjs';
-import { useSnackbar } from 'notistack';
-import { Add, Edit, Delete } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/flights/publications/list';
 import { Flight, FlightsCollection } from '/imports/api/flights/collection';
@@ -30,11 +18,9 @@ import FlightRouteModal from './FlightRouteModal';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 import useHasPermission from '../../shared/hooks/useHasPermission';
 import ReviewFlightForm from './ReviewFlightForm';
-import { cancel } from '/imports/api/flights/methods/cancel';
-import { Meteor } from 'meteor/meteor';
+import FlightDetails from './FlightDetails';
 
 const FlightList = () => {
-  const { enqueueSnackbar } = useSnackbar();
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
     open: false,
     flightId: undefined,
@@ -53,7 +39,7 @@ const FlightList = () => {
     },
   );
   const [_canUpdateLoading, canUpdate] = useHasPermission('flights.update');
-  const [_canRemoveLoading, canRemove] = useHasPermission('flights.remove');
+  const [_canRemoveLoading, canCancel] = useHasPermission('flights.cancel');
   const [_canReviewLoading, canReview] = useHasPermission('flights.review');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
@@ -174,7 +160,7 @@ const FlightList = () => {
               justifyContent="space-between"
               spacing={4}
             >
-              <Typography variant="h5">Flights</Typography>
+              <Typography variant="h5">Vôos Agendados</Typography>
               <div>
                 <Stack direction="row" spacing={2}>
                   <AuthorizedComponent permission="flights.insert">
@@ -183,7 +169,7 @@ const FlightList = () => {
                       onClick={() => setFormModalProps({ open: true, flightId: undefined })}
                       variant="contained"
                     >
-                      Add
+                      Adicionar
                     </Button>
                   </AuthorizedComponent>
                   <FlightListFilter onFilter={handleFilter} />
@@ -215,89 +201,15 @@ const FlightList = () => {
                 onScroll: (event: React.UIEvent<HTMLDivElement>) =>
                   fetchMoreOnBottomReached(event.target as HTMLDivElement),
               }}
-              enableRowActions
-              renderRowActionMenuItems={({ row, closeMenu }) => [
-                <MenuItem
-                  key={4}
-                  disabled={!canUpdate}
-                  onClick={() => {
-                    closeMenu();
-                    setFormModalProps({ open: true, flightId: row.original._id });
-                  }}
-                >
-                  <ListItemIcon>
-                    <Edit color="primary" fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Edit</ListItemText>
-                </MenuItem>,
-                <MenuItem
-                  key={3}
-                  disabled={!canReview}
-                  onClick={() => {
-                    closeMenu();
-                    setReviewFormModalProps({ open: true, flightId: row.original._id });
-                  }}
-                >
-                  <ListItemIcon>
-                    <Edit color="primary" fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Review</ListItemText>
-                </MenuItem>,
-                <MenuItem
-                  key={2}
-                  disabled={!canRemove}
-                  onClick={() => {
-                    closeMenu();
-                    setRouteModalProps({ open: true, flightGroupId: row.original.groupId });
-                  }}
-                >
-                  <ListItemIcon>
-                    <Edit color="primary" fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>View Map</ListItemText>
-                </MenuItem>,
-                <MenuItem
-                  key={2}
-                  onClick={async () => {
-                    try {
-                      await cancel({ flightId: row.original._id, cancelled: true });
-                      enqueueSnackbar('Vôo cancelado com sucesso.', {
-                        variant: 'success',
-                        action: () => (
-                          <Button
-                            color="inherit"
-                            size="small"
-                            onClick={async () => {
-                              try {
-                                await cancel({ flightId: row.original._id, cancelled: false });
-                                enqueueSnackbar('Vôo não cancelado.');
-                              } catch (e: unknown) {
-                                console.log(e);
-                                if (e instanceof Meteor.Error) {
-                                  enqueueSnackbar(e.message, { variant: 'error' });
-                                }
-                              }
-                            }}
-                          >
-                            Desfazer
-                          </Button>
-                        ),
-                      });
-                    } catch (e: unknown) {
-                      console.log(e);
-                      if (e instanceof Meteor.Error) {
-                        enqueueSnackbar(e.message, { variant: 'error' });
-                      }
-                    }
-                    closeMenu();
-                  }}
-                >
-                  <ListItemIcon>
-                    <Delete color="error" fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Cancelar Vôo</ListItemText>
-                </MenuItem>,
-              ]}
+              renderDetailPanel={({ row }) => (
+                <FlightDetails
+                  canUpdate={canUpdate}
+                  canCancel={canCancel}
+                  onViewRoute={(flightGroupId) => setRouteModalProps({ open: true, flightGroupId })}
+                  onEdit={(flightId) => setFormModalProps({ open: true, flightId })}
+                  flight={row.original}
+                />
+              )}
             />
           </Stack>
         </Container>

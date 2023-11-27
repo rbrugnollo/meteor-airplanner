@@ -49,7 +49,7 @@ export const PermissionTypes = [
   'flights.view',
   'flights.insert',
   'flights.update',
-  'flights.remove',
+  'flights.cancel',
   'flights.review',
   'schedule.list',
   'schedule.view',

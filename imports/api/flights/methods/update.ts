@@ -8,12 +8,14 @@ import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
 import { flightUpdated } from '../../notifications/methods/flightUpdated';
+import { Meteor } from 'meteor/meteor';
 
 export const update = createMethod({
   name: 'flights.update',
   schema: z.custom<Omit<Flight, IdBaseCollectionTypes>>(),
   async run(flight) {
     const { _id, ...data } = flight;
+    const user = await Meteor.users.findOneAsync(this.userId!);
     const flightBeforeUpdate = (await FlightsCollection.findOneAsync(_id))!;
     let setFlight: Omit<Flight, BaseCollectionTypes> = { ...data };
     let sendAuthorizationMessage = false;
@@ -39,6 +41,7 @@ export const update = createMethod({
           ...setFlight,
           updatedAt: new Date(),
           updatedBy: this.userId!,
+          updatedByName: user?.profile?.name ?? this.userId!,
         },
       },
     );

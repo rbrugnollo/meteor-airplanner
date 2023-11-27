@@ -34,6 +34,7 @@ export interface Flight extends BaseCollection {
   readonly firstOfficerInReserve: boolean;
   readonly passengers?: ValueLabelType[] | null;
   readonly requesters?: FlightRequester[] | null;
+  readonly authorizer?: ValueLabelType | null;
   readonly notes?: string | null;
   // review
   readonly departureDateTime?: Date;
@@ -73,6 +74,10 @@ export interface Flight extends BaseCollection {
     readonly other?: number;
     readonly grandTotal: number;
   };
+
+  // not normalized
+  readonly createdByName: string;
+  readonly updatedByName: string;
 }
 
 export const FlightsCollection = new Mongo.Collection<Flight>(COLLECTION_NAME);
