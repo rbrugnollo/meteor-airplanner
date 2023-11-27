@@ -16,6 +16,7 @@ import {
   ListItemText,
   MenuItem,
 } from '@mui/material';
+import dayjs from 'dayjs';
 import { useSnackbar } from 'notistack';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
@@ -76,7 +77,10 @@ const FlightList = () => {
       {
         accessorKey: 'scheduledDepartureDateTime',
         header: 'Data',
-        accessorFn: (row) => row.scheduledDepartureDateTime.toDateString(),
+        accessorFn: (row) =>
+          row.scheduledDepartureDateTime
+            ? dayjs(row.scheduledDepartureDateTime).format('L LT')
+            : '',
       },
       {
         accessorKey: 'airplane.label',

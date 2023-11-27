@@ -13,11 +13,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
 import timezonePlugin from 'dayjs/plugin/timezone';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/pt-br';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 dayjs.extend(utcPlugin);
 dayjs.extend(timezonePlugin);
+dayjs.extend(localizedFormat);
 
 const theme = createTheme();
 
