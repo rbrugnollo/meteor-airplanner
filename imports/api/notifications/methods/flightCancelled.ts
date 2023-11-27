@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
 
-export const flightUpdated = createMethod({
-  name: 'notifications.flightUpdated',
+export const flightCancelled = createMethod({
+  name: 'notifications.flightCancelled',
   schema: z.object({
     flightId: z.string(),
   }),
@@ -14,7 +14,7 @@ export const flightUpdated = createMethod({
 
     const users = await Meteor.users.find().fetchAsync();
     const userIds = users
-      .filter((f) => f.profile?.notifications?.['flight-updated']?.push)
+      .filter((f) => f.profile?.notifications?.['flight-cancelled']?.push)
       .map((m) => m._id)
       .filter((m) => m);
 
@@ -23,7 +23,7 @@ export const flightUpdated = createMethod({
         type: 'flight-updated',
         flightId,
         title: `${flight?.airplane
-          ?.label} - Vôo alterado ${flight?.scheduledDepartureDateTime?.toLocaleDateString()}`,
+          ?.label} - Vôo cancelado ${flight?.scheduledDepartureDateTime?.toLocaleDateString()}`,
         message: `${flight?.origin?.label} - ${flight?.destination?.label}}`,
         read: false,
         archived: false,

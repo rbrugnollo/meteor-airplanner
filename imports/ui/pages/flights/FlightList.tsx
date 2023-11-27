@@ -16,6 +16,7 @@ import {
   ListItemText,
   MenuItem,
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/flights/publications/list';
@@ -28,8 +29,11 @@ import FlightRouteModal from './FlightRouteModal';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
 import useHasPermission from '../../shared/hooks/useHasPermission';
 import ReviewFlightForm from './ReviewFlightForm';
+import { cancel } from '/imports/api/flights/methods/cancel';
+import { Meteor } from 'meteor/meteor';
 
 const FlightList = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
     open: false,
     flightId: undefined,
@@ -70,21 +74,21 @@ const FlightList = () => {
   const columns = useMemo<MrtColumnDef<Flight>[]>(
     () => [
       {
-        accessorKey: 'groupId',
-        header: 'Group Id',
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
+        accessorKey: 'scheduledDepartureDateTime',
+        header: 'Data',
+        accessorFn: (row) => row.scheduledDepartureDateTime.toDateString(),
       },
       {
         accessorKey: 'airplane.label',
-        header: 'Airplane',
+        header: 'Aeronave',
       },
       {
-        accessorKey: 'scheduledDepartureDateTime',
-        header: 'Scheduled Date',
-        accessorFn: (row) => row.scheduledDepartureDateTime.toDateString(),
+        accessorKey: 'origin.label',
+        header: 'Origem',
+      },
+      {
+        accessorKey: 'destination.label',
+        header: 'Destino',
       },
     ],
     [],
@@ -250,15 +254,44 @@ const FlightList = () => {
                 </MenuItem>,
                 <MenuItem
                   key={2}
-                  onClick={() => {
-                    console.info('Remove', row);
+                  onClick={async () => {
+                    try {
+                      await cancel({ flightId: row.original._id, cancelled: true });
+                      enqueueSnackbar('Vôo cancelado com sucesso.', {
+                        variant: 'success',
+                        action: () => (
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={async () => {
+                              try {
+                                await cancel({ flightId: row.original._id, cancelled: false });
+                                enqueueSnackbar('Vôo não cancelado.');
+                              } catch (e: unknown) {
+                                console.log(e);
+                                if (e instanceof Meteor.Error) {
+                                  enqueueSnackbar(e.message, { variant: 'error' });
+                                }
+                              }
+                            }}
+                          >
+                            Desfazer
+                          </Button>
+                        ),
+                      });
+                    } catch (e: unknown) {
+                      console.log(e);
+                      if (e instanceof Meteor.Error) {
+                        enqueueSnackbar(e.message, { variant: 'error' });
+                      }
+                    }
                     closeMenu();
                   }}
                 >
                   <ListItemIcon>
                     <Delete color="error" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText>Delete</ListItemText>
+                  <ListItemText>Cancelar Vôo</ListItemText>
                 </MenuItem>,
               ]}
             />

@@ -74,7 +74,12 @@ export const PermissionsByRole: { readonly role: RoleName; readonly permissions:
   ];
 
 // Notifications
-export const NotificationIds = ['flight-created', 'flight-updated'] as const;
+export const NotificationIds = [
+  'flight-created',
+  'flight-updated',
+  'flight-cancelled',
+  'flight-authorize',
+] as const;
 export type NotificationId = (typeof NotificationIds)[number];
 
 export const NotificationTypes = ['email', 'push'] as const;
