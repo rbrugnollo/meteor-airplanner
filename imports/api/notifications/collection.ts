@@ -4,6 +4,8 @@ import { BaseCollection } from '../common/BaseCollection';
 export const COLLECTION_NAME = 'notifications';
 
 export interface Notification extends BaseCollection {
+  readonly type: 'flight-created' | 'flight-updated' | 'flight-canceled' | 'flight-authorize';
+  readonly flightId?: string;
   readonly title: string;
   readonly message: string;
   readonly userId: string;

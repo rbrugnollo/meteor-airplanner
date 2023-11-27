@@ -6,6 +6,8 @@ import { publishGroup } from './publishGroup';
 import { upsertInReserveEvents } from './upsertInReserveEvents';
 import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
+import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
+import { flightUpdated } from '../../notifications/methods/flightUpdated';
 
 export const update = createMethod({
   name: 'flights.update',
@@ -50,10 +52,11 @@ export const update = createMethod({
     await upsertMaintenanceEvent({ flightId: _id, checkPreviousFlight: true });
     if (!flightBeforeUpdate.published && flight.published) await publishGroup(flight.groupId);
 
+    // Send Notifications
     if (sendAuthorizationMessage) {
-      // TODO send message
+      await flightAuthorize({ flightId: _id });
     }
-    // TODO send change message
+    await flightUpdated({ flightId: _id });
 
     return result;
   },
