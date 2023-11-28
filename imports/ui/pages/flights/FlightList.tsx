@@ -37,7 +37,7 @@ const FlightList = () => {
   const [_canReviewLoading] = useHasPermission('flights.review');
   const [andFilters, setAndFilters] = useState<
     NpmModuleMongodb.Filter<NpmModuleMongodb.WithId<Flight>>[]
-  >([]);
+  >([{ scheduledDepartureDateTime: { $gte: new Date() } }]);
   const [options] = useState<Mongo.Options<Flight>>({
     sort: { scheduledDepartureDateTime: 1 },
   });
@@ -76,6 +76,8 @@ const FlightList = () => {
           },
         },
       ];
+    } else {
+      selectors = [...selectors, { scheduledDepartureDateTime: { $gte: new Date() } }];
     }
 
     if (selectors.length === 0) {
