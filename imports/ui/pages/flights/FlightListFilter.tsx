@@ -89,7 +89,7 @@ const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
               spacing={4}
             >
               <Typography variant="h6" sx={{ pl: 1 }}>
-                Filter Flights
+                Filtrar Vôos
               </Typography>
               <IconButton aria-label="close" size="large" onClick={() => setOpen(false)}>
                 <Close fontSize="inherit" />
@@ -99,7 +99,7 @@ const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
               <Stack spacing={3}>
                 <TextField
                   fullWidth
-                  label="Search"
+                  label="Pesquisar"
                   name="search"
                   InputProps={{
                     startAdornment: (
@@ -114,7 +114,7 @@ const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
                 />
                 <AirplaneSelect
                   fullWidth
-                  label="Airplane"
+                  label="Aeronave"
                   name="airplane"
                   onBlur={formik.handleBlur}
                   value={formik.values.airplane}
@@ -123,7 +123,7 @@ const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
                   }}
                 />
                 <DatePicker
-                  label="Date"
+                  label="Data"
                   value={formik.values.date}
                   onChange={(value) => {
                     formik.setFieldValue('date', value);
@@ -135,13 +135,13 @@ const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
           <Box>
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button onClick={() => setOpen(false)} variant="text">
-                Cancel
+                Cancelar
               </Button>
               <Button onClick={handleReset} variant="outlined">
-                Reset
+                Resetar
               </Button>
               <Button form="flight-list-filter-form" type="submit" variant="contained">
-                Filter
+                Filtrar
               </Button>
             </Stack>
           </Box>

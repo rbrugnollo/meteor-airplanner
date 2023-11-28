@@ -72,7 +72,7 @@ const FlightList = () => {
         {
           scheduledDepartureDateTime: {
             $gte: values.date.toDate(),
-            $lt: new Date(values.date.toDate().getTime() + 24 * 60 * 60 * 1000),
+            $lt: values.date.add(1, 'month').toDate(),
           },
         },
       ];
