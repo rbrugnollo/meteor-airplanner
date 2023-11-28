@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
 
@@ -34,5 +35,8 @@ export const flightCreated = createMethod({
         userId,
       });
     });
+
+    // Update Users collection
+    await incrementNotificationCount({ userIds });
   },
 });

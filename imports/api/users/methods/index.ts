@@ -8,3 +8,4 @@ import './hasPermission';
 import './disable';
 import './enable';
 import './updateNotification';
+import './incrementNotificationCount';

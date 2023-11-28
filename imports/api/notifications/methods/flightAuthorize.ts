@@ -1,6 +1,6 @@
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
-import { AirplanesCollection } from '../../airplanes/collection';
+import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
 
@@ -11,10 +11,8 @@ export const flightAuthorize = createMethod({
   }),
   async run({ flightId }) {
     const flight = await FlightsCollection.findOneAsync(flightId);
-    const airplane = await AirplanesCollection.findOneAsync(flight?.airplane?.value ?? '');
-    const managerUserId = airplane?.manager?.value ?? '';
 
-    if (!flight || !airplane || !managerUserId) return;
+    if (!flight?.authorizer?.value) return;
 
     await NotificationsCollection.insertAsync({
       type: 'flight-authorize',
@@ -28,7 +26,10 @@ export const flightAuthorize = createMethod({
       updatedAt: new Date(),
       createdBy: this.userId!,
       updatedBy: this.userId!,
-      userId: managerUserId,
+      userId: flight.authorizer.value,
     });
+
+    // Update Users collection
+    await incrementNotificationCount({ userIds: [flight.authorizer.value] });
   },
 });
