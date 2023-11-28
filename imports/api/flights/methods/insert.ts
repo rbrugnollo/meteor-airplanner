@@ -8,20 +8,16 @@ import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightCreated } from '../../notifications/methods/flightCreated';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
-import { Meteor } from 'meteor/meteor';
 
 export const insert = createMethod({
   name: 'flights.insert',
   schema: z.custom<Omit<Flight, BaseCollectionTypes>>(),
   async run(flight) {
-    const user = await Meteor.users.findOneAsync(this.userId!);
     const result = await FlightsCollection.insertAsync({
       ...flight,
       status: 'Draft',
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdByName: user?.profile?.name ?? this.userId!,
-      updatedByName: user?.profile?.name ?? this.userId!,
       createdBy: this.userId!,
       updatedBy: this.userId!,
     });

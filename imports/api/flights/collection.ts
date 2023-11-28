@@ -74,10 +74,6 @@ export interface Flight extends BaseCollection {
     readonly other?: number;
     readonly grandTotal: number;
   };
-
-  // not normalized
-  readonly createdByName: string;
-  readonly updatedByName: string;
 }
 
 export const FlightsCollection = new Mongo.Collection<Flight>(COLLECTION_NAME);

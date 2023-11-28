@@ -1,11 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react';
-import {
-  MaterialReactTable,
-  type MRT_ColumnDef as MrtColumnDef,
-  MRT_Virtualizer as MrtVirtualizer,
-} from 'material-react-table';
-import { Box, Button, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
-import dayjs from 'dayjs';
+import React, { useState } from 'react';
+import { Box, Button, Container, Stack, Typography } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/flights/publications/list';
@@ -40,60 +34,20 @@ const FlightList = () => {
   );
   const [_canUpdateLoading, canUpdate] = useHasPermission('flights.update');
   const [_canRemoveLoading, canCancel] = useHasPermission('flights.cancel');
-  const [_canReviewLoading, canReview] = useHasPermission('flights.review');
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const rowVirtualizerInstanceRef =
-    useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
+  const [_canReviewLoading] = useHasPermission('flights.review');
   const [andFilters, setAndFilters] = useState<
     NpmModuleMongodb.Filter<NpmModuleMongodb.WithId<Flight>>[]
   >([]);
-  const [options, setOptions] = useState<Mongo.Options<Flight>>({
-    sort: { scheduledDepartureDateTime: -1 },
-    limit: 50,
+  const [options] = useState<Mongo.Options<Flight>>({
+    sort: { scheduledDepartureDateTime: 1 },
   });
-  const isLoading = useSubscribe(() => {
+  useSubscribe(() => {
     return list({ andFilters, options });
   });
   const flights = useFind(
     () => FlightsCollection.find(andFilters.length ? { $and: andFilters } : {}, options),
     [andFilters, options],
   );
-  const columns = useMemo<MrtColumnDef<Flight>[]>(
-    () => [
-      {
-        accessorKey: 'scheduledDepartureDateTime',
-        header: 'Data',
-        accessorFn: (row) =>
-          row.scheduledDepartureDateTime
-            ? dayjs(row.scheduledDepartureDateTime).format('L LT')
-            : '',
-      },
-      {
-        accessorKey: 'airplane.label',
-        header: 'Aeronave',
-      },
-      {
-        accessorKey: 'origin.label',
-        header: 'Origem',
-      },
-      {
-        accessorKey: 'destination.label',
-        header: 'Destino',
-      },
-    ],
-    [],
-  );
-  const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
-
-  const fetchMoreOnBottomReached = (containerRefElement?: HTMLDivElement | null) => {
-    if (containerRefElement) {
-      const currentLimit = options?.limit ?? 0;
-      const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
-      if (scrollHeight - scrollTop - clientHeight < 400 && !isLoading() && currentLimit < 500) {
-        setOptions({ ...options, limit: currentLimit + 50 });
-      }
-    }
-  };
 
   const handleFilter = (values: FlightListFilterValues) => {
     let selectors: NpmModuleMongodb.Filter<NpmModuleMongodb.WithId<Flight>>[] = [];
@@ -128,13 +82,6 @@ const FlightList = () => {
       setAndFilters([]);
     } else {
       setAndFilters(selectors);
-    }
-
-    // Scroll to the top of the table when the filter changes
-    try {
-      rowVirtualizerInstanceRef.current?.scrollToIndex?.(0);
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -176,41 +123,18 @@ const FlightList = () => {
                 </Stack>
               </div>
             </Stack>
-            <MaterialReactTable<Flight>
-              enablePagination={false}
-              enableTopToolbar={false}
-              enableBottomToolbar={false}
-              enableDensityToggle={false}
-              enableSorting={false}
-              enableFilters={false}
-              enableHiding={false}
-              enableColumnActions={false}
-              enableRowVirtualization
-              rowVirtualizerProps={{ overscan: 4 }}
-              rowVirtualizerInstanceRef={rowVirtualizerInstanceRef}
-              state={{
-                isLoading: isLoading(),
-                columnVisibility: { icao: lgUp, country: lgUp, timezone: lgUp },
-              }}
-              muiTablePaperProps={lgUp ? {} : { elevation: 0 }}
-              columns={columns}
-              data={flights}
-              muiTableContainerProps={{
-                ref: tableContainerRef,
-                sx: { maxHeight: lgUp ? 'calc(100vh - 90px)' : 'calc(100vh - 130px)' },
-                onScroll: (event: React.UIEvent<HTMLDivElement>) =>
-                  fetchMoreOnBottomReached(event.target as HTMLDivElement),
-              }}
-              renderDetailPanel={({ row }) => (
+            <div>
+              {flights.map((flight) => (
                 <FlightDetails
+                  key={flight._id}
                   canUpdate={canUpdate}
                   canCancel={canCancel}
                   onViewRoute={(flightGroupId) => setRouteModalProps({ open: true, flightGroupId })}
                   onEdit={(flightId) => setFormModalProps({ open: true, flightId })}
-                  flight={row.original}
+                  flight={flight}
                 />
-              )}
-            />
+              ))}
+            </div>
           </Stack>
         </Container>
         <FlightForm

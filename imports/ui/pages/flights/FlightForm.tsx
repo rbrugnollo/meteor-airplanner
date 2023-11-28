@@ -84,6 +84,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       published: false,
       dateConfirmed: false,
       timeConfirmed: false,
+      authorizer: null,
       authorized: false,
       cancelled: false,
       captain: null,
@@ -273,6 +274,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         .then((airplane) => {
           if (airplane) {
             setAirplane(airplane);
+            formik.setFieldValue('authorizer', airplane.manager);
             formik.setFieldValue('captain', airplane.captain);
             formik.setFieldValue('firstOfficer', airplane.firstOfficer);
           }
