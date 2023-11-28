@@ -110,6 +110,15 @@ export const updateFlightsCollection = createMethod({
       { multi: true },
     );
     await FlightsCollection.updateAsync(
+      { 'authorizer.value': user.value, scheduledDepartureDateTime: { $gte: new Date() } },
+      {
+        $set: {
+          'authorizer.value': user.label,
+        },
+      },
+      { multi: true },
+    );
+    await FlightsCollection.updateAsync(
       { 'passengers.value': user.value, scheduledDepartureDateTime: { $gte: new Date() } },
       {
         $set: {
