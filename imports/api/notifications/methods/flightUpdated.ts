@@ -17,7 +17,7 @@ export const flightUpdated = createMethod({
     const userIds = users
       .filter((f) => f.profile?.notifications?.['flight-updated']?.push)
       .map((m) => m._id)
-      .filter((m) => m);
+      .filter((m) => m && m !== this.userId);
 
     userIds.forEach(async (userId) => {
       await NotificationsCollection.insertAsync({

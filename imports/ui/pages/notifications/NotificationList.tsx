@@ -32,11 +32,11 @@ const NotificationList = () => {
           const { title, message } = cell?.row?.original;
           return (
             <Box>
-              <Typography variant="h6" component="h6">
+              <Typography variant="subtitle2" component="h6">
                 {title}
               </Typography>
               <Divider variant="inset" />
-              <Typography variant="body1" component="p">
+              <Typography variant="body2" component="p">
                 {message}
               </Typography>
             </Box>

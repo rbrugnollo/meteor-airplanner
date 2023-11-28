@@ -12,7 +12,7 @@ export const flightAuthorize = createMethod({
   async run({ flightId }) {
     const flight = await FlightsCollection.findOneAsync(flightId);
 
-    if (!flight?.authorizer?.value) return;
+    if (!flight?.authorizer?.value || flight.authorizer.value === this.userId) return;
 
     await NotificationsCollection.insertAsync({
       type: 'flight-authorize',
