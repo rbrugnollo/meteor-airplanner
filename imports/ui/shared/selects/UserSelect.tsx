@@ -53,6 +53,7 @@ interface UserSelectProps<
   readonly name: string;
   readonly helperText?: React.ReactNode;
   readonly error?: boolean;
+  readonly required?: boolean;
   readonly filter?: (option: ValueLabelType) => boolean;
 }
 
@@ -67,6 +68,7 @@ const UserSelect = <
   error,
   helperText,
   filter,
+  required,
   ...rest
 }: UserSelectProps<Multiple, DisableClearable, FreeSolo>) => {
   const [options, setOptions] = useState<ValueLabelType[]>([]);
@@ -214,6 +216,7 @@ const UserSelect = <
         renderInput={(params) => (
           <TextField
             {...params}
+            required={required}
             label={label}
             name={name}
             error={error}

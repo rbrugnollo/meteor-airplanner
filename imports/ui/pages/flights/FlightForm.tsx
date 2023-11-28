@@ -440,6 +440,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
           <form id="flight-form" noValidate onSubmit={formik.handleSubmit}>
             <Stack sx={{ mt: 1 }} spacing={3}>
               <AirplaneSelect
+                required
                 fullWidth
                 label="Aeronave"
                 name="airplane"
@@ -452,6 +453,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 helperText={formik.touched.airplane && formik.errors.airplane}
               />
               <AirportSelect
+                required
                 fullWidth
                 label="Origem"
                 name="origin"
@@ -464,6 +466,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 helperText={formik.touched.origin && formik.errors.origin}
               />
               <AirportSelect
+                required
                 fullWidth
                 label="Destino"
                 name="destination"
@@ -537,6 +540,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 />
               </Stack>
               <TextField
+                required
                 InputProps={{
                   readOnly: true,
                   endAdornment: calculatingDuration ? (
@@ -551,6 +555,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 value={formik.values.estimatedDuration}
               />
               <TextField
+                required
                 fullWidth
                 label="Handling"
                 name="estimatedHandlingDuration"
@@ -606,6 +611,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               </Stack>
               <Stack direction="row" spacing={2}>
                 <UserSelect
+                  required
                   fullWidth
                   disabled={formik.values.airplane === null}
                   label="Comandante"
@@ -639,6 +645,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               </Stack>
               <Stack direction="row" spacing={2}>
                 <UserSelect
+                  required
                   fullWidth
                   disabled={formik.values.airplane === null}
                   label="Co-Piloto"

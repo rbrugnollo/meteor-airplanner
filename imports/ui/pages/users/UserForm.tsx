@@ -134,6 +134,7 @@ const UserForm = ({ userId, newUser, open, onClose, onSuccess }: UserFormProps) 
         <form id="user-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
             <TextField
+              required
               error={!!(formik.touched.name && formik.errors.name)}
               fullWidth
               helperText={formik.touched.name && formik.errors.name}
@@ -144,6 +145,7 @@ const UserForm = ({ userId, newUser, open, onClose, onSuccess }: UserFormProps) 
               value={formik.values.name}
             />
             <TextField
+              required
               error={!!(formik.touched.email && formik.errors.email)}
               fullWidth
               helperText={formik.touched.email && formik.errors.email}

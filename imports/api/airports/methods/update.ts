@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import { find } from 'geo-tz';
 import { AirplanesCollection } from '../../airplanes/collection';
 import { IdBaseCollectionTypes } from '../../common/BaseCollection';
 import { ValueLabelTypeSchema } from '../../common/ValueLabelType';
@@ -18,6 +19,9 @@ export const update = createMethod({
       {
         $set: {
           ...data,
+          timezoneName: airport.timezoneName
+            ? airport.timezoneName
+            : find(parseFloat(airport.lat), parseFloat(airport.lon))[0],
           updatedAt: new Date(),
           updatedBy: this.userId!,
         },

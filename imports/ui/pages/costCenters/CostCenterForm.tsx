@@ -98,6 +98,7 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
         <form id="costCenter-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
             <TextField
+              required
               error={!!(formik.touched.name && formik.errors.name)}
               fullWidth
               helperText={formik.touched.name && formik.errors.name}
