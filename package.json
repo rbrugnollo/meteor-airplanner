@@ -2,7 +2,7 @@
   "name": "meteor-airplanner",
   "private": true,
   "scripts": {
-    "start": "meteor --settings settings.json --exclude-archs web.browser.legacy",
+    "start": "/home/rbrugnollo/.meteor/meteor --settings settings.json --exclude-archs web.browser.legacy",
     "debug": "/home/rbrugnollo/.meteor/meteor --settings settings.json --exclude-archs web.browser.legacy --inspect",
     "test": "meteor test --once --driver-package meteortesting:mocha",
     "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
