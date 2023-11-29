@@ -50,8 +50,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
       icao: Yup.string().required('ICAO é obrigatório'),
       lat: Yup.string().required('Latitute é obrigatório'),
       lon: Yup.string().required('Longitude é obrigatório'),
-      timezone: Yup.string().required('Timezone é obrigatório'),
-      timezoneName: Yup.string().required('Timezone Nome é obrigatório'),
+      timezone: Yup.string().required('Fuso Horário é obrigatório'),
     }),
     onSubmit: async (values) => {
       if (airportId) {
@@ -114,6 +113,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
         <form id="airport-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
             <TextField
+              required
               error={!!(formik.touched.name && formik.errors.name)}
               helperText={formik.touched.name && formik.errors.name}
               fullWidth
@@ -124,6 +124,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.name}
             />
             <TextField
+              required
               error={!!(formik.touched.city && formik.errors.city)}
               fullWidth
               helperText={formik.touched.city && formik.errors.city}
@@ -134,6 +135,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.city}
             />
             <TextField
+              required
               error={!!(formik.touched.country && formik.errors.country)}
               fullWidth
               helperText={formik.touched.country && formik.errors.country}
@@ -144,6 +146,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.country}
             />
             <TextField
+              required
               error={!!(formik.touched.iata && formik.errors.iata)}
               fullWidth
               helperText={formik.touched.iata && formik.errors.iata}
@@ -154,6 +157,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.iata}
             />
             <TextField
+              required
               error={!!(formik.touched.icao && formik.errors.icao)}
               fullWidth
               helperText={formik.touched.icao && formik.errors.icao}
@@ -164,6 +168,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.icao}
             />
             <TextField
+              required
               error={!!(formik.touched.lat && formik.errors.lat)}
               fullWidth
               helperText={formik.touched.lat && formik.errors.lat}
@@ -174,6 +179,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.lat}
             />
             <TextField
+              required
               error={!!(formik.touched.lon && formik.errors.lon)}
               fullWidth
               helperText={formik.touched.lon && formik.errors.lon}
@@ -184,6 +190,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.lon}
             />
             <TextField
+              required
               error={!!(formik.touched.timezone && formik.errors.timezone)}
               fullWidth
               helperText={formik.touched.timezone && formik.errors.timezone}
@@ -194,9 +201,7 @@ const AirportForm = ({ airportId, open, onClose }: AirportFormProps) => {
               value={formik.values.timezone}
             />
             <TextField
-              error={!!(formik.touched.timezoneName && formik.errors.timezoneName)}
               fullWidth
-              helperText={formik.touched.timezoneName && formik.errors.timezoneName}
               label="Descrição Fuso Horário"
               name="timezoneName"
               onBlur={formik.handleBlur}

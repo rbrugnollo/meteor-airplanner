@@ -6,7 +6,8 @@ import { publishGroup } from './publishGroup';
 import { upsertInReserveEvents } from './upsertInReserveEvents';
 import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
-import { flightCreated } from '../../messages/methods/flightCreated';
+import { flightCreated } from '../../notifications/methods/flightCreated';
+import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
 
 export const insert = createMethod({
   name: 'flights.insert',
@@ -30,8 +31,9 @@ export const insert = createMethod({
     await upsertMaintenanceEvent({ flightId: result, checkPreviousFlight: true });
     if (flight.published) await publishGroup(flight.groupId);
 
-    // Send Messages
-    flightCreated({ _id: result });
+    // Send Notifications
+    await flightCreated({ flightId: result });
+    await flightAuthorize({ flightId: result });
 
     return result;
   },

@@ -181,7 +181,7 @@ const AirplaneList = () => {
                               }
                             }}
                           >
-                            Defazer
+                            Desfazer
                           </Button>
                         ),
                       });

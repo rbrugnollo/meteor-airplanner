@@ -11,6 +11,7 @@ interface AirplaneSelectProps<Multiple extends boolean | undefined = false>
   readonly label?: React.ReactNode;
   readonly name: string;
   readonly helperText?: React.ReactNode;
+  readonly required?: boolean;
   readonly error?: boolean;
 }
 
@@ -19,6 +20,7 @@ const AirplaneSelect = <Multiple extends boolean | undefined = false>({
   label,
   error,
   helperText,
+  required,
   ...rest
 }: AirplaneSelectProps<Multiple>) => {
   const [options, setOptions] = useState<ValueLabelType[]>([]);
@@ -49,6 +51,7 @@ const AirplaneSelect = <Multiple extends boolean | undefined = false>({
       renderInput={(params) => (
         <TextField
           {...params}
+          required={required}
           label={label}
           name={name}
           error={error}

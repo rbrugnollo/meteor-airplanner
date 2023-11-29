@@ -16,6 +16,8 @@ import {
   FormControlLabel,
   List,
   ListItem,
+  Divider,
+  Checkbox,
 } from '@mui/material';
 import {
   FormikErrors,
@@ -82,6 +84,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       published: false,
       dateConfirmed: false,
       timeConfirmed: false,
+      authorizer: null,
       authorized: false,
       cancelled: false,
       captain: null,
@@ -99,7 +102,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       if (airplane && (values.passengers?.length ?? 0) > airplane.seats) {
         errors = {
           ...errors,
-          passengers: `This airplane can only fit ${airplane.seats} passengers.`,
+          passengers: `Limite máximo de ${airplane.seats} passageiros.`,
         };
       }
       // Validate availability
@@ -167,23 +170,23 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       return errors;
     },
     validationSchema: Yup.object<FlightFormValues>().shape({
-      airplane: Yup.object().required('Airplane é obrigatório'),
-      scheduledDepartureDateTime: Yup.date().required('Date Time é obrigatório'),
+      airplane: Yup.object().required('Aeronave é obrigatório'),
+      scheduledDepartureDateTime: Yup.date().required('Data e Hora é obrigatório'),
       estimatedDuration: Yup.string()
-        .required('Duration é obrigatório')
-        .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
+        .required('Tempo de vôo é obrigatório')
+        .matches(/^\d{1,2}:\d{1,2}$/, 'Formato inválido (hh:mm)'),
       estimatedHandlingDuration: Yup.string()
         .required('Handling é obrigatório')
-        .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
-      origin: Yup.object().required('Origin é obrigatório'),
-      destination: Yup.object().required('Destination é obrigatório'),
+        .matches(/^\d{1,2}:\d{1,2}$/, 'Formato inválido (hh:mm)'),
+      origin: Yup.object().required('Origem é obrigatório'),
+      destination: Yup.object().required('Destino é obrigatório'),
       requesters: Yup.array().of(
         Yup.object().shape({
-          requester: Yup.object().required('Requester é obrigatório'),
-          costCenter: Yup.object().required('Cost Center é obrigatório'),
+          requester: Yup.object().required('Solicitante é obrigatório'),
+          costCenter: Yup.object().required('Centro de Custo é obrigatório'),
           percentage: Yup.number()
-            .required('Percentage é obrigatório')
-            .test('sum', 'Sum must be 100%', function (_v) {
+            .required('Porcentagem é obrigatório')
+            .test('sum', 'Soma deve ser 100%', function (_v) {
               const values = this.from?.[1]?.value as FlightFormValues;
               if (!values || !values.requesters) return true;
               const totalPercentage = sum(values.requesters.map((m) => m.percentage ?? 0));
@@ -255,20 +258,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
   }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
 
   useEffect(() => {
-    formik.setFieldValue('scheduledArrivalDateTime', '');
-    const { scheduledDepartureDateTime, estimatedDuration, estimatedHandlingDuration } =
-      formik.values;
-    if (scheduledDepartureDateTime && estimatedDuration && estimatedHandlingDuration) {
-      const arrival = dayjs(scheduledDepartureDateTime)
-        .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
-        .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
-        .add(parseInt(estimatedHandlingDuration.split(':')[0]), 'hour')
-        .add(parseInt(estimatedHandlingDuration.split(':')[1]), 'minute')
-        .tz(destination?.timezoneName ?? 'UTC')
-        .toDate();
-
-      formik.setFieldValue('scheduledArrivalDateTime', arrival);
-    }
+    setScheduledArrivalDateTime();
   }, [
     destination,
     formik.values.scheduledDepartureDateTime,
@@ -284,6 +274,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         .then((airplane) => {
           if (airplane) {
             setAirplane(airplane);
+            formik.setFieldValue('authorizer', airplane.manager);
             formik.setFieldValue('captain', airplane.captain);
             formik.setFieldValue('firstOfficer', airplane.firstOfficer);
           }
@@ -317,6 +308,32 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     }
   }, [formik.values.destination]);
 
+  function setScheduledArrivalDateTime() {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledDepartureDateTime, estimatedDuration } = formik.values;
+    if (scheduledDepartureDateTime && estimatedDuration) {
+      const arrival = dayjs(scheduledDepartureDateTime)
+        .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+      formik.setFieldValue('scheduledArrivalDateTime', arrival);
+    }
+  }
+
+  function setNextScheduledDepartureDateTime() {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledArrivalDateTime, estimatedHandlingDuration } = formik.values;
+    if (scheduledArrivalDateTime && estimatedHandlingDuration) {
+      const departure = dayjs(scheduledArrivalDateTime)
+        .add(parseInt(estimatedHandlingDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedHandlingDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+      formik.setFieldValue('scheduledDepartureDateTime', departure);
+    }
+  }
+
   function goToNextFlight(createdAtAfter: Date) {
     // If there's a following flight for the groupId, load it
     // otherwise, start a new flight
@@ -333,9 +350,10 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     } else {
       formik.setFieldValue('_id', null);
       formik.setFieldValue('origin', formik.values.destination);
-      formik.setFieldValue('scheduledDepartureDateTime', null);
       formik.setFieldValue('destination', null);
-      formik.setFieldValue('scheduledArrivalDateTime', null);
+      setNextScheduledDepartureDateTime();
+      setScheduledArrivalDateTime();
+      formik.validateForm();
     }
   }
 
@@ -352,7 +370,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
 
       if (airplaneBaseId !== lastFlight?.destination?.value) {
         // eslint-disable-next-line quotes
-        enqueueSnackbar("The last flight must go back to the airplane's base.", {
+        enqueueSnackbar('O último vôo deve voltar para a base da Aeronave.', {
           variant: 'warning',
         });
         goToNextFlight(values._id && lastSavedFlight ? lastSavedFlight.createdAt : new Date());
@@ -382,7 +400,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     try {
       const { _id, ...finalData } = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
       await insert(finalData);
-      enqueueSnackbar('Flight criado com sucesso.', { variant: 'success' });
+      enqueueSnackbar('Vôo criado com sucesso.', { variant: 'success' });
       return true;
     } catch (e: unknown) {
       if (e instanceof Meteor.Error) {
@@ -396,7 +414,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
     try {
       const finalData = data as unknown as Omit<Flight, IdBaseCollectionTypes>;
       await update(finalData);
-      enqueueSnackbar('Flight atualizado com sucesso.', { variant: 'success' });
+      enqueueSnackbar('Vôo atualizado com sucesso.', { variant: 'success' });
       return true;
     } catch (e: unknown) {
       if (e instanceof Meteor.Error) {
@@ -416,14 +434,15 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       }}
       disableEscapeKeyDown
     >
-      <DialogTitle>{formik.values._id ? 'Update' : 'Adicionar'} Flight</DialogTitle>
+      <DialogTitle>{formik.values._id ? 'Editar' : 'Adicionar'} Vôo</DialogTitle>
       <DialogContent>
         <FormikProvider value={formik}>
           <form id="flight-form" noValidate onSubmit={formik.handleSubmit}>
             <Stack sx={{ mt: 1 }} spacing={3}>
               <AirplaneSelect
+                required
                 fullWidth
-                label="Airplane"
+                label="Aeronave"
                 name="airplane"
                 onBlur={formik.handleBlur}
                 value={formik.values.airplane}
@@ -434,8 +453,9 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 helperText={formik.touched.airplane && formik.errors.airplane}
               />
               <AirportSelect
+                required
                 fullWidth
-                label="Origin"
+                label="Origem"
                 name="origin"
                 onBlur={formik.handleBlur}
                 value={formik.values.origin}
@@ -446,8 +466,9 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 helperText={formik.touched.origin && formik.errors.origin}
               />
               <AirportSelect
+                required
                 fullWidth
-                label="Destination"
+                label="Destino"
                 name="destination"
                 onBlur={formik.handleBlur}
                 value={formik.values.destination}
@@ -457,40 +478,69 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 error={!!(formik.touched.destination && formik.errors.destination)}
                 helperText={formik.touched.destination && formik.errors.destination}
               />
-              <DateTimePicker
-                disabled={formik.values.origin === null}
-                label={`Departure (${origin?.timezoneName ?? 'UTC'})`}
-                disablePast
-                timezone={origin?.timezoneName ?? 'UTC'}
-                shouldDisableDate={(date) => {
-                  return !!groupFlights
-                    .map((m) => dayjs(m.scheduledDepartureDateTime))
-                    .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
-                }}
-                value={
-                  formik.values.scheduledDepartureDateTime
-                    ? dayjs(formik.values.scheduledDepartureDateTime)
-                    : null
-                }
-                onChange={(value) => {
-                  formik.setFieldValue('scheduledDepartureDateTime', value?.toDate());
-                }}
-                onClose={() => {
-                  formik.setFieldTouched('scheduledDepartureDateTime', true);
-                }}
-                slotProps={{
-                  textField: {
-                    error: !!(
-                      formik.touched.scheduledDepartureDateTime &&
-                      formik.errors.scheduledDepartureDateTime
-                    ),
-                    helperText:
-                      formik.touched.scheduledDepartureDateTime &&
-                      formik.errors.scheduledDepartureDateTime,
-                  },
-                }}
-              />
+              <Stack direction="row" spacing={2}>
+                <DateTimePicker
+                  disabled={formik.values.origin === null}
+                  label={`Decolagem (${origin?.timezoneName ?? 'UTC'})`}
+                  disablePast
+                  timezone={origin?.timezoneName ?? 'UTC'}
+                  shouldDisableDate={(date) => {
+                    return !!groupFlights
+                      .map((m) => dayjs(m.scheduledArrivalDateTime))
+                      .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
+                  }}
+                  value={
+                    formik.values.scheduledDepartureDateTime
+                      ? dayjs(formik.values.scheduledDepartureDateTime)
+                      : null
+                  }
+                  onChange={(value) => {
+                    formik.setFieldValue('scheduledDepartureDateTime', value?.toDate());
+                  }}
+                  onClose={() => {
+                    formik.setFieldTouched('scheduledDepartureDateTime', true);
+                  }}
+                  slotProps={{
+                    textField: {
+                      error: !!(
+                        formik.touched.scheduledDepartureDateTime &&
+                        formik.errors.scheduledDepartureDateTime
+                      ),
+                      helperText:
+                        formik.touched.scheduledDepartureDateTime &&
+                        formik.errors.scheduledDepartureDateTime,
+                    },
+                  }}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.dateConfirmed ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Data ${value ? '' : 'NÃO'} Confirmada`);
+                        formik.setFieldValue('dateConfirmed', value);
+                      }}
+                      name="dateConfirmed"
+                    />
+                  }
+                  label=""
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.timeConfirmed ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Hora ${value ? '' : 'NÃO'} Confirmada`);
+                        formik.setFieldValue('timeConfirmed', value);
+                      }}
+                      name="timeConfirmed"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
               <TextField
+                required
                 InputProps={{
                   readOnly: true,
                   endAdornment: calculatingDuration ? (
@@ -500,11 +550,12 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                   ) : undefined,
                 }}
                 fullWidth
-                label="Estimated Duration"
+                label="Duração Prevista"
                 name="estimatedDuration"
                 value={formik.values.estimatedDuration}
               />
               <TextField
+                required
                 fullWidth
                 label="Handling"
                 name="estimatedHandlingDuration"
@@ -524,7 +575,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
               />
               <DateTimePicker
                 readOnly
-                label={`Arrival (${destination?.timezoneName ?? 'UTC'})`}
+                label={`Chegada (${destination?.timezoneName ?? 'UTC'})`}
                 timezone={destination?.timezoneName ?? 'UTC'}
                 value={
                   formik.values.scheduledArrivalDateTime
@@ -532,120 +583,109 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                     : null
                 }
               />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.published ?? false}
-                    onChange={(_e, value) => {
-                      if (!lastSavedFlight?.published) formik.setFieldValue('published', value);
-                    }}
-                    name="published"
-                  />
-                }
-                label={lastSavedFlight?.published ? 'Flight Published' : 'Publish this Flight'}
-              />
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.dateConfirmed ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('dateConfirmed', value);
-                    }}
-                    name="dateConfirmed"
-                  />
-                }
-                label="Date Confirmed"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.timeConfirmed ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('timeConfirmed', value);
-                    }}
-                    name="timeConfirmed"
-                  />
-                }
-                label="Time Confirmed"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.authorized ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('authorized', value);
-                    }}
-                    name="authorized"
-                  />
-                }
-                label="Authorized"
-              />
+              <Stack direction="row" spacing={2}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formik.values.published ?? false}
+                      onChange={(_e, value) => {
+                        if (!lastSavedFlight?.published) formik.setFieldValue('published', value);
+                      }}
+                      name="published"
+                    />
+                  }
+                  label={lastSavedFlight?.published ? 'Vôo Publicado' : 'Publicar Vôo'}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formik.values.maintenance ?? false}
+                      onChange={(_e, value) => {
+                        formik.setFieldValue('maintenance', value);
+                      }}
+                      name="maintenance"
+                    />
+                  }
+                  label="Manutenção"
+                />
+              </Stack>
+              <Stack direction="row" spacing={2}>
+                <UserSelect
+                  required
+                  fullWidth
+                  disabled={formik.values.airplane === null}
+                  label="Comandante"
+                  name="captain"
+                  roles={['Comandante']}
+                  onBlur={formik.handleBlur}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('captain', value);
+                  }}
+                  filter={(o) =>
+                    airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
+                  }
+                  defaultValue={formik.initialValues.captain ?? null}
+                  value={formik.values.captain ?? null}
+                  error={!!formik.errors.captain}
+                  helperText={formik.errors.captain}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.captainInReserve ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Comandante ${value ? 'em' : 'fora de'} Reserva`);
+                        formik.setFieldValue('captainInReserve', value);
+                      }}
+                      name="captainInReserve"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
+              <Stack direction="row" spacing={2}>
+                <UserSelect
+                  required
+                  fullWidth
+                  disabled={formik.values.airplane === null}
+                  label="Co-Piloto"
+                  name="firstOfficer"
+                  roles={['Comandante', 'Co-Piloto']}
+                  onBlur={formik.handleBlur}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('firstOfficer', value);
+                  }}
+                  filter={(o) =>
+                    airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
+                  }
+                  defaultValue={formik.initialValues.firstOfficer ?? null}
+                  value={formik.values.firstOfficer ?? null}
+                  error={!!formik.errors.firstOfficer}
+                  helperText={formik.errors.firstOfficer}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.firstOfficerInReserve ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Co-Piloto ${value ? 'em' : 'fora de'} Reserva`);
+                        formik.setFieldValue('firstOfficerInReserve', value);
+                      }}
+                      name="firstOfficerInReserve"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
               <UserSelect
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="Captain"
-                name="captain"
-                roles={['Comandante']}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('captain', value);
-                }}
-                filter={(o) =>
-                  airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
-                }
-                defaultValue={formik.initialValues.captain ?? null}
-                value={formik.values.captain ?? null}
-                error={!!formik.errors.captain}
-                helperText={formik.errors.captain}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.captainInReserve ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('captainInReserve', value);
-                    }}
-                    name="captainInReserve"
-                  />
-                }
-                label="Captain in Reserve"
-              />
-              <UserSelect
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="First Officer"
-                name="firstOfficer"
-                roles={['Comandante', 'Co-Piloto']}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('firstOfficer', value);
-                }}
-                filter={(o) =>
-                  airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
-                }
-                defaultValue={formik.initialValues.firstOfficer ?? null}
-                value={formik.values.firstOfficer ?? null}
-                error={!!formik.errors.firstOfficer}
-                helperText={formik.errors.firstOfficer}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.firstOfficerInReserve ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('firstOfficerInReserve', value);
-                    }}
-                    name="firstOfficerInReserve"
-                  />
-                }
-                label="First Officer in Reserve"
-              />
-              <UserSelect
+                selectOnFocus
+                clearOnBlur
+                handleHomeEndKeys
+                freeSolo
                 multiple
                 fullWidth
                 disabled={formik.values.airplane === null}
-                label="Passengers"
+                label="Passageiros"
                 name="passengers"
                 roles={[]}
                 onBlur={formik.handleBlur}
@@ -657,21 +697,10 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 error={!!(formik.touched.passengers && formik.errors.passengers)}
                 helperText={formik.touched.passengers && formik.errors.passengers}
               />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.maintenance ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('maintenance', value);
-                    }}
-                    name="maintenance"
-                  />
-                }
-                label="Maintenance"
-              />
+
               <TextField
                 fullWidth
-                label="Notes"
+                label="Observações"
                 name="notes"
                 multiline
                 rows={4}
@@ -679,7 +708,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
               />
-
+              <Divider textAlign="left">Solicitantes</Divider>
               <FieldArray name="requesters">
                 {({
                   remove,
@@ -708,7 +737,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                               <Stack sx={{ mt: 1 }} spacing={3}>
                                 <UserSelect
                                   fullWidth
-                                  label="Requester"
+                                  label="Solicitante"
                                   name={requesterName}
                                   roles={[]}
                                   onBlur={formik.handleBlur}
@@ -721,7 +750,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                                 />
                                 <CostCenterSelect
                                   fullWidth
-                                  label="Cost Center"
+                                  label="Centro de Custo"
                                   name={costCenter}
                                   onBlur={formik.handleBlur}
                                   onChange={(_e, value) => {
@@ -733,7 +762,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                                 />
                                 <TextField
                                   fullWidth
-                                  label="Percentage"
+                                  label="Porcentagem"
                                   type="number"
                                   name={percentage}
                                   onBlur={formik.handleBlur}
@@ -755,7 +784,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                                     remove(index);
                                   }}
                                 >
-                                  Remove
+                                  Remover
                                 </Button>
                               </Stack>
                             </ListItem>
@@ -772,7 +801,7 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
                         push({ costCenter: null, percentage, requester: null });
                       }}
                     >
-                      Add Requester
+                      Adicionar Solicitante
                     </Button>
                   </>
                 )}
@@ -782,12 +811,12 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         </FormikProvider>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Cancelar</Button>
         <Button onClick={handleSaveAndContinue} autoFocus>
-          Save and Continue
+          Salvar e Continuar
         </Button>
-        <Button type="submit" form="flight-form" autoFocus>
-          Save and Close
+        <Button type="submit" form="flight-form">
+          Salvar e Finalizar
         </Button>
       </DialogActions>
     </Dialog>

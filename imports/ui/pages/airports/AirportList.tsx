@@ -206,7 +206,7 @@ const AirportList = () => {
                               }
                             }}
                           >
-                            Defazer
+                            Desfazer
                           </Button>
                         ),
                       });

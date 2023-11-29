@@ -1,5 +1,7 @@
 import './insert';
 import './update';
+import './cancel';
+import './authorize';
 import './getOne';
 import './calculateDuration';
 import './upsertFlightEvent';

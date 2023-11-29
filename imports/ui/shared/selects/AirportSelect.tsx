@@ -13,6 +13,7 @@ interface AirportSelectProps<Multiple extends boolean | undefined = false>
   readonly name: string;
   readonly helperText?: React.ReactNode;
   readonly error?: boolean;
+  readonly required?: boolean;
 }
 
 const AirportSelect = <Multiple extends boolean | undefined = false>({
@@ -20,6 +21,7 @@ const AirportSelect = <Multiple extends boolean | undefined = false>({
   label,
   error,
   helperText,
+  required,
   ...rest
 }: AirportSelectProps<Multiple>) => {
   const [options, setOptions] = useState<ValueLabelType[]>([]);
@@ -64,6 +66,7 @@ const AirportSelect = <Multiple extends boolean | undefined = false>({
       }}
       renderInput={(params) => (
         <TextField
+          required={required}
           {...params}
           label={label}
           name={name}

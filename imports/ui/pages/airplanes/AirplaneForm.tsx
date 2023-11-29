@@ -129,6 +129,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
         <form id="airplane-form" noValidate onSubmit={formik.handleSubmit}>
           <Stack sx={{ mt: 1 }} spacing={3}>
             <TextField
+              required
               error={!!(formik.touched.name && formik.errors.name)}
               fullWidth
               helperText={formik.touched.name && formik.errors.name}
@@ -139,6 +140,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               value={formik.values.name}
             />
             <TextField
+              required
               error={!!(formik.touched.tailNumber && formik.errors.tailNumber)}
               fullWidth
               helperText={formik.touched.tailNumber && formik.errors.tailNumber}
@@ -149,6 +151,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               value={formik.values.tailNumber}
             />
             <AirportSelect
+              required
               fullWidth
               label="Base"
               name="base"
@@ -161,6 +164,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               helperText={formik.touched.base && formik.errors.base}
             />
             <TextField
+              required
               error={!!(formik.touched.icaoCode && formik.errors.icaoCode)}
               helperText={formik.touched.icaoCode && formik.errors.icaoCode}
               fullWidth
@@ -174,6 +178,7 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
               value={formik.values.icaoCode}
             />
             <TextField
+              required
               error={!!(formik.touched.seats && formik.errors.seats)}
               fullWidth
               helperText={formik.touched.seats && formik.errors.seats}

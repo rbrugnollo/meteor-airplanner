@@ -34,6 +34,7 @@ export interface Flight extends BaseCollection {
   readonly firstOfficerInReserve: boolean;
   readonly passengers?: ValueLabelType[] | null;
   readonly requesters?: FlightRequester[] | null;
+  readonly authorizer?: ValueLabelType | null;
   readonly notes?: string | null;
   // review
   readonly departureDateTime?: Date;

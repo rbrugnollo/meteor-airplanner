@@ -30,3 +30,4 @@ email
 zodern:relay
 fetch
 quave:email-postmark@=1.0.1
+force-ssl
