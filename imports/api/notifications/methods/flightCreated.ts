@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import dayjs from 'dayjs';
 import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
@@ -23,9 +24,9 @@ export const flightCreated = createMethod({
       await NotificationsCollection.insertAsync({
         type: 'flight-created',
         flightId,
-        title: `${flight?.airplane
-          ?.label} - Novo vôo agendado para ${flight?.scheduledDepartureDateTime?.toLocaleDateString()}`,
-        message: `${flight?.origin?.label} - ${flight?.destination?.label}}`,
+        title: `${flight?.airplane?.label} - Novo Vôo`,
+        message: `${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} de ${flight
+          ?.origin?.label} para ${flight?.destination?.label}}`,
         read: false,
         archived: false,
         createdAt: new Date(),
