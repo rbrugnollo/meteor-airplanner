@@ -54,6 +54,7 @@ export const PermissionTypes = [
   'schedule.list',
   'schedule.view',
   'notification.list',
+  'notification.view',
   'schedule.insert',
   'schedule.update',
   'schedule.remove',
@@ -67,10 +68,10 @@ export const PermissionsByRole: { readonly role: RoleName; readonly permissions:
     { role: 'Admin', permissions: PermissionTypes.map((m) => m) },
     { role: 'Comandante', permissions: PermissionTypes.map((m) => m) },
     { role: 'Co-Piloto', permissions: PermissionTypes.map((m) => m) },
-    { role: 'Secretário', permissions: ['notification.list'] },
-    { role: 'Responsável Aeronave', permissions: ['notification.list'] },
-    { role: 'Solicitante', permissions: ['notification.list'] },
-    { role: 'Passageiro', permissions: ['notification.list'] },
+    { role: 'Secretário', permissions: ['notification.list', 'notification.view'] },
+    { role: 'Responsável Aeronave', permissions: ['notification.list', 'notification.view'] },
+    { role: 'Solicitante', permissions: ['notification.list', 'notification.view'] },
+    { role: 'Passageiro', permissions: ['notification.list', 'notification.view'] },
   ];
 
 // Notifications

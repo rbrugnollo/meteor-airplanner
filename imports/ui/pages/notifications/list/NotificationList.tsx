@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MrtColumnDef,
@@ -12,6 +13,7 @@ import { Mongo } from 'meteor/mongo';
 import SetAllAsReadButton from './SetAllAsReadButton';
 
 const NotificationList = () => {
+  const navigate = useNavigate();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -109,6 +111,14 @@ const NotificationList = () => {
                 onScroll: (event: React.UIEvent<HTMLDivElement>) =>
                   fetchMoreOnBottomReached(event.target as HTMLDivElement),
               }}
+              muiTableBodyRowProps={({ row }) => ({
+                onClick: () => {
+                  navigate(`/app/notifications/${row.original._id}`);
+                },
+                sx: {
+                  cursor: 'pointer',
+                },
+              })}
             />
           </Stack>
         </Container>

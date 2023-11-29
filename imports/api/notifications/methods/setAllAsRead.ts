@@ -1,6 +1,6 @@
-import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import { setNotificationCountToZero } from '../../users/methods/setNotificationCountToZero';
 import { NotificationsCollection } from '../collection';
 
 export const setAllAsRead = createMethod({
@@ -16,21 +16,5 @@ export const setAllAsRead = createMethod({
     );
     // Update dependent collections
     await setNotificationCountToZero();
-  },
-});
-
-export const setNotificationCountToZero = createMethod({
-  name: 'notifications.setNotificationCountToZero',
-  schema: z.undefined(),
-  async run() {
-    if (!this.userId) return;
-    await Meteor.users.updateAsync(
-      { _id: this.userId },
-      {
-        $set: {
-          'profile.notificationCount': 0,
-        },
-      },
-    );
   },
 });
