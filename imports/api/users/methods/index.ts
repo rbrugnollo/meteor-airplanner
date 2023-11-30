@@ -11,3 +11,4 @@ import './updateNotification';
 import './incrementNotificationCount';
 import './decrementNotificationCount';
 import './setNotificationCountToZero';
+import './subscribeToPush';

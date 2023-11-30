@@ -71,6 +71,20 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+self.addEventListener('push', (event) => {
+  if (event.data) {
+    const data = event.data.json();
+    event.waitUntil(
+      self.registration.showNotification(data.title, {
+        body: 'test 1',
+        // body: data.body,
+        // icon: data.icon || '/favicon.ico',
+        // tag: data.tag,
+      })
+    );
+  }
+});
+
 function removeHash(element) {
   if (typeof element === 'string') return element.split('?hash=')[0];
 }
