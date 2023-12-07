@@ -7,10 +7,11 @@ export const sendPushNotification = createMethod({
   name: 'notifications.sendPushNotification',
   schema: z.object({
     userId: z.string(),
+    payload: z.any(),
   }),
-  async run({ userId }) {
+  async run({ userId, payload }) {
     const subscription = Meteor.users.findOne(userId)?.profile?.subscription;
     if (!subscription) return;
-    await sendNotification(subscription, JSON.stringify({ title: 'Hello', body: 'World' }));
+    await sendNotification(subscription, JSON.stringify(payload));
   },
 });

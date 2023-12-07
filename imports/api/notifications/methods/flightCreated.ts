@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
+import { sendPushNotification } from './sendPushNotification';
 
 export const flightCreated = createMethod({
   name: 'notifications.flightCreated',
@@ -20,11 +21,21 @@ export const flightCreated = createMethod({
       .map((m) => m._id)
       .filter((m) => m && m !== this.userId);
 
+    const title = `Vôo adicionado: ${flight?.airplane.label}`;
+    const notificationData = [
+      `📅 ${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} ${
+        flight?.dateConfirmed ? '✅' : '⚠️'
+      } ${flight?.timeConfirmed ? '✅' : '⚠️'}`,
+      `${flight?.authorized ? '✅ Autorizado' : '⚠️ Autorização Pendente'}`,
+      `🛫 ${flight?.origin.label}`,
+      `🛬 ${flight?.destination.label}`,
+      `👥 ${flight?.requesters?.map((requester) => requester.requester?.label).join(', ')}`,
+    ];
     userIds.forEach(async (userId) => {
       await NotificationsCollection.insertAsync({
         type: 'flight-created',
         flightId,
-        title: `${flight?.airplane?.label} - Novo Vôo`,
+        title,
         message: `${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} de ${flight
           ?.origin?.label} para ${flight?.destination?.label}}`,
         read: false,
@@ -34,6 +45,20 @@ export const flightCreated = createMethod({
         createdBy: this.userId!,
         updatedBy: this.userId!,
         userId,
+      });
+
+      // Send Push Notification
+      await sendPushNotification({
+        userId,
+        payload: {
+          title,
+          body: notificationData.join('\n'),
+          vibrate: [200, 100, 200],
+          data: {
+            flightId,
+            userId,
+          },
+        },
       });
     });
 

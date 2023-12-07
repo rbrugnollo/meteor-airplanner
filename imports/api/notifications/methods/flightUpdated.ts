@@ -5,13 +5,15 @@ import dayjs from 'dayjs';
 import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
+import { sendPushNotification } from './sendPushNotification';
 
 export const flightUpdated = createMethod({
   name: 'notifications.flightUpdated',
   schema: z.object({
     flightId: z.string(),
+    difference: z.object({}),
   }),
-  async run({ flightId }) {
+  async run({ flightId, difference }) {
     const flight = await FlightsCollection.findOneAsync(flightId);
 
     const users = await Meteor.users.find().fetchAsync();
@@ -20,11 +22,23 @@ export const flightUpdated = createMethod({
       .map((m) => m._id)
       .filter((m) => m && m !== this.userId);
 
+    const title = `Vôo Atualizado: ${flight?.airplane.label}`;
+    const notificationData = [
+      `📅 ${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} ${
+        flight?.dateConfirmed ? '✅' : '⚠️'
+      } ${flight?.timeConfirmed ? '✅' : '⚠️'}`,
+      `${flight?.authorized ? '✅ Autorizado' : '⚠️ Autorização Pendente'}`,
+      `🛫 ${flight?.origin.label}`,
+      `🛬 ${flight?.destination.label}`,
+      `👥 ${flight?.requesters?.map((requester) => requester.requester?.label).join(', ')}`,
+      `Changes: ${JSON.stringify(difference)}`,
+    ];
+
     userIds.forEach(async (userId) => {
       await NotificationsCollection.insertAsync({
         type: 'flight-updated',
         flightId,
-        title: `${flight?.airplane?.label} - Vôo alterado`,
+        title,
         message: `${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} de ${flight
           ?.origin?.label} para ${flight?.destination?.label}}`,
         read: false,
@@ -34,6 +48,20 @@ export const flightUpdated = createMethod({
         createdBy: this.userId!,
         updatedBy: this.userId!,
         userId,
+      });
+
+      // Send Push Notification
+      await sendPushNotification({
+        userId,
+        payload: {
+          title,
+          body: notificationData.join('\n'),
+          vibrate: [200, 100, 200],
+          data: {
+            flightId,
+            userId,
+          },
+        },
       });
     });
 

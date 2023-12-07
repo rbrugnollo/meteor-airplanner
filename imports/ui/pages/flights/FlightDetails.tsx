@@ -1,6 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
 import { useSnackbar } from 'notistack';
+import { useLoggedUser } from 'meteor/quave:logged-user-react';
 import {
   Accordion,
   AccordionSummary,
@@ -47,6 +48,7 @@ const FlightDetails = ({
   onViewRoute,
 }: FlightDetailsProps) => {
   const { enqueueSnackbar } = useSnackbar();
+  const { loggedUser } = useLoggedUser();
 
   const handleCancel = async () => {
     try {
@@ -82,6 +84,9 @@ const FlightDetails = ({
   };
 
   const handleAuthorize = async () => {
+    const canAuthorize =
+      !loggedUser || !flight.authorizer ? false : loggedUser._id === flight.authorizer.value;
+    if (!canAuthorize) return;
     try {
       await authorize({ flightId: flight._id, authorized: true });
       enqueueSnackbar('Vôo autorizado com sucesso.', {

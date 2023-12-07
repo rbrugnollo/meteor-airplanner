@@ -8,6 +8,7 @@ import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
 import { flightUpdated } from '../../notifications/methods/flightUpdated';
+import { deepDiff } from '../../lib/deepDiff';
 
 export const update = createMethod({
   name: 'flights.update',
@@ -56,7 +57,7 @@ export const update = createMethod({
     if (sendAuthorizationMessage) {
       await flightAuthorize({ flightId: _id });
     }
-    await flightUpdated({ flightId: _id });
+    await flightUpdated({ flightId: _id, difference: deepDiff(flightBeforeUpdate, flight) });
 
     return result;
   },

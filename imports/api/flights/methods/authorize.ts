@@ -5,10 +5,11 @@ import { FlightsCollection } from '../collection';
 export const authorize = createMethod({
   name: 'flights.authorize',
   schema: z.object({
+    userId: z.string().optional(),
     flightId: z.string(),
     authorized: z.boolean(),
   }),
-  async run({ flightId, authorized }) {
+  async run({ userId, flightId, authorized }) {
     // Update
     await FlightsCollection.updateAsync(
       { _id: flightId },
@@ -16,7 +17,7 @@ export const authorize = createMethod({
         $set: {
           authorized,
           updatedAt: new Date(),
-          updatedBy: this.userId!,
+          updatedBy: userId ?? this.userId!,
         },
       },
     );
