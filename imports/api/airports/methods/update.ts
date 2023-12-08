@@ -28,20 +28,7 @@ export const update = createMethod({
       },
     );
 
-    // Update dependent collections
-    await updateFlightsCollection({
-      airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
-    });
-
-    await updateFlightsCollection({
-      airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
-    });
-
-    await updateAirplanesCollection({
-      airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
-    });
-
-    await updateEventsCollection({
+    updateFireAndForget({
       airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
     });
 
@@ -49,95 +36,86 @@ export const update = createMethod({
   },
 });
 
-export const updateFlightsCollection = createMethod({
-  name: 'airports.updateFlightsCollection',
+export const updateFireAndForget = createMethod({
+  name: 'airports.updateFireAndForget',
   schema: z.object({
     airport: ValueLabelTypeSchema,
   }),
   async run({ airport }) {
-    await FlightsCollection.updateAsync(
-      { 'origin.value': airport.value, scheduledDepartureDateTime: { $gte: new Date() } },
-      {
-        $set: {
-          'origin.label': airport.label,
+    const updateFlightsCollection = async () => {
+      await FlightsCollection.updateAsync(
+        { 'origin.value': airport.value, scheduledDepartureDateTime: { $gte: new Date() } },
+        {
+          $set: {
+            'origin.label': airport.label,
+          },
         },
-      },
-      { multi: true },
-    );
-    await FlightsCollection.updateAsync(
-      { 'destination.value': airport.value, scheduledDepartureDateTime: { $gte: new Date() } },
-      {
-        $set: {
-          'destination.label': airport.label,
+        { multi: true },
+      );
+      await FlightsCollection.updateAsync(
+        { 'destination.value': airport.value, scheduledDepartureDateTime: { $gte: new Date() } },
+        {
+          $set: {
+            'destination.label': airport.label,
+          },
         },
-      },
-      { multi: true },
-    );
-  },
-});
+        { multi: true },
+      );
+    };
+    const updateUsersCollection = async () => {
+      await Meteor.users.updateAsync(
+        { 'profile.base.value': airport.value },
+        {
+          $set: {
+            'profile.base.label': airport.label,
+          },
+        },
+        { multi: true },
+      );
+    };
 
-export const updateUsersCollection = createMethod({
-  name: 'airports.updateUsersCollection',
-  schema: z.object({
-    airport: ValueLabelTypeSchema,
-  }),
-  async run({ airport }) {
-    await Meteor.users.updateAsync(
-      { 'profile.base.value': airport.value },
-      {
-        $set: {
-          'profile.base.label': airport.label,
+    const updateAirplanesCollection = async () => {
+      await AirplanesCollection.updateAsync(
+        { 'base.value': airport.value },
+        {
+          $set: {
+            'base.label': airport.label,
+          },
         },
-      },
-      { multi: true },
-    );
-  },
-});
+        { multi: true },
+      );
+    };
 
-export const updateAirplanesCollection = createMethod({
-  name: 'airports.updateAirplanesCollection',
-  schema: z.object({
-    airport: ValueLabelTypeSchema,
-  }),
-  async run({ airport }) {
-    await AirplanesCollection.updateAsync(
-      { 'base.value': airport.value },
-      {
-        $set: {
-          'base.label': airport.label,
+    const updateEventsCollection = async () => {
+      await EventsCollection.updateAsync(
+        { 'flight.origin.value': airport.value, start: { $gte: new Date() } },
+        {
+          $set: {
+            'flight.origin.label': airport.label,
+          },
         },
-      },
-      { multi: true },
-    );
-  },
-});
+        { multi: true },
+      );
+      await EventsCollection.updateAsync(
+        {
+          'flight.destination.value': airport.value,
+          start: { $gte: new Date() },
+        },
+        {
+          $set: {
+            'flight.destination.label': airport.label,
+          },
+        },
+        { multi: true },
+      );
+    };
 
-export const updateEventsCollection = createMethod({
-  name: 'airports.updateEventsCollection',
-  schema: z.object({
-    airport: ValueLabelTypeSchema,
-  }),
-  async run({ airport }) {
-    await EventsCollection.updateAsync(
-      { 'flight.origin.value': airport.value, start: { $gte: new Date() } },
-      {
-        $set: {
-          'flight.origin.label': airport.label,
-        },
-      },
-      { multi: true },
-    );
-    await EventsCollection.updateAsync(
-      {
-        'flight.destination.value': airport.value,
-        start: { $gte: new Date() },
-      },
-      {
-        $set: {
-          'flight.destination.label': airport.label,
-        },
-      },
-      { multi: true },
-    );
+    // Update dependent collections
+    await Promise.all([
+      updateFlightsCollection(),
+      updateUsersCollection(),
+      updateAirplanesCollection(),
+      updateEventsCollection(),
+    ]);
   },
 });

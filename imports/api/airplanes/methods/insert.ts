@@ -28,7 +28,7 @@ export const insert = createMethod({
     });
 
     // Update the airplane info if possible
-    await updateInfo({ _id: airplaneId });
+    updateInfo({ _id: airplaneId });
 
     return airplaneId;
   },
