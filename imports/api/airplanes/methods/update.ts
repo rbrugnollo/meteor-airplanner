@@ -34,14 +34,7 @@ export const update = createMethod({
       },
     );
 
-    // Update the airplane info if possible
-    await updateInfo({ _id: _id });
-
-    // Update dependent collections
-    await updateFlightsCollection({
-      airplane: { value: _id, label: `(${data.tailNumber}) ${data.name}` },
-    });
-    await updateEventsCollection({
+    updateFireAndForget({
       airplane: { value: _id, label: `(${data.tailNumber}) ${data.name}` },
     });
 
@@ -49,48 +42,49 @@ export const update = createMethod({
   },
 });
 
-export const updateFlightsCollection = createMethod({
-  name: 'airplanes.updateFlightsCollection',
+export const updateFireAndForget = createMethod({
+  name: 'airplanes.updateFireAndForget',
   schema: z.object({
     airplane: ValueLabelTypeSchema,
   }),
   async run({ airplane }) {
-    await FlightsCollection.updateAsync(
-      { 'airplane.value': airplane.value, scheduledDepartureDateTime: { $gte: new Date() } },
-      {
-        $set: {
-          'airplane.label': airplane.label,
+    const updateFlightsCollection = async () => {
+      await FlightsCollection.updateAsync(
+        { 'airplane.value': airplane.value, scheduledDepartureDateTime: { $gte: new Date() } },
+        {
+          $set: {
+            'airplane.label': airplane.label,
+          },
         },
-      },
-      { multi: true },
-    );
-  },
-});
+        { multi: true },
+      );
+    };
+    const updateEventsCollection = async () => {
+      await EventsCollection.updateAsync(
+        { 'airplane.value': airplane.value, start: { $gte: new Date() } },
+        {
+          $set: {
+            'airplane.label': airplane.label,
+          },
+        },
+        { multi: true },
+      );
 
-export const updateEventsCollection = createMethod({
-  name: 'airplanes.updateEventsCollection',
-  schema: z.object({
-    airplane: ValueLabelTypeSchema,
-  }),
-  async run({ airplane }) {
-    await EventsCollection.updateAsync(
-      { 'airplane.value': airplane.value, start: { $gte: new Date() } },
-      {
-        $set: {
-          'airplane.label': airplane.label,
+      await EventsCollection.updateAsync(
+        { 'flight.airplane.value': airplane.value, start: { $gte: new Date() } },
+        {
+          $set: {
+            'flight.airplane.label': airplane.label,
+          },
         },
-      },
-      { multi: true },
-    );
+        { multi: true },
+      );
+    };
 
-    await EventsCollection.updateAsync(
-      { 'flight.airplane.value': airplane.value, start: { $gte: new Date() } },
-      {
-        $set: {
-          'flight.airplane.label': airplane.label,
-        },
-      },
-      { multi: true },
-    );
+    // Update the airplane info if possible
+    await updateInfo({ _id: airplane.value });
+    // Update dependent collections
+    await updateFlightsCollection();
+    await updateEventsCollection();
   },
 });

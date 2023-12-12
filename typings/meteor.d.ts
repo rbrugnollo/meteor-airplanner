@@ -1,5 +1,6 @@
 import { Roles } from 'meteor/alanning:roles';
 import { Mongo } from 'meteor/mongo';
+import { PushSubscription } from 'web-push';
 import { ValueLabelType } from '/imports/api/common/ValueLabelType';
 import { NotificationId, NotificationType, RoleName } from '/imports/api/users/collection';
 
@@ -17,6 +18,7 @@ declare module 'meteor/meteor' {
       roles: RoleName[];
       base?: ValueLabelType | null;
       disabled?: boolean;
+      subscription?: PushSubscription;
       notificationCount?: number;
       notifications?: {
         [key in NotificationId]: {

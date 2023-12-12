@@ -8,6 +8,7 @@ import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
 import { flightUpdated } from '../../notifications/methods/flightUpdated';
+import { deepDiff } from '../../lib/deepDiff';
 
 export const update = createMethod({
   name: 'flights.update',
@@ -43,21 +44,43 @@ export const update = createMethod({
       },
     );
 
+    // Fire and forget
+    const flightAfterUpdate = (await FlightsCollection.findOneAsync(_id))!;
+    updateFireAndForget({
+      flightBeforeUpdate,
+      flightAfterUpdate,
+      sendAuthorizationMessage,
+    });
+
+    return result;
+  },
+});
+
+export const updateFireAndForget = createMethod({
+  name: 'flights.updateFireAndForget',
+  schema: z.object({
+    flightBeforeUpdate: z.custom<Flight>(),
+    flightAfterUpdate: z.custom<Flight>(),
+    sendAuthorizationMessage: z.boolean(),
+  }),
+  async run({ flightBeforeUpdate, flightAfterUpdate, sendAuthorizationMessage }) {
     // Update dependent collections
-    await upsertFlightEvent(_id);
+    await upsertFlightEvent(flightAfterUpdate._id);
     await upsertInReserveEvents({
       flightBeforeUpdate: flightBeforeUpdate,
       checkPreviousFlight: true,
     });
-    await upsertMaintenanceEvent({ flightId: _id, checkPreviousFlight: true });
-    if (!flightBeforeUpdate.published && flight.published) await publishGroup(flight.groupId);
+    await upsertMaintenanceEvent({ flightId: flightAfterUpdate._id, checkPreviousFlight: true });
+    if (!flightBeforeUpdate.published && flightAfterUpdate.published)
+      await publishGroup(flightAfterUpdate.groupId);
 
     // Send Notifications
     if (sendAuthorizationMessage) {
-      await flightAuthorize({ flightId: _id });
+      await flightAuthorize({ flightId: flightAfterUpdate._id });
     }
-    await flightUpdated({ flightId: _id });
-
-    return result;
+    await flightUpdated({
+      flightId: flightAfterUpdate._id,
+      difference: deepDiff(flightBeforeUpdate, flightAfterUpdate),
+    });
   },
 });

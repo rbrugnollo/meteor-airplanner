@@ -15,7 +15,8 @@ import CostCenterList from '/imports/ui/pages/costCenters/CostCenterList';
 import FlightList from '/imports/ui/pages/flights/FlightList';
 import Schedule from '/imports/ui/pages/schedule/Schedule';
 import Settings from '/imports/ui/pages/settings/Settings';
-import NotificationList from '/imports/ui/pages/notifications/NotificationList';
+import NotificationList from '/imports/ui/pages/notifications/list/NotificationList';
+import Notification from '/imports/ui/pages/notifications/notification/Notification';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
@@ -100,6 +101,10 @@ const Router = createBrowserRouter([
           {
             path: 'schedule',
             element: <Authorized Component={Schedule} permission="schedule.list" />,
+          },
+          {
+            path: 'notifications/:id',
+            element: <Authorized Component={Notification} permission="notification.view" />,
           },
           {
             path: 'notifications',

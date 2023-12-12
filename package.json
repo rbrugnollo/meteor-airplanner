@@ -40,6 +40,7 @@
     "react-router": "^6.15.0",
     "react-router-dom": "^6.15.0",
     "simpl-schema": "^3.4.1",
+    "web-push": "^3.6.6",
     "yup": "^1.2.0",
     "zod": "^3.22.2"
   },
@@ -53,6 +54,7 @@
     "@types/react-dom": "^18.2.7",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "@types/web-push": "^3.6.3",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "eslint": "^7.0.0",

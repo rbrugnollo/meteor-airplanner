@@ -71,6 +71,50 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+self.addEventListener('notificationclick', (event) => {
+  console.log('notificationclick', event);
+  event.notification.close();
+  const apiData = event.notification.data;
+
+  switch (event.action) {
+    case 'authorize':
+      // Make a fetch request to the new server endpoint
+      event.waitUntil(
+        fetch('/api/flights/authorize', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({userId: apiData.userId, flightId: apiData.flightId}),
+        })
+          .then(response => response.json())
+          .then(data => {
+            // Process the response from the server
+            console.log(data);
+          })
+          .catch(error => {
+            console.error('Error making API request:', error);
+          })
+      );
+      break;
+    case 'close':
+      console.log('close');
+      break;
+    default:
+      console.log('nothing');
+    // Handle other actions ...
+  }
+});
+
+self.addEventListener('push', (event) => {
+  if (event.data) {
+    const { title, ...payload } = event.data.json();
+    console.log(title, payload);
+    event.waitUntil(
+      self.registration.showNotification(title, payload));
+  }
+});
+
 function removeHash(element) {
   if (typeof element === 'string') return element.split('?hash=')[0];
 }

@@ -17,6 +17,7 @@ import '../../api/costCenters/publications';
 // Flights
 import '../../api/flights/methods';
 import '../../api/flights/publications';
+import '../../api/flights/rest';
 
 // Events
 import '../../api/events/methods';
