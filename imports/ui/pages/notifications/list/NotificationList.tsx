@@ -1,19 +1,20 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import dayjs from 'dayjs';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MrtColumnDef,
   MRT_Virtualizer as MrtVirtualizer,
 } from 'material-react-table';
-import { Box, Container, Stack, Typography, Divider, useMediaQuery, Theme } from '@mui/material';
+import { Grid, Box, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/notifications/publications/list';
 import { Notification, NotificationsCollection } from '/imports/api/notifications/collection';
 import { Mongo } from 'meteor/mongo';
 import SetAllAsReadButton from './SetAllAsReadButton';
+import AuthorizeButton from './AuthorizeButton';
+import { toggleRead } from '/imports/api/notifications/methods/toggleRead';
 
 const NotificationList = () => {
-  const navigate = useNavigate();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -31,15 +32,28 @@ const NotificationList = () => {
         accessorKey: '_id',
         header: '',
         Cell: (cell) => {
-          const { title, message } = cell?.row?.original;
+          const { title, message, createdAt, type, flightId, read } = cell?.row?.original;
           return (
-            <Box>
+            <Box width={'100%'}>
               <Typography variant="subtitle2" component="h6">
-                {title}
+                <Grid
+                  sx={{ fontWeight: read ? 'regular' : 'bold' }}
+                  container
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Grid item>{title}</Grid>
+                  <Grid item>{dayjs(createdAt).format('DD/MM HH:mm')}</Grid>
+                </Grid>
               </Typography>
-              <Divider variant="inset" />
               <Typography variant="body2" component="p">
                 {message}
+                <div>
+                  {type === 'flight-authorize' && flightId ? (
+                    <AuthorizeButton flightId={flightId} />
+                  ) : null}
+                </div>
               </Typography>
             </Box>
           );
@@ -113,7 +127,7 @@ const NotificationList = () => {
               }}
               muiTableBodyRowProps={({ row }) => ({
                 onClick: () => {
-                  navigate(`/app/notifications/${row.original._id}`);
+                  toggleRead({ _id: row.original._id, read: !row.original.read });
                 },
                 sx: {
                   cursor: 'pointer',

@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import dayjs from 'dayjs';
-import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
+import { updateNotificationCount } from '../../users/methods/updateNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
 import { sendPushNotification } from './sendPushNotification';
@@ -63,6 +63,6 @@ export const flightCreated = createMethod({
     });
 
     // Update Users collection
-    await incrementNotificationCount({ userIds });
+    await updateNotificationCount({ userIds });
   },
 });

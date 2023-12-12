@@ -8,7 +8,5 @@ import './hasPermission';
 import './disable';
 import './enable';
 import './updateNotification';
-import './incrementNotificationCount';
-import './decrementNotificationCount';
-import './setNotificationCountToZero';
+import './updateNotificationCount';
 import './subscribeToPush';

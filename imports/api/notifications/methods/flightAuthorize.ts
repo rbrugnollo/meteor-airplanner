@@ -1,7 +1,7 @@
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import dayjs from 'dayjs';
-import { incrementNotificationCount } from '../../users/methods/incrementNotificationCount';
+import { updateNotificationCount } from '../../users/methods/updateNotificationCount';
 import { NotificationsCollection } from '../collection';
 import { FlightsCollection } from '/imports/api/flights/collection';
 import { sendPushNotification } from './sendPushNotification';
@@ -41,7 +41,7 @@ export const flightAuthorize = createMethod({
     });
 
     // Update Users collection
-    await incrementNotificationCount({ userIds: [flight.authorizer.value] });
+    await updateNotificationCount({ userIds: [flight.authorizer.value] });
 
     // Send Push Notification
 

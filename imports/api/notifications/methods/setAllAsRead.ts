@@ -1,6 +1,6 @@
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
-import { setNotificationCountToZero } from '../../users/methods/setNotificationCountToZero';
+import { updateNotificationCount } from '../../users/methods/updateNotificationCount';
 import { NotificationsCollection } from '../collection';
 
 export const setAllAsRead = createMethod({
@@ -15,6 +15,6 @@ export const setAllAsRead = createMethod({
       { multi: true },
     );
     // Update dependent collections
-    await setNotificationCountToZero();
+    await updateNotificationCount({ userIds: [this.userId] });
   },
 });
