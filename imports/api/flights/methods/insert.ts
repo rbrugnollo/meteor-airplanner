@@ -15,7 +15,6 @@ export const insert = createMethod({
   async run(flight) {
     const result = await FlightsCollection.insertAsync({
       ...flight,
-      status: 'Draft',
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: this.userId!,

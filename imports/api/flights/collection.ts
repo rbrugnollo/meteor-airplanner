@@ -12,9 +12,50 @@ export interface FlightRequester {
   readonly percentage?: number;
 }
 
+export interface FlightFuelExpenses {
+  readonly pounds: number;
+  readonly liters: number;
+  readonly unitPrice: number;
+  readonly subTotal: number;
+}
+
+export interface FlightHangarExpenses {
+  readonly stopover?: number;
+  readonly ramp?: number;
+  readonly price?: number;
+  readonly subTotal: number;
+}
+
+export interface FlightMaintenanceExpenses {
+  readonly maintenancePrice: number;
+  readonly duration: number;
+  readonly dolarPrice: number;
+  readonly subTotal: number;
+}
+
+export interface FlightCrewExpenses {
+  readonly flightAttendant?: number;
+  readonly security?: number;
+  readonly transportation?: number;
+  readonly hotel?: number;
+  readonly food?: number;
+  readonly subTotal: number;
+}
+
+export interface FlightExpenses {
+  readonly fuel?: FlightFuelExpenses;
+  readonly hangar?: FlightHangarExpenses;
+  readonly maintenance?: FlightMaintenanceExpenses;
+  readonly crew?: FlightCrewExpenses;
+  readonly landings?: number;
+  readonly landingsPrice?: number;
+  readonly decea?: number;
+  readonly other?: number;
+  readonly grandTotal: number;
+}
+
 export interface Flight extends BaseCollection {
   readonly groupId: string;
-  readonly status: 'Draft' | 'Published' | 'Scheduled' | 'Confirmed';
   readonly airplane: ValueLabelType;
   readonly scheduledDepartureDateTime: Date;
   readonly scheduledArrivalDateTime: Date;
@@ -41,39 +82,7 @@ export interface Flight extends BaseCollection {
   readonly arrivalDateTime?: Date;
   readonly duration?: string;
   readonly handlingDuration?: string;
-  readonly expensenses?: {
-    readonly fuel?: {
-      readonly pounds: number;
-      readonly liters: number;
-      readonly unitPrice: number;
-      readonly subTotal: number;
-    };
-    readonly hangar?: {
-      readonly stopover?: number;
-      readonly ramp?: number;
-      readonly price?: number;
-      readonly subTotal: number;
-    };
-    readonly maintenance?: {
-      readonly maintenancePrice: number;
-      readonly duration: number;
-      readonly dolarPrice: number;
-      readonly subTotal: number;
-    };
-    readonly crew?: {
-      readonly flightAttendant?: number;
-      readonly security?: number;
-      readonly transportation?: number;
-      readonly hotel?: number;
-      readonly food?: number;
-      readonly subTotal: number;
-    };
-    readonly landings?: number;
-    readonly landingsPrice?: number;
-    readonly decea?: number;
-    readonly other?: number;
-    readonly grandTotal: number;
-  };
+  readonly expenses?: FlightExpenses;
 }
 
 export const FlightsCollection = new Mongo.Collection<Flight>(COLLECTION_NAME);
