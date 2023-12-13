@@ -27,7 +27,7 @@ import {
   Flight as FlightIcon,
 } from '@mui/icons-material';
 import { Flight } from '/imports/api/flights/collection';
-import { cancel } from '/imports/api/flights/methods/cancel';
+// import { cancel } from '/imports/api/flights/methods/cancel';
 import { Meteor } from 'meteor/meteor';
 import { authorize } from '/imports/api/flights/methods/authorize';
 import { update } from '/imports/api/flights/methods/update';
@@ -37,6 +37,7 @@ interface FlightDetailsProps {
   readonly canUpdate: boolean;
   readonly canCancel: boolean;
   readonly onEdit: (flightId: string) => void;
+  readonly onReview: (flightId: string) => void;
   readonly onViewRoute: (flightGroupId: string) => void;
 }
 
@@ -45,6 +46,7 @@ const FlightDetails = ({
   canUpdate,
   canCancel,
   onEdit,
+  onReview,
   onViewRoute,
 }: FlightDetailsProps) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -226,6 +228,10 @@ const FlightDetails = ({
           <Grid item xs={12} md={3}>
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReview(flight._id);
+                }}
                 color={isCancelled ? 'default' : 'info'}
                 label={dayjs(flight.scheduledDepartureDateTime).format('ddd, DD/MM HH:mm')}
               />

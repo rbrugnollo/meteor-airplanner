@@ -12,13 +12,26 @@ import {
   Stack,
   Switch,
   FormControlLabel,
+  IconButton,
+  CircularProgress,
   List,
+  Checkbox,
+  Divider,
   ListItem,
 } from '@mui/material';
 import { FormikErrors, useFormik, FormikProvider, FieldArray, getIn } from 'formik';
 import { update } from '/imports/api/flights/methods/update';
 import { useSnackbar } from 'notistack';
-import { Flight, FlightRequester, FlightsCollection } from '/imports/api/flights/collection';
+import {
+  Flight,
+  FlightCrewExpenses,
+  FlightExpenses,
+  FlightFuelExpenses,
+  FlightHangarExpenses,
+  FlightMaintenanceExpenses,
+  FlightRequester,
+  FlightsCollection,
+} from '/imports/api/flights/collection';
 import { Meteor } from 'meteor/meteor';
 import { IdBaseCollectionTypes, Nullable } from '/imports/api/common/BaseCollection';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -29,14 +42,24 @@ import AirplaneSelect from '../../shared/selects/AirplaneSelect';
 import AirportSelect from '../../shared/selects/AirportSelect';
 import UserSelect from '../../shared/selects/UserSelect';
 import { Airplane } from '/imports/api/airplanes/collection';
-import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import createUuid from '../../shared/functions/createUuid';
-import { list } from '/imports/api/flights/publications/list';
 import { Airport } from '/imports/api/airports/collection';
 import CostCenterSelect from '../../shared/selects/CostCenterSelect';
 import { sum } from 'lodash';
+import { calculateDuration } from '/imports/api/flights/methods/calculateDuration';
 
-type ReviewFlightFormValues = Partial<Nullable<Omit<Flight, IdBaseCollectionTypes>>>;
+interface ReviewFlightFormFlightExpensesValues
+  extends Omit<Nullable<FlightExpenses>, 'fuel' | 'hangar' | 'maintenance' | 'crew'> {
+  readonly fuel?: Nullable<FlightFuelExpenses>;
+  readonly hangar?: Nullable<FlightHangarExpenses>;
+  readonly maintenance?: Nullable<FlightMaintenanceExpenses>;
+  readonly crew?: Nullable<FlightCrewExpenses>;
+}
+
+interface ReviewFlightFormValues
+  extends Omit<Nullable<Flight>, IdBaseCollectionTypes | 'expenses'> {
+  readonly expenses?: ReviewFlightFormFlightExpensesValues;
+}
 
 interface ReviewFlightFormProps {
   readonly flightId?: string;
@@ -49,6 +72,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
   const [origin, setOrigin] = useState<Airport | undefined>(undefined);
   const [lastSavedFlight, setLastSavedFlight] = useState<Flight | undefined>(undefined);
   const [destination, setDestination] = useState<Airport | undefined>(undefined);
+  const [calculatingDuration, setCalculatingDuration] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
   const fullScreen = useMediaQuery<Theme>((theme) => theme.breakpoints.down('md'));
@@ -57,52 +81,59 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
       _id: null,
       groupId: null,
       airplane: null,
-      departureDateTime: null,
-      arrivalDateTime: null,
-      duration: '',
-      handlingDuration: '',
+      scheduledDepartureDateTime: null,
+      scheduledArrivalDateTime: null,
+      estimatedDuration: '',
+      estimatedHandlingDuration: '00:30',
       origin: null,
       destination: null,
+      maintenance: false,
+      published: false,
+      dateConfirmed: false,
+      timeConfirmed: false,
+      authorizer: null,
+      authorized: false,
+      cancelled: false,
       captain: null,
       captainInReserve: true,
       firstOfficer: null,
       firstOfficerInReserve: true,
       passengers: [],
       requesters: [],
-      expensenses: {
+      notes: '',
+      expenses: {
         fuel: {
-          pounds: 0,
-          liters: 0,
-          unitPrice: 0,
-          subTotal: 0,
+          pounds: null,
+          liters: null,
+          unitPrice: null,
+          subTotal: null,
         },
         hangar: {
-          stopover: undefined,
-          ramp: undefined,
-          price: undefined,
-          subTotal: 0,
+          stopover: null,
+          ramp: null,
+          price: null,
+          subTotal: null,
         },
         maintenance: {
-          maintenancePrice: 0,
-          duration: 0,
-          dolarPrice: 0,
-          subTotal: 0,
+          maintenancePrice: null,
+          duration: null,
+          dolarPrice: null,
+          subTotal: null,
         },
         crew: {
-          flightAttendant: undefined,
-          security: undefined,
-          transportation: undefined,
-          hotel: undefined,
-          food: undefined,
-          subTotal: 0,
+          flightAttendant: null,
+          security: null,
+          transportation: null,
+          hotel: null,
+          food: null,
+          subTotal: null,
         },
-        landings: undefined,
-        landingsPrice: undefined,
-        decea: undefined,
-        other: undefined,
-        grandTotal: 0,
+        landings: null,
+        landingsPrice: null,
+        decea: null,
+        other: null,
+        grandTotal: null,
       },
-      notes: '',
     },
     validate: async (values) => {
       let errors: FormikErrors<ReviewFlightFormValues> = {};
@@ -111,30 +142,30 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
       if (airplane && (values.passengers?.length ?? 0) > airplane.seats) {
         errors = {
           ...errors,
-          passengers: `This airplane can only fit ${airplane.seats} passengers.`,
+          passengers: `Limite máximo de ${airplane.seats} passageiros.`,
         };
       }
 
       return errors;
     },
     validationSchema: Yup.object<ReviewFlightFormValues>().shape({
-      airplane: Yup.object().required('Airplane é obrigatório'),
-      departureDateTime: Yup.date().required('Date Time é obrigatório'),
+      airplane: Yup.object().required('Aeronave é obrigatório'),
+      departureDateTime: Yup.date().required('Data e Hora é obrigatório'),
       duration: Yup.string()
-        .required('Duration é obrigatório')
-        .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
+        .required('Tempo de vôo é obrigatório')
+        .matches(/^\d{1,2}:\d{1,2}$/, 'Formato inválido (hh:mm)'),
       handlingDuration: Yup.string()
         .required('Handling é obrigatório')
-        .matches(/^\d{1,2}:\d{1,2}$/, 'Invalid format (hh:mm)'),
-      origin: Yup.object().required('Origin é obrigatório'),
-      destination: Yup.object().required('Destination é obrigatório'),
+        .matches(/^\d{1,2}:\d{1,2}$/, 'Formato inválido (hh:mm)'),
+      origin: Yup.object().required('Origem é obrigatório'),
+      destination: Yup.object().required('Destino é obrigatório'),
       requesters: Yup.array().of(
         Yup.object().shape({
-          requester: Yup.object().required('Requester é obrigatório'),
-          costCenter: Yup.object().required('Cost Center é obrigatório'),
+          requester: Yup.object().required('Solicitante é obrigatório'),
+          costCenter: Yup.object().required('Centro de Custo é obrigatório'),
           percentage: Yup.number()
-            .required('Percentage é obrigatório')
-            .test('sum', 'Sum must be 100%', function (_v) {
+            .required('Porcentagem é obrigatório')
+            .test('sum', 'Soma deve ser 100%', function (_v) {
               const values = this.from?.[1]?.value as ReviewFlightFormValues;
               if (!values || !values.requesters) return true;
               const totalPercentage = sum(values.requesters.map((m) => m.percentage ?? 0));
@@ -147,30 +178,6 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
     enableReinitialize: true,
   });
 
-  useSubscribe(() => {
-    return list({
-      andFilters: [
-        { groupId: formik.values.groupId ?? '' },
-        { _id: { $ne: formik.values._id ?? '' } },
-      ],
-      options: {},
-    });
-  });
-
-  const groupFlights = useFind(
-    () =>
-      FlightsCollection.find(
-        {
-          $and: [
-            { groupId: formik.values.groupId ?? '' },
-            { _id: { $ne: formik.values._id ?? '' } },
-          ],
-        },
-        {},
-      ),
-    [formik.values.groupId],
-  );
-
   useEffect(() => {
     formik.resetForm();
     if (!open) return;
@@ -180,10 +187,10 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
       if (flight)
         formik.setValues({
           ...flight,
-          duration: flight.estimatedDuration,
-          handlingDuration: flight.estimatedHandlingDuration,
-          departureDateTime: flight.scheduledDepartureDateTime,
-          arrivalDateTime: flight.scheduledArrivalDateTime,
+          duration: flight.duration ?? flight.estimatedDuration,
+          handlingDuration: flight.handlingDuration ?? flight.estimatedHandlingDuration,
+          departureDateTime: flight.departureDateTime ?? flight.scheduledDepartureDateTime,
+          arrivalDateTime: flight.arrivalDateTime ?? flight.scheduledArrivalDateTime,
         });
     } else {
       formik.setFieldValue('groupId', createUuid());
@@ -192,24 +199,33 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
   }, [open]);
 
   useEffect(() => {
-    formik.setFieldValue('arrivalDateTime', '');
-    const { departureDateTime, duration, handlingDuration } = formik.values;
-    if (departureDateTime && duration && handlingDuration) {
-      const arrival = dayjs(departureDateTime)
-        .add(parseInt(duration.split(':')[0]), 'hour')
-        .add(parseInt(duration.split(':')[1]), 'minute')
-        .add(parseInt(handlingDuration.split(':')[0]), 'hour')
-        .add(parseInt(handlingDuration.split(':')[1]), 'minute')
-        .tz(destination?.timezoneName ?? 'UTC')
-        .toDate();
-
-      formik.setFieldValue('arrivalDateTime', arrival);
+    formik.setFieldValue('estimatedDuration', '');
+    if (formik.values.origin && formik.values.destination && formik.values.airplane) {
+      setCalculatingDuration(true);
+      calculateDuration({
+        originAirportId: formik.values.origin.value,
+        destinationAirportId: formik.values.destination.value,
+        airplaneId: formik.values.airplane.value,
+      })
+        .then((d) => d)
+        .then((duration) => {
+          if (duration) {
+            formik.setFieldValue('estimatedDuration', duration ?? '');
+          }
+        })
+        .finally(() => {
+          setCalculatingDuration(false);
+        });
     }
+  }, [formik.values.origin, formik.values.destination, formik.values.airplane]);
+
+  useEffect(() => {
+    setScheduledArrivalDateTime();
   }, [
     destination,
-    formik.values.departureDateTime,
-    formik.values.duration,
-    formik.values.handlingDuration,
+    formik.values.scheduledDepartureDateTime,
+    formik.values.estimatedDuration,
+    formik.values.estimatedHandlingDuration,
   ]);
 
   useEffect(() => {
@@ -220,6 +236,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
         .then((airplane) => {
           if (airplane) {
             setAirplane(airplane);
+            formik.setFieldValue('authorizer', airplane.manager);
             formik.setFieldValue('captain', airplane.captain);
             formik.setFieldValue('firstOfficer', airplane.firstOfficer);
           }
@@ -253,7 +270,114 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
     }
   }, [formik.values.destination]);
 
+  useEffect(() => {
+    formik.setFieldValue(
+      'expenses.fuel.subTotal',
+      (formik.values.expenses?.fuel?.unitPrice ?? 0) * (formik.values.expenses?.fuel?.liters ?? 0),
+    );
+  }, [
+    formik.values.expenses?.fuel?.pounds,
+    formik.values.expenses?.fuel?.liters,
+    formik.values.expenses?.fuel?.unitPrice,
+  ]);
+
+  useEffect(() => {
+    formik.setFieldValue(
+      'expenses.hangar.subTotal',
+      sum([
+        formik.values.expenses?.hangar?.stopover ?? 0,
+        formik.values.expenses?.hangar?.ramp ?? 0,
+        formik.values.expenses?.hangar?.price ?? 0,
+      ]),
+    );
+  }, [
+    formik.values.expenses?.hangar?.stopover,
+    formik.values.expenses?.hangar?.ramp,
+    formik.values.expenses?.hangar?.price,
+  ]);
+
+  useEffect(() => {
+    formik.setFieldValue(
+      'expenses.maintenance.subTotal',
+      (formik.values.expenses?.maintenance?.maintenancePrice ?? 0) *
+        (formik.values.expenses?.maintenance?.dolarPrice ?? 0),
+    );
+  }, [
+    formik.values.expenses?.maintenance?.maintenancePrice,
+    formik.values.expenses?.maintenance?.dolarPrice,
+  ]);
+
+  useEffect(() => {
+    formik.setFieldValue(
+      'expenses.crew.subTotal',
+      sum([
+        formik.values.expenses?.crew?.flightAttendant ?? 0,
+        formik.values.expenses?.crew?.security ?? 0,
+        formik.values.expenses?.crew?.transportation ?? 0,
+        formik.values.expenses?.crew?.hotel ?? 0,
+        formik.values.expenses?.crew?.food ?? 0,
+      ]),
+    );
+  }, [
+    formik.values.expenses?.crew?.flightAttendant,
+    formik.values.expenses?.crew?.security,
+    formik.values.expenses?.crew?.transportation,
+    formik.values.expenses?.crew?.hotel,
+    formik.values.expenses?.crew?.food,
+  ]);
+
+  useEffect(() => {
+    formik.setFieldValue(
+      'expenses.grandTotal',
+      sum([
+        formik.values.expenses?.fuel?.subTotal ?? 0,
+        formik.values.expenses?.hangar?.subTotal ?? 0,
+        formik.values.expenses?.maintenance?.subTotal ?? 0,
+        formik.values.expenses?.crew?.subTotal ?? 0,
+        formik.values.expenses?.landingsPrice ?? 0,
+        formik.values.expenses?.decea ?? 0,
+        formik.values.expenses?.other ?? 0,
+      ]),
+    );
+  }, [
+    formik.values.expenses?.fuel?.subTotal,
+    formik.values.expenses?.hangar?.subTotal,
+    formik.values.expenses?.maintenance?.subTotal,
+    formik.values.expenses?.crew?.subTotal,
+    formik.values.expenses?.landingsPrice,
+    formik.values.expenses?.decea,
+    formik.values.expenses?.other,
+  ]);
+
+  function setScheduledArrivalDateTime() {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledDepartureDateTime, estimatedDuration } = formik.values;
+    if (scheduledDepartureDateTime && estimatedDuration) {
+      const arrival = dayjs(scheduledDepartureDateTime)
+        .add(parseInt(estimatedDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+      formik.setFieldValue('scheduledArrivalDateTime', arrival);
+    }
+  }
+
+  function setNextScheduledDepartureDateTime() {
+    formik.setFieldValue('scheduledArrivalDateTime', '');
+    const { scheduledArrivalDateTime, estimatedHandlingDuration } = formik.values;
+    if (scheduledArrivalDateTime && estimatedHandlingDuration) {
+      const departure = dayjs(scheduledArrivalDateTime)
+        .add(parseInt(estimatedHandlingDuration.split(':')[0]), 'hour')
+        .add(parseInt(estimatedHandlingDuration.split(':')[1]), 'minute')
+        .tz(destination?.timezoneName ?? 'UTC')
+        .toDate();
+      formik.setFieldValue('scheduledDepartureDateTime', departure);
+    }
+  }
+
   function goToNextFlight(createdAtAfter: Date) {
+    // If there's a following flight for the groupId, load it
+    // otherwise, start a new flight
     const followingFlight = FlightsCollection.findOne(
       {
         groupId: formik.values.groupId ?? '',
@@ -264,6 +388,13 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
     if (followingFlight) {
       setLastSavedFlight(followingFlight);
       if (followingFlight) formik.setValues(followingFlight);
+    } else {
+      formik.setFieldValue('_id', null);
+      formik.setFieldValue('origin', formik.values.destination);
+      formik.setFieldValue('destination', null);
+      setNextScheduledDepartureDateTime();
+      setScheduledArrivalDateTime();
+      formik.validateForm();
     }
   }
 
@@ -308,15 +439,16 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
       }}
       disableEscapeKeyDown
     >
-      <DialogTitle>Review Flight</DialogTitle>
+      <DialogTitle>Revisar Vôo</DialogTitle>
       <DialogContent>
         <FormikProvider value={formik}>
           <form id="review-flight-form" noValidate onSubmit={formik.handleSubmit}>
             <Stack sx={{ mt: 1 }} spacing={3}>
               <AirplaneSelect
                 fullWidth
-                label="Airplane"
+                label="Aeronave"
                 name="airplane"
+                required
                 onBlur={formik.handleBlur}
                 value={formik.values.airplane}
                 onChange={(_e, value) => {
@@ -326,8 +458,9 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 helperText={formik.touched.airplane && formik.errors.airplane}
               />
               <AirportSelect
+                required
                 fullWidth
-                label="Origin"
+                label="Origem"
                 name="origin"
                 onBlur={formik.handleBlur}
                 value={formik.values.origin}
@@ -338,8 +471,9 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 helperText={formik.touched.origin && formik.errors.origin}
               />
               <AirportSelect
+                required
                 fullWidth
-                label="Destination"
+                label="Destino"
                 name="destination"
                 onBlur={formik.handleBlur}
                 value={formik.values.destination}
@@ -351,14 +485,9 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
               />
               <DateTimePicker
                 disabled={formik.values.origin === null}
-                label={`Departure (${origin?.timezoneName ?? 'UTC'})`}
+                label={`Decolagem (${origin?.timezoneName ?? 'UTC'})`}
                 disablePast
                 timezone={origin?.timezoneName ?? 'UTC'}
-                shouldDisableDate={(date) => {
-                  return !!groupFlights
-                    .map((m) => dayjs(m.departureDateTime))
-                    .find((f) => f.isSame(date, 'day') || f.isAfter(date, 'day'));
-                }}
                 value={
                   formik.values.departureDateTime ? dayjs(formik.values.departureDateTime) : null
                 }
@@ -376,18 +505,25 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 }}
               />
               <TextField
+                required
+                fullWidth
+                label="Duração"
+                name="duration"
                 InputProps={{
                   readOnly: true,
+                  endAdornment: calculatingDuration ? (
+                    <IconButton edge="end">
+                      <CircularProgress size={24} />
+                    </IconButton>
+                  ) : undefined,
                 }}
-                fullWidth
-                label="Duration"
-                name="duration"
                 value={formik.values.duration}
               />
               <TextField
+                required
                 fullWidth
                 label="Handling"
-                name="handlingDuration"
+                name="estimatedHandlingDuration"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 value={formik.values.handlingDuration}
@@ -396,85 +532,9 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
               />
               <DateTimePicker
                 readOnly
-                label={`Arrival (${destination?.timezoneName ?? 'UTC'})`}
+                label={`Chegada (${destination?.timezoneName ?? 'UTC'})`}
                 timezone={destination?.timezoneName ?? 'UTC'}
                 value={formik.values.arrivalDateTime ? dayjs(formik.values.arrivalDateTime) : null}
-              />
-              <UserSelect
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="Captain"
-                name="captain"
-                roles={['Comandante']}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('captain', value);
-                }}
-                filter={(o) =>
-                  airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
-                }
-                defaultValue={formik.initialValues.captain ?? null}
-                value={formik.values.captain ?? null}
-                error={!!formik.errors.captain}
-                helperText={formik.errors.captain}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.captainInReserve ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('captainInReserve', value);
-                    }}
-                    name="captainInReserve"
-                  />
-                }
-                label="Captain in Reserve"
-              />
-              <UserSelect
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="First Officer"
-                name="firstOfficer"
-                roles={['Comandante', 'Co-Piloto']}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('firstOfficer', value);
-                }}
-                filter={(o) =>
-                  airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
-                }
-                defaultValue={formik.initialValues.firstOfficer ?? null}
-                value={formik.values.firstOfficer ?? null}
-                error={!!formik.errors.firstOfficer}
-                helperText={formik.errors.firstOfficer}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formik.values.firstOfficerInReserve ?? false}
-                    onChange={(_e, value) => {
-                      formik.setFieldValue('firstOfficerInReserve', value);
-                    }}
-                    name="firstOfficerInReserve"
-                  />
-                }
-                label="First Officer in Reserve"
-              />
-              <UserSelect
-                multiple
-                fullWidth
-                disabled={formik.values.airplane === null}
-                label="Passengers"
-                name="passengers"
-                roles={[]}
-                onBlur={formik.handleBlur}
-                onChange={(_e, value) => {
-                  formik.setFieldValue('passengers', value);
-                }}
-                defaultValue={formik.initialValues.passengers ?? undefined}
-                value={formik.values.passengers ?? undefined}
-                error={!!(formik.touched.passengers && formik.errors.passengers)}
-                helperText={formik.touched.passengers && formik.errors.passengers}
               />
               <FormControlLabel
                 control={
@@ -486,11 +546,99 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                     name="maintenance"
                   />
                 }
-                label="Maintenance"
+                label="Manutenção"
+              />
+              <Stack direction="row" spacing={2}>
+                <UserSelect
+                  required
+                  fullWidth
+                  disabled={formik.values.airplane === null}
+                  label="Comandante"
+                  name="captain"
+                  roles={['Comandante']}
+                  onBlur={formik.handleBlur}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('captain', value);
+                  }}
+                  filter={(o) =>
+                    airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
+                  }
+                  defaultValue={formik.initialValues.captain ?? null}
+                  value={formik.values.captain ?? null}
+                  error={!!formik.errors.captain}
+                  helperText={formik.errors.captain}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.captainInReserve ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Comandante ${value ? 'em' : 'fora de'} Reserva`);
+                        formik.setFieldValue('captainInReserve', value);
+                      }}
+                      name="captainInReserve"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
+              <Stack direction="row" spacing={2}>
+                <UserSelect
+                  required
+                  fullWidth
+                  disabled={formik.values.airplane === null}
+                  label="Co-Piloto"
+                  name="firstOfficer"
+                  roles={['Comandante', 'Co-Piloto']}
+                  onBlur={formik.handleBlur}
+                  onChange={(_e, value) => {
+                    formik.setFieldValue('firstOfficer', value);
+                  }}
+                  filter={(o) =>
+                    airplane ? (airplane.pilots ?? []).map((m) => m.value).includes(o.value) : true
+                  }
+                  defaultValue={formik.initialValues.firstOfficer ?? null}
+                  value={formik.values.firstOfficer ?? null}
+                  error={!!formik.errors.firstOfficer}
+                  helperText={formik.errors.firstOfficer}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.firstOfficerInReserve ?? false}
+                      onChange={(_e, value) => {
+                        enqueueSnackbar(`Co-Piloto ${value ? 'em' : 'fora de'} Reserva`);
+                        formik.setFieldValue('firstOfficerInReserve', value);
+                      }}
+                      name="firstOfficerInReserve"
+                    />
+                  }
+                  label=""
+                />
+              </Stack>
+              <UserSelect
+                selectOnFocus
+                clearOnBlur
+                handleHomeEndKeys
+                freeSolo
+                multiple
+                fullWidth
+                disabled={formik.values.airplane === null}
+                label="Passageiros"
+                name="passengers"
+                roles={[]}
+                onBlur={formik.handleBlur}
+                onChange={(_e, value) => {
+                  formik.setFieldValue('passengers', value);
+                }}
+                defaultValue={formik.initialValues.passengers ?? undefined}
+                value={formik.values.passengers ?? undefined}
+                error={!!(formik.touched.passengers && formik.errors.passengers)}
+                helperText={formik.touched.passengers && formik.errors.passengers}
               />
               <TextField
                 fullWidth
-                label="Notes"
+                label="Observações"
                 name="notes"
                 multiline
                 rows={4}
@@ -499,6 +647,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 onBlur={formik.handleBlur}
               />
 
+              <Divider textAlign="left">Solicitantes</Divider>
               <FieldArray name="requesters">
                 {({
                   remove,
@@ -527,7 +676,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                               <Stack sx={{ mt: 1 }} spacing={3}>
                                 <UserSelect
                                   fullWidth
-                                  label="Requester"
+                                  label="Solicitante"
                                   name={requesterName}
                                   roles={[]}
                                   onBlur={formik.handleBlur}
@@ -540,7 +689,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                                 />
                                 <CostCenterSelect
                                   fullWidth
-                                  label="Cost Center"
+                                  label="Centro de Custo"
                                   name={costCenter}
                                   onBlur={formik.handleBlur}
                                   onChange={(_e, value) => {
@@ -552,7 +701,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                                 />
                                 <TextField
                                   fullWidth
-                                  label="Percentage"
+                                  label="Porcentagem"
                                   type="number"
                                   name={percentage}
                                   onBlur={formik.handleBlur}
@@ -574,7 +723,7 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                                     remove(index);
                                   }}
                                 >
-                                  Remove
+                                  Remover
                                 </Button>
                               </Stack>
                             </ListItem>
@@ -591,118 +740,39 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                         push({ costCenter: null, percentage, requester: null });
                       }}
                     >
-                      Add Requester
+                      Adicionar Solicitante
                     </Button>
                   </>
                 )}
               </FieldArray>
 
+              <Divider textAlign="left">Despesas - Combustível</Divider>
               <TextField
                 fullWidth
-                label="Pounds"
+                label="Libras"
                 type="number"
-                name="expensenses.fuel.pounds"
+                name="expenses.fuel.pounds"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.fuel?.pounds}
+                value={formik.values.expenses?.fuel?.pounds}
               />
               <TextField
                 fullWidth
-                label="Liters"
+                label="Litros"
                 type="number"
-                name="expensenses.fuel.liters"
+                name="expenses.fuel.liters"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.fuel?.liters}
+                value={formik.values.expenses?.fuel?.liters}
               />
               <TextField
                 fullWidth
-                label="Unit Price"
+                label="Unitário"
                 type="number"
-                name="expensenses.fuel.unitPrice"
+                name="expenses.fuel.unitPrice"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.fuel?.unitPrice}
-              />
-              <TextField
-                fullWidth
-                InputProps={{
-                  readOnly: true,
-                }}
-                label="Total Price"
-                type="number"
-                name="expensenses.fuel.subTotal"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.fuel?.subTotal}
-              />
-
-              <TextField
-                fullWidth
-                label="Stopover"
-                type="number"
-                name="expensenses.hangar.stopover"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.hangar?.stopover}
-              />
-              <TextField
-                fullWidth
-                label="Ramp"
-                type="number"
-                name="expensenses.hangar.ramp"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.hangar?.ramp}
-              />
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                name="expensenses.hangar.price"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.hangar?.price}
-              />
-              <TextField
-                InputProps={{
-                  readOnly: true,
-                }}
-                fullWidth
-                label="Total"
-                type="number"
-                name="expensenses.hangar.subTotal"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.hangar?.subTotal}
-              />
-
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                name="expensenses.maintenance.maintenancePrice"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.maintenance?.maintenancePrice}
-              />
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                name="expensenses.maintenance.duration"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.maintenance?.duration}
-              />
-              <TextField
-                fullWidth
-                label="Dolar"
-                type="number"
-                name="expensenses.maintenance.dolarPrice"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                value={formik.values.expensenses?.maintenance?.dolarPrice}
+                value={formik.values.expenses?.fuel?.unitPrice}
               />
               <TextField
                 fullWidth
@@ -711,56 +781,139 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 }}
                 label="Total"
                 type="number"
-                name="expensenses.maintenance.subTotal"
+                name="expenses.fuel.subTotal"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.maintenance?.subTotal}
+                value={formik.values.expenses?.fuel?.subTotal}
               />
 
+              <Divider textAlign="left">Despesas - Hangar</Divider>
               <TextField
                 fullWidth
-                label="Flight Attendant"
+                label="Pernoite"
                 type="number"
-                name="expensenses.crew.flightAttendant"
+                name="expenses.hangar.stopover"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.crew?.flightAttendant}
+                value={formik.values.expenses?.hangar?.stopover}
               />
               <TextField
                 fullWidth
-                label="Security"
+                label="Valor"
                 type="number"
-                name="expensenses.crew.security"
+                name="expenses.hangar.price"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.crew?.security}
+                value={formik.values.expenses?.hangar?.price}
               />
               <TextField
                 fullWidth
-                label="Transportation"
+                label="Rampa"
                 type="number"
-                name="expensenses.crew.transportation"
+                name="expenses.hangar.ramp"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.crew?.transportation}
+                value={formik.values.expenses?.hangar?.ramp}
+              />
+              <TextField
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+                label="Total"
+                type="number"
+                name="expenses.hangar.subTotal"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.hangar?.subTotal}
+              />
+
+              <Divider textAlign="left">Despesas - Manutenção</Divider>
+              <TextField
+                fullWidth
+                label="Manutenção"
+                type="number"
+                name="expenses.maintenance.maintenancePrice"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.maintenance?.maintenancePrice}
+              />
+              <TextField
+                fullWidth
+                label="Horas"
+                type="number"
+                name="expenses.maintenance.duration"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.maintenance?.duration}
+              />
+              <TextField
+                fullWidth
+                label="Dólar"
+                type="number"
+                name="expenses.maintenance.dolarPrice"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.maintenance?.dolarPrice}
+              />
+              <TextField
+                fullWidth
+                InputProps={{
+                  readOnly: true,
+                }}
+                label="Total"
+                type="number"
+                name="expenses.maintenance.subTotal"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.maintenance?.subTotal}
+              />
+
+              <Divider textAlign="left">Despesas - Tripulação</Divider>
+              <TextField
+                fullWidth
+                label="Comissária"
+                type="number"
+                name="expenses.crew.flightAttendant"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.crew?.flightAttendant}
+              />
+              <TextField
+                fullWidth
+                label="Revistas"
+                type="number"
+                name="expenses.crew.security"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.crew?.security}
+              />
+              <TextField
+                fullWidth
+                label="Transporte"
+                type="number"
+                name="expenses.crew.transportation"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                value={formik.values.expenses?.crew?.transportation}
               />
               <TextField
                 fullWidth
                 label="Hotel"
                 type="number"
-                name="expensenses.crew.hotel"
+                name="expenses.crew.hotel"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.crew?.hotel}
+                value={formik.values.expenses?.crew?.hotel}
               />
               <TextField
                 fullWidth
-                label="Food"
+                label="Refeição"
                 type="number"
-                name="expensenses.crew.food"
+                name="expenses.crew.food"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.crew?.food}
+                value={formik.values.expenses?.crew?.food}
               />
               <TextField
                 fullWidth
@@ -769,47 +922,48 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 }}
                 label="Total"
                 type="number"
-                name="expensenses.crew.subTotal"
+                name="expenses.crew.subTotal"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.crew?.subTotal}
+                value={formik.values.expenses?.crew?.subTotal}
               />
 
+              <Divider textAlign="left">Despesas - Outros</Divider>
               <TextField
                 fullWidth
-                label="Landings"
+                label="Número de Pousos"
                 type="number"
-                name="expensenses.landings"
+                name="expenses.landings"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.landings}
+                value={formik.values.expenses?.landings}
               />
               <TextField
                 fullWidth
-                label="Landings Price"
+                label="Custo de Pousos"
                 type="number"
-                name="expensenses.landingsPrice"
+                name="expenses.landingsPrice"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.landingsPrice}
+                value={formik.values.expenses?.landingsPrice}
               />
               <TextField
                 fullWidth
                 label="Decea"
                 type="number"
-                name="expensenses.decea"
+                name="expenses.decea"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.decea}
+                value={formik.values.expenses?.decea}
               />
               <TextField
                 fullWidth
-                label="Other"
+                label="Outros"
                 type="number"
-                name="expensenses.other"
+                name="expenses.other"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.other}
+                value={formik.values.expenses?.other}
               />
               <TextField
                 InputProps={{
@@ -818,10 +972,10 @@ const ReviewFlightForm = ({ flightId, open, onClose }: ReviewFlightFormProps) =>
                 fullWidth
                 label="GrandTotal"
                 type="number"
-                name="expensenses.grandTotal"
+                name="expenses.grandTotal"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.expensenses?.grandTotal}
+                value={formik.values.expenses?.grandTotal}
               />
             </Stack>
           </form>

@@ -133,6 +133,7 @@ const FlightList = () => {
                   canCancel={canCancel}
                   onViewRoute={(flightGroupId) => setRouteModalProps({ open: true, flightGroupId })}
                   onEdit={(flightId) => setFormModalProps({ open: true, flightId })}
+                  onReview={(flightId) => setReviewFormModalProps({ open: true, flightId })}
                   flight={flight}
                 />
               ))}
