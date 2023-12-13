@@ -10,12 +10,16 @@ import {
   TableBody,
 } from '@mui/material';
 import { useLoggedUser } from 'meteor/quave:logged-user-react';
-import { NotificationId, NotificationType, NotificationIds } from '/imports/api/users/collection';
+import {
+  NotificationId,
+  NotificationType,
+  NotificationLabels,
+} from '/imports/api/users/collection';
 import { updateNotification } from '/imports/api/users/methods/updateNotification';
 
 const NotificationsSettings = () => {
   const { loggedUser } = useLoggedUser();
-  const notificationIds = NotificationIds;
+  const notificationLabels = NotificationLabels;
 
   const isChecked = (notificationId: NotificationId, notificationType: NotificationType) => {
     const booleanOrUndefined =
@@ -54,9 +58,9 @@ const NotificationsSettings = () => {
         </TableHead>
         <TableBody>
           {loggedUser &&
-            notificationIds.map((notificationId) => (
+            notificationLabels.map(({ id: notificationId, label }) => (
               <TableRow key={notificationId}>
-                <TableCell>{notificationId}</TableCell>
+                <TableCell>{label}</TableCell>
                 <TableCell>
                   <Switch
                     defaultChecked={isChecked(notificationId, 'email')}
