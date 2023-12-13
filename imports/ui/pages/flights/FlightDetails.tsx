@@ -50,31 +50,34 @@ const FlightDetails = ({
   const { enqueueSnackbar } = useSnackbar();
   const { loggedUser } = useLoggedUser();
 
+  const isCancelled = flight.cancelled;
+
   const handleCancel = async () => {
+    if (!canUpdate || isCancelled) return;
     try {
-      await cancel({ flightId: flight._id, cancelled: true });
-      enqueueSnackbar('Vôo cancelado com sucesso.', {
-        variant: 'success',
-        action: () => (
-          <Button
-            color="inherit"
-            size="small"
-            onClick={async () => {
-              try {
-                await cancel({ flightId: flight._id, cancelled: false });
-                enqueueSnackbar('Vôo não cancelado.');
-              } catch (e: unknown) {
-                console.log(e);
-                if (e instanceof Meteor.Error) {
-                  enqueueSnackbar(e.message, { variant: 'error' });
-                }
-              }
-            }}
-          >
-            Desfazer
-          </Button>
-        ),
-      });
+      // await cancel({ flightId: flight._id, cancelled: true });
+      // enqueueSnackbar('Vôo cancelado com sucesso.', {
+      //   variant: 'success',
+      //   action: () => (
+      //     <Button
+      //       color="inherit"
+      //       size="small"
+      //       onClick={async () => {
+      //         try {
+      //           await cancel({ flightId: flight._id, cancelled: false });
+      //           enqueueSnackbar('Vôo não cancelado.');
+      //         } catch (e: unknown) {
+      //           console.log(e);
+      //           if (e instanceof Meteor.Error) {
+      //             enqueueSnackbar(e.message, { variant: 'error' });
+      //           }
+      //         }
+      //       }}
+      //     >
+      //       Desfazer
+      //     </Button>
+      //   ),
+      // });
     } catch (e: unknown) {
       console.log(e);
       if (e instanceof Meteor.Error) {
@@ -86,7 +89,7 @@ const FlightDetails = ({
   const handleAuthorize = async () => {
     const canAuthorize =
       !loggedUser || !flight.authorizer ? false : loggedUser._id === flight.authorizer.value;
-    if (!canAuthorize) return;
+    if (!canAuthorize || isCancelled) return;
     try {
       await authorize({ flightId: flight._id, authorized: true });
       enqueueSnackbar('Vôo autorizado com sucesso.', {
@@ -120,7 +123,7 @@ const FlightDetails = ({
   };
 
   const handleToggleProperty = async (propName: string, value: boolean) => {
-    if (!canUpdate) return;
+    if (!canUpdate || isCancelled) return;
     try {
       const previousValue = !value;
       await update({
@@ -173,7 +176,7 @@ const FlightDetails = ({
                       e.stopPropagation();
                       handleToggleProperty('dateConfirmed', !flight.dateConfirmed);
                     }}
-                    color={flight.dateConfirmed ? 'success' : 'warning'}
+                    color={isCancelled ? 'disabled' : flight.dateConfirmed ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 <Tooltip title={flight.timeConfirmed ? 'Horário Confirmado' : 'Horário Previsto'}>
@@ -182,7 +185,7 @@ const FlightDetails = ({
                       e.stopPropagation();
                       handleToggleProperty('timeConfirmed', !flight.timeConfirmed);
                     }}
-                    color={flight.timeConfirmed ? 'success' : 'warning'}
+                    color={isCancelled ? 'disabled' : flight.timeConfirmed ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 <Tooltip title={flight.authorized ? 'Autorizado' : 'Pendente de autorização'}>
@@ -191,7 +194,7 @@ const FlightDetails = ({
                       e.stopPropagation();
                       handleAuthorize();
                     }}
-                    color={flight.authorized ? 'success' : 'warning'}
+                    color={isCancelled ? 'disabled' : flight.authorized ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 {canUpdate && (
@@ -199,9 +202,10 @@ const FlightDetails = ({
                     <Edit
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (isCancelled) return;
                         onEdit(flight._id);
                       }}
-                      color="primary"
+                      color={isCancelled ? 'disabled' : 'primary'}
                     />
                   </Tooltip>
                 )}
@@ -212,7 +216,7 @@ const FlightDetails = ({
                         e.stopPropagation();
                         handleCancel();
                       }}
-                      color="error"
+                      color={isCancelled ? 'disabled' : 'error'}
                     />
                   </Tooltip>
                 )}
@@ -222,7 +226,7 @@ const FlightDetails = ({
           <Grid item xs={12} md={3}>
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
-                color="info"
+                color={isCancelled ? 'default' : 'info'}
                 label={dayjs(flight.scheduledDepartureDateTime).format('ddd, DD/MM HH:mm')}
               />
               {flight.maintenance ? (
