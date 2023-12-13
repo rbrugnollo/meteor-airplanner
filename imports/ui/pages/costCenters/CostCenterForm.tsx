@@ -91,7 +91,10 @@ const CostCenterForm = ({ costCenterId, open, onClose }: CostCenterFormProps) =>
       fullScreen={fullScreen}
       PaperProps={{ sx: { width: 450 } }}
       open={open}
-      onClose={onClose}
+      onClose={() => {
+        return;
+      }}
+      disableEscapeKeyDown
     >
       <DialogTitle>{costCenterId ? 'Editar' : 'Adicionar'} Centro de Custo</DialogTitle>
       <DialogContent>
