@@ -1,5 +1,6 @@
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
+import dayjs from 'dayjs';
 import { IdBaseCollectionTypes, BaseCollectionTypes } from '../../common/BaseCollection';
 import { Flight, FlightsCollection } from '../collection';
 import { publishGroup } from './publishGroup';
@@ -22,7 +23,9 @@ export const update = createMethod({
     // If the flight was authorized and the scheduled departure date or airplane changed, then the flight is no longer authorized
     if (
       flightBeforeUpdate.authorized &&
-      (flightBeforeUpdate.scheduledDepartureDateTime !== flight.scheduledArrivalDateTime ||
+      (!dayjs(flightBeforeUpdate.scheduledDepartureDateTime).isSame(
+        dayjs(flight.scheduledDepartureDateTime),
+      ) ||
         flightBeforeUpdate.airplane?.value !== flight.airplane?.value)
     ) {
       setFlight = {
