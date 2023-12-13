@@ -15,26 +15,38 @@ export const insert = createMethod({
   async run(flight) {
     const result = await FlightsCollection.insertAsync({
       ...flight,
-      status: 'Draft',
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: this.userId!,
       updatedBy: this.userId!,
     });
 
+    insertFireAndForget({ flightId: result });
+
+    return result;
+  },
+});
+
+export const insertFireAndForget = createMethod({
+  name: 'flights.insertFireAndForget',
+  schema: z.object({
+    flightId: z.string(),
+  }),
+  async run({ flightId }) {
+    const flight = await FlightsCollection.findOneAsync(flightId);
+    if (!flight) return;
+
     // Update dependent collections
-    await upsertFlightEvent(result);
+    await upsertFlightEvent(flightId);
     await upsertInReserveEvents({
-      flightBeforeUpdate: (await FlightsCollection.findOneAsync(result))!,
+      flightBeforeUpdate: flight,
       checkPreviousFlight: true,
     });
-    await upsertMaintenanceEvent({ flightId: result, checkPreviousFlight: true });
+    await upsertMaintenanceEvent({ flightId, checkPreviousFlight: true });
     if (flight.published) await publishGroup(flight.groupId);
 
     // Send Notifications
-    await flightCreated({ flightId: result });
-    await flightAuthorize({ flightId: result });
-
-    return result;
+    await flightCreated({ flightId });
+    await flightAuthorize({ flightId });
   },
 });

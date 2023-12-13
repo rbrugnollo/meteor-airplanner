@@ -52,7 +52,7 @@ import { checkPilotAvailability } from '/imports/api/users/methods/checkPilotAva
 import CostCenterSelect from '../../shared/selects/CostCenterSelect';
 import { sum } from 'lodash';
 
-type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes | 'status'>>;
+type FlightFormValues = Nullable<Omit<Flight, IdBaseCollectionTypes>>;
 
 interface FlightFormProps {
   readonly flightId?: string;

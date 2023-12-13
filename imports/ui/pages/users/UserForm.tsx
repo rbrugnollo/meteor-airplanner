@@ -127,7 +127,10 @@ const UserForm = ({ userId, newUser, open, onClose, onSuccess }: UserFormProps) 
       fullScreen={fullScreen}
       PaperProps={{ sx: { width: 450 } }}
       open={open}
-      onClose={onClose}
+      onClose={() => {
+        return;
+      }}
+      disableEscapeKeyDown
     >
       <DialogTitle>{userId ? 'Editar' : 'Adicionar'} Usuário</DialogTitle>
       <DialogContent>

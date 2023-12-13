@@ -82,6 +82,24 @@ export const NotificationIds = [
   'flight-authorize',
 ] as const;
 export type NotificationId = (typeof NotificationIds)[number];
+export const NotificationLabels: { id: NotificationId; label: string }[] = [
+  {
+    id: 'flight-created',
+    label: 'Vôo criado',
+  },
+  {
+    id: 'flight-updated',
+    label: 'Vôo atualizado',
+  },
+  {
+    id: 'flight-cancelled',
+    label: 'Vôo cancelado',
+  },
+  {
+    id: 'flight-authorize',
+    label: 'Vôo autorizado',
+  },
+];
 
 export const NotificationTypes = ['email', 'push'] as const;
 export type NotificationType = (typeof NotificationTypes)[number];

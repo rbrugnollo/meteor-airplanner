@@ -22,7 +22,31 @@ export const cancel = createMethod({
       },
     );
 
-    // Send Notifications
-    if (cancelled) await flightCancelled({ flightId });
+    cancelFireAndForget({ flightId });
+  },
+});
+
+export const cancelFireAndForget = createMethod({
+  name: 'flights.cancelFireAndForget',
+  schema: z.object({
+    flightId: z.string(),
+  }),
+  async run({ flightId }) {
+    const flight = await FlightsCollection.findOneAsync(flightId);
+    if (!flight) return;
+
+    if (flight.cancelled) {
+      // // Update dependent collections
+      // await removeFlightEvent(flightId);
+      // await removeInReserveEvents({
+      //   flightBeforeUpdate: flight,
+      //   checkPreviousFlight: true,
+      // });
+      // await upsertMaintenanceEvent({ flightId, checkPreviousFlight: true });
+      // if (flight.published) await publishGroup(flight.groupId);
+
+      // Send Notifications
+      await flightCancelled({ flightId });
+    }
   },
 });

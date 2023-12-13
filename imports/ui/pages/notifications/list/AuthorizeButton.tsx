@@ -28,7 +28,16 @@ const AuthorizeButton = ({ flightId }: AuthorizeButtonProps) => {
   };
 
   return (
-    <Button disabled={loading} variant="outlined" onClick={handleClick}>
+    <Button
+      disabled={loading}
+      variant="contained"
+      size="small"
+      sx={{ marginTop: 1 }}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleClick();
+      }}
+    >
       Autorizar Vôo
     </Button>
   );

@@ -27,7 +27,7 @@ import {
   Flight as FlightIcon,
 } from '@mui/icons-material';
 import { Flight } from '/imports/api/flights/collection';
-import { cancel } from '/imports/api/flights/methods/cancel';
+// import { cancel } from '/imports/api/flights/methods/cancel';
 import { Meteor } from 'meteor/meteor';
 import { authorize } from '/imports/api/flights/methods/authorize';
 import { update } from '/imports/api/flights/methods/update';
@@ -37,6 +37,7 @@ interface FlightDetailsProps {
   readonly canUpdate: boolean;
   readonly canCancel: boolean;
   readonly onEdit: (flightId: string) => void;
+  readonly onReview: (flightId: string) => void;
   readonly onViewRoute: (flightGroupId: string) => void;
 }
 
@@ -45,36 +46,40 @@ const FlightDetails = ({
   canUpdate,
   canCancel,
   onEdit,
+  onReview,
   onViewRoute,
 }: FlightDetailsProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const { loggedUser } = useLoggedUser();
 
+  const isCancelled = flight.cancelled;
+
   const handleCancel = async () => {
+    if (!canUpdate || isCancelled) return;
     try {
-      await cancel({ flightId: flight._id, cancelled: true });
-      enqueueSnackbar('Vôo cancelado com sucesso.', {
-        variant: 'success',
-        action: () => (
-          <Button
-            color="inherit"
-            size="small"
-            onClick={async () => {
-              try {
-                await cancel({ flightId: flight._id, cancelled: false });
-                enqueueSnackbar('Vôo não cancelado.');
-              } catch (e: unknown) {
-                console.log(e);
-                if (e instanceof Meteor.Error) {
-                  enqueueSnackbar(e.message, { variant: 'error' });
-                }
-              }
-            }}
-          >
-            Desfazer
-          </Button>
-        ),
-      });
+      // await cancel({ flightId: flight._id, cancelled: true });
+      // enqueueSnackbar('Vôo cancelado com sucesso.', {
+      //   variant: 'success',
+      //   action: () => (
+      //     <Button
+      //       color="inherit"
+      //       size="small"
+      //       onClick={async () => {
+      //         try {
+      //           await cancel({ flightId: flight._id, cancelled: false });
+      //           enqueueSnackbar('Vôo não cancelado.');
+      //         } catch (e: unknown) {
+      //           console.log(e);
+      //           if (e instanceof Meteor.Error) {
+      //             enqueueSnackbar(e.message, { variant: 'error' });
+      //           }
+      //         }
+      //       }}
+      //     >
+      //       Desfazer
+      //     </Button>
+      //   ),
+      // });
     } catch (e: unknown) {
       console.log(e);
       if (e instanceof Meteor.Error) {
@@ -86,7 +91,7 @@ const FlightDetails = ({
   const handleAuthorize = async () => {
     const canAuthorize =
       !loggedUser || !flight.authorizer ? false : loggedUser._id === flight.authorizer.value;
-    if (!canAuthorize) return;
+    if (!canAuthorize || isCancelled) return;
     try {
       await authorize({ flightId: flight._id, authorized: true });
       enqueueSnackbar('Vôo autorizado com sucesso.', {
@@ -120,7 +125,7 @@ const FlightDetails = ({
   };
 
   const handleToggleProperty = async (propName: string, value: boolean) => {
-    if (!canUpdate) return;
+    if (!canUpdate || isCancelled) return;
     try {
       const previousValue = !value;
       await update({
@@ -169,32 +174,52 @@ const FlightDetails = ({
               <Stack direction="row" spacing={1}>
                 <Tooltip title={flight.dateConfirmed ? 'Data Confirmada' : 'Data Prevista'}>
                   <EventNote
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleToggleProperty('dateConfirmed', !flight.dateConfirmed);
                     }}
-                    color={flight.dateConfirmed ? 'success' : 'warning'}
+                    color={isCancelled ? 'disabled' : flight.dateConfirmed ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 <Tooltip title={flight.timeConfirmed ? 'Horário Confirmado' : 'Horário Previsto'}>
                   <AccessTime
-                    onClick={() => handleToggleProperty('timeConfirmed', !flight.timeConfirmed)}
-                    color={flight.timeConfirmed ? 'success' : 'warning'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleProperty('timeConfirmed', !flight.timeConfirmed);
+                    }}
+                    color={isCancelled ? 'disabled' : flight.timeConfirmed ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 <Tooltip title={flight.authorized ? 'Autorizado' : 'Pendente de autorização'}>
                   <AssignmentTurnedIn
-                    onClick={handleAuthorize}
-                    color={flight.authorized ? 'success' : 'warning'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAuthorize();
+                    }}
+                    color={isCancelled ? 'disabled' : flight.authorized ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 {canUpdate && (
                   <Tooltip title="Editar">
-                    <Edit onClick={() => onEdit(flight._id)} color="primary" />
+                    <Edit
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isCancelled) return;
+                        onEdit(flight._id);
+                      }}
+                      color={isCancelled ? 'disabled' : 'primary'}
+                    />
                   </Tooltip>
                 )}
                 {canCancel && (
                   <Tooltip title="Cancelar">
-                    <Cancel onClick={handleCancel} color="error" />
+                    <Cancel
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancel();
+                      }}
+                      color={isCancelled ? 'disabled' : 'error'}
+                    />
                   </Tooltip>
                 )}
               </Stack>
@@ -203,7 +228,11 @@ const FlightDetails = ({
           <Grid item xs={12} md={3}>
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
-                color="info"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReview(flight._id);
+                }}
+                color={isCancelled ? 'default' : 'info'}
                 label={dayjs(flight.scheduledDepartureDateTime).format('ddd, DD/MM HH:mm')}
               />
               {flight.maintenance ? (
@@ -225,7 +254,12 @@ const FlightDetails = ({
               <NavigateNext />
               <span>{flight.destination?.label}</span>
               <Tooltip title="Visualizar Rota">
-                <IconButton onClick={() => onViewRoute(flight.groupId)}>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewRoute(flight.groupId);
+                  }}
+                >
                   <Map />
                 </IconButton>
               </Tooltip>

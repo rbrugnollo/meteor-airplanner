@@ -122,7 +122,10 @@ const AirplaneForm = ({ airplaneId, open, onClose }: AirplaneFormProps) => {
       fullScreen={fullScreen}
       PaperProps={{ sx: { width: 450 } }}
       open={open}
-      onClose={onClose}
+      onClose={() => {
+        return;
+      }}
+      disableEscapeKeyDown
     >
       <DialogTitle>{airplaneId ? 'Editar' : 'Adicionar'} Aeronave</DialogTitle>
       <DialogContent>
