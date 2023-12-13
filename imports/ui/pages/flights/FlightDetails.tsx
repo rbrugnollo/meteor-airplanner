@@ -169,7 +169,8 @@ const FlightDetails = ({
               <Stack direction="row" spacing={1}>
                 <Tooltip title={flight.dateConfirmed ? 'Data Confirmada' : 'Data Prevista'}>
                   <EventNote
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleToggleProperty('dateConfirmed', !flight.dateConfirmed);
                     }}
                     color={flight.dateConfirmed ? 'success' : 'warning'}
@@ -177,24 +178,42 @@ const FlightDetails = ({
                 </Tooltip>
                 <Tooltip title={flight.timeConfirmed ? 'Horário Confirmado' : 'Horário Previsto'}>
                   <AccessTime
-                    onClick={() => handleToggleProperty('timeConfirmed', !flight.timeConfirmed)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleProperty('timeConfirmed', !flight.timeConfirmed);
+                    }}
                     color={flight.timeConfirmed ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 <Tooltip title={flight.authorized ? 'Autorizado' : 'Pendente de autorização'}>
                   <AssignmentTurnedIn
-                    onClick={handleAuthorize}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAuthorize();
+                    }}
                     color={flight.authorized ? 'success' : 'warning'}
                   />
                 </Tooltip>
                 {canUpdate && (
                   <Tooltip title="Editar">
-                    <Edit onClick={() => onEdit(flight._id)} color="primary" />
+                    <Edit
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(flight._id);
+                      }}
+                      color="primary"
+                    />
                   </Tooltip>
                 )}
                 {canCancel && (
                   <Tooltip title="Cancelar">
-                    <Cancel onClick={handleCancel} color="error" />
+                    <Cancel
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancel();
+                      }}
+                      color="error"
+                    />
                   </Tooltip>
                 )}
               </Stack>
@@ -225,7 +244,12 @@ const FlightDetails = ({
               <NavigateNext />
               <span>{flight.destination?.label}</span>
               <Tooltip title="Visualizar Rota">
-                <IconButton onClick={() => onViewRoute(flight.groupId)}>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewRoute(flight.groupId);
+                  }}
+                >
                   <Map />
                 </IconButton>
               </Tooltip>
