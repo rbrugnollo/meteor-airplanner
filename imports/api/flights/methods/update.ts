@@ -10,6 +10,7 @@ import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
 import { flightUpdated } from '../../notifications/methods/flightUpdated';
 import { deepDiff } from '../../lib/deepDiff';
+import { Meteor } from 'meteor/meteor';
 
 export const update = createMethod({
   name: 'flights.update',
@@ -36,6 +37,7 @@ export const update = createMethod({
     }
 
     // Update
+    const user = await Meteor.users.findOneAsync(this.userId!);
     const result = await FlightsCollection.updateAsync(
       { _id },
       {
@@ -43,6 +45,7 @@ export const update = createMethod({
           ...setFlight,
           updatedAt: new Date(),
           updatedBy: this.userId!,
+          updatedByLabel: user?.profile?.name ?? '',
         },
       },
     );

@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { FlightsCollection } from '../collection';
@@ -11,6 +12,7 @@ export const authorize = createMethod({
   }),
   async run({ userId, flightId, authorized }) {
     // Update
+    const user = await Meteor.users.findOneAsync(userId ?? this.userId!);
     await FlightsCollection.updateAsync(
       { _id: flightId },
       {
@@ -18,6 +20,7 @@ export const authorize = createMethod({
           authorized,
           updatedAt: new Date(),
           updatedBy: userId ?? this.userId!,
+          updatedByLabel: user?.profile?.name ?? '',
         },
       },
     );

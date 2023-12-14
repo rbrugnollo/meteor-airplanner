@@ -83,6 +83,9 @@ export interface Flight extends BaseCollection {
   readonly duration?: string;
   readonly handlingDuration?: string;
   readonly expenses?: FlightExpenses;
+  // Update By and Created By
+  readonly createdByLabel: string;
+  readonly updatedByLabel: string;
 }
 
 export const FlightsCollection = new Mongo.Collection<Flight>(COLLECTION_NAME);

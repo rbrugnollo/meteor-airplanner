@@ -129,6 +129,30 @@ export const updateFireAndForget = createMethod({
         },
         { multi: true },
       );
+      await FlightsCollection.updateAsync(
+        {
+          createdBy: user.value,
+          scheduledDepartureDateTime: { $gte: new Date() },
+        },
+        {
+          $set: {
+            createdByLabel: user.label,
+          },
+        },
+        { multi: true },
+      );
+      await FlightsCollection.updateAsync(
+        {
+          updatedByBy: user.value,
+          scheduledDepartureDateTime: { $gte: new Date() },
+        },
+        {
+          $set: {
+            updatedByLabel: user.label,
+          },
+        },
+        { multi: true },
+      );
     };
 
     const updateEventsCollection = async () => {
