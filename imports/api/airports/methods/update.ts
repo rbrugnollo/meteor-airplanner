@@ -29,7 +29,7 @@ export const update = createMethod({
     );
 
     updateFireAndForget({
-      airport: { value: _id, label: `(${data.icao}) ${data.name} - ${data.city}` },
+      airport: { value: _id, label: `(${data.icao}) ${data.city}` },
     });
 
     return result;
