@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Meteor } from 'meteor/meteor';
-import React, { useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
-import { getTimeline } from '/imports/api/flights/methods/getTimeline';
+import React, { useState } from 'react';
+import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
+import { COLLECTION_NAME as FlightsCollectionName } from '/imports/api/flights/collection';
+import { list } from '/imports/api/auditLogs/publications/list';
 import {
   TableContainer,
   Paper,
@@ -19,7 +19,7 @@ import {
 import dayjs from 'dayjs';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { AuditLog } from '/imports/api/auditLogs/collection';
+import { AuditLog, AuditLogsCollection } from '/imports/api/auditLogs/collection';
 import { deepDiff } from '/imports/api/lib/deepDiff';
 import { isArray, isEmpty } from 'lodash';
 import { useTheme } from '@mui/material/styles';
@@ -29,26 +29,21 @@ interface FlightTimelineProps {
 }
 
 const FlightTimeline = ({ flightId }: FlightTimelineProps) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const [_loading, setLoading] = useState(false);
-  const [data, setData] = useState<AuditLog[]>([]);
-  useEffect(() => {
-    fetchFlightTimeline();
-  }, []);
-
-  async function fetchFlightTimeline() {
-    setLoading(true);
-    try {
-      const result = await getTimeline({ flightId });
-      setData(result);
-    } catch (e: unknown) {
-      console.log(e);
-      if (e instanceof Meteor.Error) {
-        enqueueSnackbar(e.message, { variant: 'error' });
-      }
-    }
-    setLoading(false);
-  }
+  useSubscribe(() => {
+    return list({ docId: flightId, collection: FlightsCollectionName });
+  });
+  const data = useFind(
+    () =>
+      AuditLogsCollection.find(
+        { docId: flightId, collection: FlightsCollectionName },
+        {
+          sort: { createdAt: -1 },
+          projection: { _id: 1, doc: 1, docId: 1, collection: 1, createdAt: 1 },
+        },
+      ),
+    [],
+  );
+  console.log(data);
   return (
     <div>
       <Typography variant="h6" component="h2">
@@ -95,24 +90,25 @@ const getTitle = (key: string) => {
     ['firstOfficer.label', 'Co-Piloto'],
     ['firstOfficerInReserve', 'Co-Piloto em Reserva'],
     ['passengers', 'Passageiros'],
-    ['requesters', 'Solicitantes'],
+    ['requesters', 'Solicitante'],
     ['notes', 'Observações'],
   ];
-  return map.find((item) => item[0] === key)?.[1] || null;
+  return (
+    map.find((item) => item[0] === key)?.[1] ??
+    map.find((item) => key.includes(item[0]))?.[1] ??
+    null
+  );
 };
 
-const getValue = (value: any) => {
+const getValue = (value: any): string => {
+  if (value === undefined || value === null) return ' ';
   if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
   if (typeof value.getMonth === 'function') return dayjs(value).format('DD/MM HH:mm');
   if (typeof value.label === 'string') return value.label;
+  if (typeof value.percentage === 'number')
+    return `(${value.costCenter.label}) ${value.requester.label} - ${value.percentage}%`;
   if (isArray(value)) {
-    return value
-      .map((m) => {
-        if (typeof m.label === 'string') return m.label;
-        if (typeof m.percentage === 'number')
-          return `(${m.costCenter.label}) ${m.requester.label} - ${m.percentage}%`;
-      })
-      .join(' | ');
+    return value.map(getValue).join(' | ');
   }
   return value.toString();
 };
@@ -122,6 +118,7 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
   const theme = useTheme();
 
   const diff = logBefore ? deepDiff(logBefore.doc, log.doc) : null;
+  console.log(diff);
 
   const tableBody = (
     isEmpty(diff)
@@ -162,7 +159,7 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
                   <Grid container spacing={0.5}>
                     <Grid item xs={12} md={6}>
                       <Box sx={{ p: '6px' }} bgcolor={theme.palette.warning.light}>
-                        {getValue(value.from)}
+                        {getValue(value.from)}&nbsp;
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -205,7 +202,7 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
                 sx={{ fontWeight: 600, fontSize: { xs: 'small', md: 'normal' } }}
                 component="span"
               >
-                {(log.doc! as any).updatedByLabel} Rafael Brugnollo
+                {(log.doc! as any).updatedByLabel}
               </Typography>
             </Grid>
           </Grid>

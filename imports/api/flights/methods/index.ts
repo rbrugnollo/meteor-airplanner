@@ -8,4 +8,3 @@ import './upsertFlightEvent';
 import './upsertInReserveEvents';
 import './upsertMaintenanceEvent';
 import './publishGroup';
-import './getTimeline';

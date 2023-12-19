@@ -29,3 +29,6 @@ import '../../api/notifications/publications';
 
 // Messages
 import '../../api/messages/methods';
+
+// AuditLogs
+import '../../api/auditLogs/publications';
