@@ -9,7 +9,6 @@ export const list = createPublication({
     collection: z.string(),
   }),
   async run({ docId, collection }) {
-    console.log('auditLogs.list', docId, collection);
     return AuditLogsCollection.find(
       { docId, collection },
       {

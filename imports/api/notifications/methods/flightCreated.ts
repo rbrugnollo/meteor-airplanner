@@ -36,8 +36,7 @@ export const flightCreated = createMethod({
         type: 'flight-created',
         flightId,
         title,
-        message: `${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} de ${flight
-          ?.origin?.label} para ${flight?.destination?.label}}`,
+        message: notificationData.join('||'),
         read: false,
         archived: false,
         createdAt: new Date(),

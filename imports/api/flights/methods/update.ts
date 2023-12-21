@@ -9,7 +9,6 @@ import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
 import { flightUpdated } from '../../notifications/methods/flightUpdated';
-import { deepDiff } from '../../lib/deepDiff';
 import { Meteor } from 'meteor/meteor';
 
 export const update = createMethod({
@@ -86,7 +85,6 @@ export const updateFireAndForget = createMethod({
     }
     await flightUpdated({
       flightId: flightAfterUpdate._id,
-      difference: deepDiff(flightBeforeUpdate, flightAfterUpdate),
     });
   },
 });

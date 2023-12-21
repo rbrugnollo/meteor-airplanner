@@ -11,16 +11,15 @@ export const flightUpdated = createMethod({
   name: 'notifications.flightUpdated',
   schema: z.object({
     flightId: z.string(),
-    difference: z.object({}),
   }),
-  async run({ flightId, difference }) {
+  async run({ flightId }) {
     const flight = await FlightsCollection.findOneAsync(flightId);
 
     const users = await Meteor.users.find().fetchAsync();
     const userIds = users
       .filter((f) => f.profile?.notifications?.['flight-updated']?.push)
       .map((m) => m._id)
-      .filter((m) => m && m !== this.userId);
+      .filter((m) => m);
 
     const title = `Vôo Atualizado: ${flight?.airplane.label}`;
     const notificationData = [
@@ -31,16 +30,14 @@ export const flightUpdated = createMethod({
       `🛫 ${flight?.origin.label}`,
       `🛬 ${flight?.destination.label}`,
       `👥 ${flight?.requesters?.map((requester) => requester.requester?.label).join(', ')}`,
-      `Changes: ${JSON.stringify(difference)}`,
     ];
 
     userIds.forEach(async (userId) => {
-      await NotificationsCollection.insertAsync({
+      const notificationId = await NotificationsCollection.insertAsync({
         type: 'flight-updated',
         flightId,
         title,
-        message: `${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} de ${flight
-          ?.origin?.label} para ${flight?.destination?.label}}`,
+        message: notificationData.join('||'),
         read: false,
         archived: false,
         createdAt: new Date(),
@@ -60,6 +57,7 @@ export const flightUpdated = createMethod({
           data: {
             flightId,
             userId,
+            notificationId,
           },
         },
       });

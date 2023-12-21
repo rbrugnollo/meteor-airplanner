@@ -101,8 +101,9 @@ self.addEventListener('notificationclick', (event) => {
       console.log('close');
       break;
     default:
-      console.log('nothing');
-    // Handle other actions ...
+      event.waitUntil(
+        self.clients.openWindow('http://localhost:3000/app/flights/' + apiData.flightId + '?notificationId='  + apiData.notificationId)
+      );
   }
 });
 

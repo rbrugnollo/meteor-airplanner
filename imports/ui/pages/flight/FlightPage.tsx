@@ -1,11 +1,27 @@
-import React from 'react';
-import { useMatch } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Box, Container, Stack, Typography } from '@mui/material';
 import FlightDetails from './FlightDetails';
 import FlightTimeline from './FlightTimeline';
+import { useQuery } from '../../shared/hooks/useQuery';
+import { debounce } from 'lodash';
+import { toggleRead } from '/imports/api/notifications/methods/toggleRead';
+
+const handleSetAsRead = (notificationId?: string | null) => {
+  if (!notificationId) return;
+  toggleRead({ _id: notificationId, read: true });
+};
+
+const dhandleSetAsRead = debounce(handleSetAsRead, 500);
 
 const FlightPage = () => {
-  const match = useMatch('app/flights/:id');
+  const { id } = useParams();
+  const query = useQuery();
+
+  useEffect(() => {
+    dhandleSetAsRead(query.get('notificationId'));
+  }, []);
+
   return (
     <>
       <Box
@@ -31,8 +47,8 @@ const FlightPage = () => {
               <Typography variant="h5">Detalhes de Vôo</Typography>
             </Stack>
             <Stack spacing={0}>
-              <FlightDetails flightId={match?.params.id ?? ''} />
-              <FlightTimeline flightId={match?.params.id ?? ''} />
+              <FlightDetails flightId={id ?? ''} />
+              <FlightTimeline flightId={id ?? ''} />
             </Stack>
           </Stack>
         </Container>

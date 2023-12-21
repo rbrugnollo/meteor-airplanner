@@ -36,7 +36,7 @@ export const flightCancelled = createMethod({
         type: 'flight-updated',
         flightId,
         title,
-        message: notificationData.join('\n'),
+        message: notificationData.join('||'),
         read: false,
         archived: false,
         createdAt: new Date(),

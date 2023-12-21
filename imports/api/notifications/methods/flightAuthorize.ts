@@ -30,7 +30,7 @@ export const flightAuthorize = createMethod({
       type: 'flight-authorize',
       flightId,
       title,
-      message: notificationData.join('\n'),
+      message: notificationData.join('||'),
       read: false,
       archived: false,
       createdAt: new Date(),
