@@ -43,10 +43,9 @@ const FlightTimeline = ({ flightId }: FlightTimelineProps) => {
       ),
     [],
   );
-  console.log(data);
   return (
     <div>
-      <Typography variant="h6" component="h2">
+      <Typography sx={{ fontSize: '14px', paddingTop: '20px' }} variant="h6">
         Histórico de Alterações
       </Typography>
       <TableContainer component={Paper}>
@@ -118,44 +117,72 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
   const theme = useTheme();
 
   const diff = logBefore ? deepDiff(logBefore.doc, log.doc) : null;
-  console.log(diff);
 
   const tableBody = (
     isEmpty(diff)
-      ? Object.entries(log.doc!).map(([key, value]: [string, any], i) =>
-          getTitle(key) && value ? (
-            <TableRow key={`${log._id}${key}`}>
-              <TableCell
-                component="th"
-                scope="row"
-                sx={i % 2 > 0 ? { backgroundColor: theme.palette.action.hover } : {}}
-              >
-                {getTitle(key)}
-              </TableCell>
-              <TableCell sx={{ py: 0, backgroundColor: theme.palette.success.light }}>
-                <Grid container spacing={0}>
-                  <Grid item xs={12}>
-                    <Box bgcolor={theme.palette.success.light} sx={{ p: '6px' }}>
-                      {getValue(value)}
-                    </Box>
-                  </Grid>
-                </Grid>
-              </TableCell>
-            </TableRow>
-          ) : null,
-        )
-      : Object.entries(diff).map(
-          ([key, value]: [string, any], i) =>
-            getTitle(key) &&
-            value && (
-              <TableRow
-                key={`${log._id}${key}`}
-                sx={i % 2 > 0 ? { backgroundColor: theme.palette.action.hover } : {}}
-              >
-                <TableCell component="th" scope="row">
+      ? Object.entries(log.doc!)
+          .map(([key, value]: [string, any]) => (getTitle(key) && value ? [key, value] : null))
+          .filter((f) => f)
+          .map((m, i) => {
+            if (!m) return null;
+            const [key, value] = m;
+            return (
+              <TableRow key={`${log._id}${key}`}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={
+                    i % 2 > 0
+                      ? {
+                          backgroundColor: theme.palette.action.hover,
+                          fontSize: { xs: '11px', md: '12px' },
+                        }
+                      : { fontSize: { xs: '11px', md: '12px' } }
+                  }
+                >
                   {getTitle(key)}
                 </TableCell>
-                <TableCell sx={{ py: { xs: 0.5, md: 0 } }}>
+                <TableCell
+                  sx={{
+                    py: 0,
+                    backgroundColor: theme.palette.success.light,
+                    fontSize: { xs: '11px', md: '12px' },
+                  }}
+                >
+                  <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                      <Box bgcolor={theme.palette.success.light} sx={{ p: '6px' }}>
+                        {getValue(value)}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </TableCell>
+              </TableRow>
+            );
+          })
+      : Object.entries(diff)
+          .map(([key, value]: [string, any]) => (getTitle(key) && value ? [key, value] : null))
+          .filter((f) => f)
+          .map((m, i) => {
+            if (!m) return null;
+            const [key, value] = m;
+            return (
+              <TableRow key={`${log._id}${key}`}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={
+                    i % 2 > 0
+                      ? {
+                          backgroundColor: theme.palette.action.hover,
+                          fontSize: { xs: '11px', md: '12px' },
+                        }
+                      : { fontSize: { xs: '11px', md: '12px' } }
+                  }
+                >
+                  {getTitle(key)}
+                </TableCell>
+                <TableCell sx={{ py: { xs: 0.5, md: 0 }, fontSize: { xs: '11px', md: '12px' } }}>
                   <Grid container spacing={0.5}>
                     <Grid item xs={12} md={6}>
                       <Box sx={{ p: '6px' }} bgcolor={theme.palette.warning.light}>
@@ -170,27 +197,27 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
                   </Grid>
                 </TableCell>
               </TableRow>
-            ),
-        )
+            );
+          })
   ).filter((f) => f);
 
   return isEmpty(tableBody) ? null : (
     <React.Fragment>
-      <TableRow sx={{ backgroundColor: 'neutral.300', '& > *': { borderBottom: 'unset' } }}>
+      <TableRow sx={{ backgroundColor: 'neutral.200', '& > *': { borderBottom: 'unset' } }}>
         <TableCell
           component="th"
           sx={{ cursor: 'pointer' }}
           scope="row"
           onClick={() => setOpen(!open)}
         >
-          <Grid container columns={24} spacing={{ xs: 1, md: 2 }}>
-            <Grid item xs={8} md={2}>
+          <Grid container columns={36} spacing={{ xs: 1, md: 2 }}>
+            <Grid item xs={8} md={3}>
               <IconButton sx={{ padding: 0, pr: 2 }} aria-label="expand row" size="small">
                 {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
               </IconButton>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 500, fontSize: { xs: 'small', md: 'normal' } }}
+                sx={{ fontWeight: 500, fontSize: { xs: '11px', md: '12px' } }}
                 component="span"
               >
                 {dayjs(log.createdAt).format('DD/MM HH:mm')}
@@ -199,7 +226,7 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
             <Grid item>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 600, fontSize: { xs: 'small', md: 'normal' } }}
+                sx={{ fontWeight: 600, fontSize: { xs: '11px', md: '12px' } }}
                 component="span"
               >
                 {(log.doc! as any).updatedByLabel}

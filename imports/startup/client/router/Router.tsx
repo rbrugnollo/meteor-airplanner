@@ -17,6 +17,7 @@ import Schedule from '/imports/ui/pages/schedule/Schedule';
 import Settings from '/imports/ui/pages/settings/Settings';
 import NotificationList from '/imports/ui/pages/notifications/list/NotificationList';
 import Notification from '/imports/ui/pages/notifications/notification/Notification';
+import FlightPage from '/imports/ui/pages/flight/FlightPage';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
@@ -78,6 +79,10 @@ const Router = createBrowserRouter([
         element: <MainLayout />,
         loader: loggedInOnly,
         children: [
+          {
+            path: 'flights/:id',
+            element: <Authorized Component={FlightPage} permission="flights.list" />,
+          },
           {
             path: 'flights',
             element: <Authorized Component={FlightList} permission="flights.list" />,
