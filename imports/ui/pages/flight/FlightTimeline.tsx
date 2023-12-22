@@ -89,7 +89,7 @@ const getTitle = (key: string) => {
     ['firstOfficer.label', 'Co-Piloto'],
     ['firstOfficerInReserve', 'Co-Piloto em Reserva'],
     ['passengers', 'Passageiros'],
-    ['requesters', 'Solicitante'],
+    ['requesters', 'Solicitantes'],
     ['notes', 'Observações'],
   ];
   return (
@@ -116,7 +116,21 @@ const Row = ({ log, logBefore }: { log: AuditLog; logBefore?: AuditLog }) => {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
 
-  const diff = logBefore ? deepDiff(logBefore.doc, log.doc) : null;
+  const normalize = (doc: any): any => ({
+    ...doc,
+    requesters:
+      doc?.requesters
+        ?.map((r: any) => `(${r.costCenter?.label}) ${r.requester?.label} - ${r.percentage}%`)
+        .sort()
+        .join(', ') ?? '',
+    passengers:
+      doc?.passengers
+        ?.map((m: any) => m.label)
+        .sort()
+        .join(', ') ?? '',
+  });
+
+  const diff = logBefore ? deepDiff(normalize(logBefore.doc), normalize(log.doc)) : null;
 
   const tableBody = (
     isEmpty(diff)
