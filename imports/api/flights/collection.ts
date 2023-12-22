@@ -61,6 +61,8 @@ export interface Flight extends BaseCollection {
   readonly scheduledArrivalDateTime: Date;
   readonly estimatedDuration: string;
   readonly estimatedHandlingDuration: string;
+  readonly estimatedDistanceKm: number;
+  readonly estimatedDistanceNm: number;
   readonly origin: ValueLabelType;
   readonly destination: ValueLabelType;
   readonly maintenance: boolean;

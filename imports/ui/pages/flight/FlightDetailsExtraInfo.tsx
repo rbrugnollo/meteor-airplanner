@@ -15,6 +15,14 @@ const FlightDetailsExtraInfo = ({ flight }: FlightDetailsExtraInfoProps) => {
         <Grid item>
           <Box sx={fontSizeStyle}>
             <Stack direction="row" spacing={0.5}>
+              <Box sx={{ fontWeight: 500 }}>Distance:</Box>
+              <span>{flight.estimatedDistanceKm} km</span>
+            </Stack>
+          </Box>
+        </Grid>
+        <Grid item>
+          <Box sx={fontSizeStyle}>
+            <Stack direction="row" spacing={0.5}>
               <Box sx={{ fontWeight: 500 }}>Comandante:</Box>
               <span>{flight.captain?.label}</span>
             </Stack>
@@ -35,6 +43,14 @@ const FlightDetailsExtraInfo = ({ flight }: FlightDetailsExtraInfoProps) => {
                 {flight.authorized ? 'Autorizado por:' : 'Aguardando autorização de:'}
               </Box>
               <span>{flight.authorizer?.label}</span>
+            </Stack>
+          </Box>
+        </Grid>
+        <Grid item>
+          <Box sx={fontSizeStyle}>
+            <Stack direction="row" spacing={0.5}>
+              <Box sx={{ fontWeight: 500 }}>Passageiros:</Box>
+              <span>{flight.passengers?.map((m) => m.label).join(', ') ?? ''}</span>
             </Stack>
           </Box>
         </Grid>

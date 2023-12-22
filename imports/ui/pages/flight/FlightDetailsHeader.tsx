@@ -14,6 +14,7 @@ import {
 import dayjs from 'dayjs';
 import { Flight } from '/imports/api/flights/collection';
 import FlightDetailsStatusButtons from './FlightStatusButtons';
+import { uniq } from 'lodash';
 
 interface FlightDetailsHeaderProps {
   readonly flight: Flight;
@@ -24,7 +25,7 @@ interface FlightDetailsHeaderProps {
 const iconStyle = { fontSize: '19px' };
 const fontSizeStyle = { fontSize: { xs: '12px', md: '13px' } };
 
-const FlightDetailsHeader = ({ flight, onEdit }: FlightDetailsHeaderProps) => {
+const FlightDetailsHeader = ({ flight, onEdit, onViewRoute }: FlightDetailsHeaderProps) => {
   return (
     flight && (
       <Grid container spacing={2} columns={24} alignItems="center">
@@ -60,6 +61,7 @@ const FlightDetailsHeader = ({ flight, onEdit }: FlightDetailsHeaderProps) => {
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
+                  onViewRoute(flight.groupId);
                 }}
               >
                 <Map />
@@ -94,9 +96,13 @@ const FlightDetailsHeader = ({ flight, onEdit }: FlightDetailsHeaderProps) => {
             <Stack direction="row" spacing={0.5}>
               <LocalAtm sx={iconStyle} />
               <span>
-                {flight.requesters
-                  ?.map((m) => `${m.costCenter?.label} - ${m.requester?.label}`)
-                  .join(', ')}
+                {uniq(flight.requesters?.map((m) => m.costCenter?.label).filter((f) => f)).join(
+                  ', ',
+                )}{' '}
+                -
+                {uniq(flight.requesters?.map((m) => m.requester?.label).filter((f) => f)).join(
+                  ', ',
+                )}
               </span>
             </Stack>
           </Box>
