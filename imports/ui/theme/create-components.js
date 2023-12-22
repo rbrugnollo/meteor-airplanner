@@ -261,7 +261,10 @@ export function createComponents(config) {
       styleOverrides: {
         root: {
           borderBottomColor: palette.divider,
-          padding: '15px 16px',
+          padding: '13px 14px',
+        },
+        sizeSmall: {
+          padding: '6px 11px',
         },
       },
     },

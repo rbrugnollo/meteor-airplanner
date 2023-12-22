@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, redirect } from 'react-router-dom';
+import { createBrowserRouter, Navigate, redirect } from 'react-router-dom';
 import { App } from '/imports/ui/App';
 import { Meteor } from 'meteor/meteor';
 import LoginForm from '/imports/ui/pages/login/LoginForm';
@@ -16,7 +16,7 @@ import FlightList from '/imports/ui/pages/flights/FlightList';
 import Schedule from '/imports/ui/pages/schedule/Schedule';
 import Settings from '/imports/ui/pages/settings/Settings';
 import NotificationList from '/imports/ui/pages/notifications/list/NotificationList';
-import Notification from '/imports/ui/pages/notifications/notification/Notification';
+import FlightPage from '/imports/ui/pages/flight/FlightPage';
 
 const mainLoader = ({ request }: { request: Request }) => {
   const url = `${window.location.origin}/`;
@@ -60,6 +60,10 @@ const Router = createBrowserRouter([
         loader: notLoggedInOnly,
         children: [
           {
+            path: '',
+            element: <Navigate to="login" />,
+          },
+          {
             path: 'login',
             element: <LoginForm />,
           },
@@ -78,6 +82,14 @@ const Router = createBrowserRouter([
         element: <MainLayout />,
         loader: loggedInOnly,
         children: [
+          {
+            path: '',
+            element: <Navigate to="flights" />,
+          },
+          {
+            path: 'flights/:id',
+            element: <Authorized Component={FlightPage} permission="flights.list" />,
+          },
           {
             path: 'flights',
             element: <Authorized Component={FlightList} permission="flights.list" />,
@@ -101,10 +113,6 @@ const Router = createBrowserRouter([
           {
             path: 'schedule',
             element: <Authorized Component={Schedule} permission="schedule.list" />,
-          },
-          {
-            path: 'notifications/:id',
-            element: <Authorized Component={Notification} permission="notification.view" />,
           },
           {
             path: 'notifications',

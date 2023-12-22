@@ -39,6 +39,10 @@ export const calculateDuration = createMethod({
     const hours = Math.floor(flightTimeMin / 60);
     const minutes = Math.ceil(flightTimeMin % 60);
     const duration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    return duration;
+    return {
+      duration,
+      distanceNm: result.totals.distance_nm,
+      distanceKm: result.totals.distance_km,
+    };
   },
 });

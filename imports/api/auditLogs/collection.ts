@@ -5,7 +5,7 @@ import { BaseCollection } from '../common/BaseCollection';
 
 export const COLLECTION_NAME = 'auditLogs';
 
-export type AudigLog = {
+export type AuditLog = {
   _id?: string;
   userId?: string;
   collection: string;
@@ -18,7 +18,7 @@ export type AudigLog = {
   options?: any;
 };
 
-class AuditLogsCollectionClass extends Mongo.Collection<AudigLog> {
+class AuditLogsCollectionClass extends Mongo.Collection<AuditLog> {
   constructor() {
     super(COLLECTION_NAME);
   }

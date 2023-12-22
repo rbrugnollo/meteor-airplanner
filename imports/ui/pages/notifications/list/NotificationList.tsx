@@ -5,6 +5,7 @@ import {
   type MRT_ColumnDef as MrtColumnDef,
   MRT_Virtualizer as MrtVirtualizer,
 } from 'material-react-table';
+import { useNavigate } from 'react-router-dom';
 import { Grid, Box, Container, Stack, Typography, useMediaQuery, Theme } from '@mui/material';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/notifications/publications/list';
@@ -15,6 +16,7 @@ import AuthorizeButton from './AuthorizeButton';
 import { toggleRead } from '/imports/api/notifications/methods/toggleRead';
 
 const NotificationList = () => {
+  const navigate = useNavigate();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -32,7 +34,7 @@ const NotificationList = () => {
         accessorKey: '_id',
         header: '',
         Cell: (cell) => {
-          const { title, message, createdAt, type, flightId, read } = cell?.row?.original;
+          const { _id, title, message, createdAt, type, flightId, read } = cell?.row?.original;
           return (
             <Box width={'100%'}>
               <Typography variant="subtitle2" component="h6">
@@ -48,7 +50,9 @@ const NotificationList = () => {
                 </Grid>
               </Typography>
               <Typography variant="body2" component="p">
-                {message}
+                {message.split('||').map((line, index) => (
+                  <div key={_id + index}>{line}</div>
+                ))}
                 <div>
                   {type === 'flight-authorize' && flightId ? (
                     <AuthorizeButton flightId={flightId} />
@@ -127,7 +131,8 @@ const NotificationList = () => {
               }}
               muiTableBodyRowProps={({ row }) => ({
                 onClick: () => {
-                  toggleRead({ _id: row.original._id, read: !row.original.read });
+                  toggleRead({ _id: row.original._id, read: true });
+                  navigate(`/app/flights/${row.original.flightId}`);
                 },
                 sx: {
                   cursor: 'pointer',

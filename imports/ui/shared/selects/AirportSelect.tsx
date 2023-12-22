@@ -33,7 +33,7 @@ const AirportSelect = <Multiple extends boolean | undefined = false>({
       .then((items) => {
         let options = items.map((item) => ({
           value: item._id!,
-          label: `(${item.icao}) ${item.name} - ${item.city}`,
+          label: `(${item.icao}) ${item.city}`,
         }));
         if (rest.value) {
           if (rest.multiple) {

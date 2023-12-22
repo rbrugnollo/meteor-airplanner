@@ -8,17 +8,21 @@ import { upsertFlightEvent } from './upsertFlightEvent';
 import { upsertMaintenanceEvent } from './upsertMaintenanceEvent';
 import { flightCreated } from '../../notifications/methods/flightCreated';
 import { flightAuthorize } from '../../notifications/methods/flightAuthorize';
+import { Meteor } from 'meteor/meteor';
 
 export const insert = createMethod({
   name: 'flights.insert',
   schema: z.custom<Omit<Flight, BaseCollectionTypes>>(),
   async run(flight) {
+    const user = await Meteor.users.findOneAsync(this.userId!);
     const result = await FlightsCollection.insertAsync({
       ...flight,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: this.userId!,
       updatedBy: this.userId!,
+      createdByLabel: user?.profile?.name ?? '',
+      updatedByLabel: user?.profile?.name ?? '',
     });
 
     insertFireAndForget({ flightId: result });

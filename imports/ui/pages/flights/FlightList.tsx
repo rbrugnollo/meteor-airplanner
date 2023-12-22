@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Container, Stack, Typography } from '@mui/material';
 import { Add } from '@mui/icons-material';
+import dayjs from 'dayjs';
 import { useFind, useSubscribe } from '/imports/ui/shared/hooks/useSubscribe';
 import { list } from '/imports/api/flights/publications/list';
 import { Flight, FlightsCollection } from '/imports/api/flights/collection';
@@ -37,7 +38,14 @@ const FlightList = () => {
   const [_canReviewLoading] = useHasPermission('flights.review');
   const [andFilters, setAndFilters] = useState<
     NpmModuleMongodb.Filter<NpmModuleMongodb.WithId<Flight>>[]
-  >([{ scheduledDepartureDateTime: { $gte: new Date() } }]);
+  >([
+    {
+      scheduledDepartureDateTime: {
+        $gte: dayjs(new Date()).startOf('day').toDate(),
+        $lt: dayjs(new Date()).add(3, 'days').toDate(),
+      },
+    },
+  ]);
   const [options] = useState<Mongo.Options<Flight>>({
     sort: { scheduledDepartureDateTime: 1 },
   });
@@ -66,13 +74,13 @@ const FlightList = () => {
     if (values.airplane) {
       selectors = [...selectors, { 'airplane.value': values.airplane.value }];
     }
-    if (values.date) {
+    if (values.dateFrom) {
       selectors = [
         ...selectors,
         {
           scheduledDepartureDateTime: {
-            $gte: values.date.toDate(),
-            $lt: values.date.add(1, 'month').toDate(),
+            $gte: values.dateFrom.toDate(),
+            $lt: values.dateTo ? values.dateTo.toDate() : values.dateFrom.add(1, 'month').toDate(),
           },
         },
       ];
@@ -121,7 +129,14 @@ const FlightList = () => {
                       Adicionar
                     </Button>
                   </AuthorizedComponent>
-                  <FlightListFilter onFilter={handleFilter} />
+                  <FlightListFilter
+                    initialValues={{
+                      airplane: null,
+                      dateFrom: dayjs(new Date()).startOf('day'),
+                      dateTo: dayjs(new Date()).add(3, 'days').startOf('day'),
+                    }}
+                    onFilter={handleFilter}
+                  />
                 </Stack>
               </div>
             </Stack>

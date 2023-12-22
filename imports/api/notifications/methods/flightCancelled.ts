@@ -26,8 +26,8 @@ export const flightCancelled = createMethod({
       `📅 ${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} ${
         flight?.dateConfirmed ? '✅' : '⚠️'
       } ${flight?.timeConfirmed ? '✅' : '⚠️'}`,
-      `🛫 ${flight?.origin.label}`,
-      `🛬 ${flight?.destination.label}`,
+      `${flight?.authorized ? '✅ Autorizado' : '⚠️ Aut. Pendente'}`,
+      `🛫 ${flight?.origin.label} | 🛬 ${flight?.destination.label}`,
       `👥 ${flight?.requesters?.map((requester) => requester.requester?.label).join(', ')}`,
     ];
 
@@ -36,7 +36,7 @@ export const flightCancelled = createMethod({
         type: 'flight-updated',
         flightId,
         title,
-        message: notificationData.join('\n'),
+        message: notificationData.join('||'),
         read: false,
         archived: false,
         createdAt: new Date(),

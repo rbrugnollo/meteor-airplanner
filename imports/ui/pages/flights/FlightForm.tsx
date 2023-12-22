@@ -78,6 +78,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       scheduledArrivalDateTime: null,
       estimatedDuration: '',
       estimatedHandlingDuration: '00:30',
+      estimatedDistanceKm: null,
+      estimatedDistanceNm: null,
       origin: null,
       destination: null,
       maintenance: false,
@@ -94,6 +96,8 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
       passengers: [],
       requesters: [],
       notes: '',
+      createdByLabel: null,
+      updatedByLabel: null,
     },
     validate: async (values) => {
       let errors: FormikErrors<FlightFormValues> = {};
@@ -246,9 +250,11 @@ const FlightForm = ({ flightId, open, onClose }: FlightFormProps) => {
         airplaneId: formik.values.airplane.value,
       })
         .then((d) => d)
-        .then((duration) => {
-          if (duration) {
-            formik.setFieldValue('estimatedDuration', duration ?? '');
+        .then((result) => {
+          if (result?.duration) {
+            formik.setFieldValue('estimatedDuration', result?.duration ?? '');
+            formik.setFieldValue('estimatedDistanceNm', result?.distanceNm ?? null);
+            formik.setFieldValue('estimatedDistanceKm', result?.distanceKm ?? null);
           }
         })
         .finally(() => {

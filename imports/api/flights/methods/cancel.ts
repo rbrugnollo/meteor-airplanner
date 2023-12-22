@@ -1,3 +1,4 @@
+import { Meteor } from 'meteor/meteor';
 import { createMethod } from 'meteor/zodern:relay';
 import { z } from 'zod';
 import { flightCancelled } from '../../notifications/methods/flightCancelled';
@@ -11,6 +12,7 @@ export const cancel = createMethod({
   }),
   async run({ flightId, cancelled }) {
     // Update
+    const user = await Meteor.users.findOneAsync(this.userId!);
     await FlightsCollection.updateAsync(
       { _id: flightId },
       {
@@ -18,6 +20,7 @@ export const cancel = createMethod({
           cancelled,
           updatedAt: new Date(),
           updatedBy: this.userId!,
+          updatedByLabel: user?.profile?.name ?? '',
         },
       },
     );

@@ -26,9 +26,8 @@ export const flightCreated = createMethod({
       `📅 ${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} ${
         flight?.dateConfirmed ? '✅' : '⚠️'
       } ${flight?.timeConfirmed ? '✅' : '⚠️'}`,
-      `${flight?.authorized ? '✅ Autorizado' : '⚠️ Autorização Pendente'}`,
-      `🛫 ${flight?.origin.label}`,
-      `🛬 ${flight?.destination.label}`,
+      `${flight?.authorized ? '✅ Autorizado' : '⚠️ Aut. Pendente'}`,
+      `🛫 ${flight?.origin.label} | 🛬 ${flight?.destination.label}`,
       `👥 ${flight?.requesters?.map((requester) => requester.requester?.label).join(', ')}`,
     ];
     userIds.forEach(async (userId) => {
@@ -36,8 +35,7 @@ export const flightCreated = createMethod({
         type: 'flight-created',
         flightId,
         title,
-        message: `${dayjs(flight?.scheduledDepartureDateTime).format('DD/MM HH:mm')} de ${flight
-          ?.origin?.label} para ${flight?.destination?.label}}`,
+        message: notificationData.join('||'),
         read: false,
         archived: false,
         createdAt: new Date(),
