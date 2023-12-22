@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, redirect } from 'react-router-dom';
+import { createBrowserRouter, Navigate, redirect } from 'react-router-dom';
 import { App } from '/imports/ui/App';
 import { Meteor } from 'meteor/meteor';
 import LoginForm from '/imports/ui/pages/login/LoginForm';
@@ -60,6 +60,10 @@ const Router = createBrowserRouter([
         loader: notLoggedInOnly,
         children: [
           {
+            path: '',
+            element: <Navigate to="login" />,
+          },
+          {
             path: 'login',
             element: <LoginForm />,
           },
@@ -78,6 +82,10 @@ const Router = createBrowserRouter([
         element: <MainLayout />,
         loader: loggedInOnly,
         children: [
+          {
+            path: '',
+            element: <Navigate to="flights" />,
+          },
           {
             path: 'flights/:id',
             element: <Authorized Component={FlightPage} permission="flights.list" />,
