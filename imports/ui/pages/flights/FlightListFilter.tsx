@@ -21,22 +21,20 @@ import { Dayjs } from 'dayjs';
 export interface FlightListFilterValues {
   search?: string;
   airplane: ValueLabelType | null;
-  date: Dayjs | null;
+  dateFrom: Dayjs | null;
+  dateTo: Dayjs | null;
 }
 
 interface FlightListFilterProps {
+  initialValues: FlightListFilterValues;
   onFilter: (filter: FlightListFilterValues) => void;
 }
 
-const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
+const FlightListFilter = ({ onFilter, initialValues }: FlightListFilterProps) => {
   const [open, setOpen] = useState(false);
 
   const formik = useFormik<FlightListFilterValues>({
-    initialValues: {
-      search: '',
-      airplane: null,
-      date: null,
-    },
+    initialValues,
     onSubmit: (values) => {
       onFilter(values);
       setOpen(false);
@@ -123,10 +121,17 @@ const FlightListFilter = ({ onFilter }: FlightListFilterProps) => {
                   }}
                 />
                 <DatePicker
-                  label="Data"
-                  value={formik.values.date}
+                  label="Data de"
+                  value={formik.values.dateFrom}
                   onChange={(value) => {
-                    formik.setFieldValue('date', value);
+                    formik.setFieldValue('dateFrom', value);
+                  }}
+                />
+                <DatePicker
+                  label="Data até"
+                  value={formik.values.dateTo}
+                  onChange={(value) => {
+                    formik.setFieldValue('dateTo', value);
                   }}
                 />
               </Stack>
