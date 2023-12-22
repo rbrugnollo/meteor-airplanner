@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Permission } from '/imports/api/users/collection';
-import useHasPermission from '/imports/ui/shared/hooks/useHasPermission';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 interface AuthorizedProps {
   readonly permission: Permission;
@@ -8,8 +8,16 @@ interface AuthorizedProps {
 }
 
 const AuthorizedComponent = ({ children, permission }: AuthorizedProps) => {
-  const [verifying, hasPermission] = useHasPermission(permission);
-  if (verifying || !hasPermission) return <span />;
+  const [isLoaded, setLoaded] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+  useEffect(() => {
+    if (isLoaded) return;
+    setLoaded(true);
+    hasPermission({ permission }).then((hasPermission) => {
+      setAuthorized(hasPermission);
+    });
+  }, []);
+  if (!authorized) return <span />;
   return children;
 };
 

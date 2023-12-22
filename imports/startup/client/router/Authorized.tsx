@@ -14,9 +14,9 @@ const Authorized = ({ Component, permission }: AuthorizedProps) => {
 
   useEffect(() => {
     if (isLoaded) return;
+    setLoaded(true);
     hasPermission({ permission }).then((hasPermission) => {
       if (!hasPermission) navigate('/app');
-      setLoaded(true);
     });
   }, []);
   return <Component />;

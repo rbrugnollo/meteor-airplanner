@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Tooltip, Stack, Button } from '@mui/material';
 import { Edit, Cancel, AssignmentTurnedIn, AccessTime, EventNote } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
@@ -7,7 +7,7 @@ import { Flight } from '/imports/api/flights/collection';
 import { authorize } from '/imports/api/flights/methods/authorize';
 import { update } from '/imports/api/flights/methods/update';
 import { Meteor } from 'meteor/meteor';
-import useHasPermission from '../../shared/hooks/useHasPermission';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 interface FlightDetailsStatusButtonsProps {
   readonly flight: Flight;
@@ -15,16 +15,28 @@ interface FlightDetailsStatusButtonsProps {
 }
 
 const FlightDetailsStatusButtons = ({ flight, onEdit }: FlightDetailsStatusButtonsProps) => {
-  const [_canUpdateLoading, canUpdate] = useHasPermission('flights.update');
-  const [_canRemoveLoading, canCancel] = useHasPermission('flights.cancel');
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [canCancel, setCanCancel] = useState(false);
   const { loggedUser } = useLoggedUser();
+  // Verify Permissions
+  useEffect(() => {
+    if (isLoaded) return;
+    setIsLoaded(true);
+    hasPermission({ permission: 'flights.update' }).then((hasPermission) => {
+      setCanUpdate(hasPermission);
+    });
+    hasPermission({ permission: 'flights.cancel' }).then((hasPermission) => {
+      setCanCancel(hasPermission);
+    });
+  }, []);
   const isCancelled = flight.cancelled;
   const canAuthorize =
     !loggedUser || !flight.authorizer ? false : loggedUser._id === flight.authorizer.value;
 
   const handleCancel = async () => {
-    if (!canUpdate || isCancelled) return;
+    if (!canCancel || isCancelled) return;
     try {
       // await cancel({ flightId: flight._id, cancelled: true });
       // enqueueSnackbar('Vôo cancelado com sucesso.', {
