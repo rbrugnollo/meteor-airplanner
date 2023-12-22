@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MrtColumnDef,
@@ -25,19 +25,20 @@ import AirportListFilter, { AirportListFilterValues } from './AirportListFilter'
 import { Mongo } from 'meteor/mongo';
 import AirportForm from './AirportForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
-import useHasPermission from '../../shared/hooks/useHasPermission';
 import { disable } from '/imports/api/airports/methods/disable';
 import { enable } from '/imports/api/airports/methods/enable';
 import { Meteor } from 'meteor/meteor';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 const AirportList = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [canRemove, setCanRemove] = useState(false);
   const [modalProps, setModalProps] = useState<{ open: boolean; airportId?: string }>({
     open: false,
     airportId: undefined,
   });
-  const [_canUpdateLoading, canUpdate] = useHasPermission('airports.update');
-  const [_canRemoveLoading, canRemove] = useHasPermission('airports.remove');
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const rowVirtualizerInstanceRef =
     useRef<MrtVirtualizer<HTMLDivElement, HTMLTableRowElement>>(null);
@@ -73,6 +74,17 @@ const AirportList = () => {
     [],
   );
   const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
+  // Verify Permissions
+  useEffect(() => {
+    if (isLoaded) return;
+    setIsLoaded(true);
+    hasPermission({ permission: 'airports.update' }).then((hasPermission) => {
+      setCanUpdate(hasPermission);
+    });
+    hasPermission({ permission: 'airports.remove' }).then((hasPermission) => {
+      setCanRemove(hasPermission);
+    });
+  }, []);
 
   const fetchMoreOnBottomReached = (containerRefElement?: HTMLDivElement | null) => {
     if (containerRefElement) {

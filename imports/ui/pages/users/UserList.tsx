@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
 import {
   Box,
@@ -23,19 +23,31 @@ import { list } from '/imports/api/users/publications/list';
 import UserListFilter, { UserListFilterValues } from './UserListFilter';
 import UserForm from './UserForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
-import useHasPermission from '../../shared/hooks/useHasPermission';
 import { disable } from '/imports/api/users/methods/disable';
 import { enable } from '/imports/api/users/methods/enable';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 const UserList = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [canRemove, setCanRemove] = useState(false);
   const [selector, setSelector] = useState<Mongo.Selector<Meteor.User>>({ role: null });
   const [modalProps, setModalProps] = useState<{ open: boolean; userId?: string }>({
     open: false,
     userId: undefined,
   });
-  const [_canUpdateLoading, canUpdate] = useHasPermission('users.update');
-  const [_canRemoveLoading, canRemove] = useHasPermission('users.remove');
+  // Verify Permissions
+  useEffect(() => {
+    if (isLoaded) return;
+    setIsLoaded(true);
+    hasPermission({ permission: 'users.update' }).then((hasPermission) => {
+      setCanUpdate(hasPermission);
+    });
+    hasPermission({ permission: 'users.remove' }).then((hasPermission) => {
+      setCanRemove(hasPermission);
+    });
+  }, []);
   const isLoading = useSubscribe(() => list(selector));
   const users = useFind(() => Meteor.users.find(selector), [selector]);
   const columns = useMemo<MrtColumnDef<Meteor.User>[]>(

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Permission } from '/imports/api/users/collection';
-import useHasPermission from '/imports/ui/shared/hooks/useHasPermission';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 interface AuthorizedProps {
   readonly permission: Permission;
@@ -10,11 +10,15 @@ interface AuthorizedProps {
 
 const Authorized = ({ Component, permission }: AuthorizedProps) => {
   const navigate = useNavigate();
-  const [verifying, hasPermission] = useHasPermission(permission);
+  const [isLoaded, setLoaded] = useState(false);
 
-  if (verifying) return <></>;
-  if (!hasPermission) navigate('/app');
-
+  useEffect(() => {
+    if (isLoaded) return;
+    setLoaded(true);
+    hasPermission({ permission }).then((hasPermission) => {
+      if (!hasPermission) navigate('/app');
+    });
+  }, []);
   return <Component />;
 };
 

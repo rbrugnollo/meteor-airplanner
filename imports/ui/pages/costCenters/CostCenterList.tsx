@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MaterialReactTable, type MRT_ColumnDef as MrtColumnDef } from 'material-react-table';
 import {
   Box,
@@ -20,19 +20,20 @@ import { CostCenter, CostCentersCollection } from '/imports/api/costCenters/coll
 import { Edit, Delete } from '@mui/icons-material';
 import CostCenterForm from './CostCenterForm';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
-import useHasPermission from '../../shared/hooks/useHasPermission';
 import { disable } from '/imports/api/costCenters/methods/disable';
 import { enable } from '/imports/api/costCenters/methods/enable';
 import { Meteor } from 'meteor/meteor';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 const CostCenterList = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [canRemove, setCanRemove] = useState(false);
   const [modalProps, setModalProps] = useState<{ open: boolean; costCenterId?: string }>({
     open: false,
     costCenterId: undefined,
   });
-  const [_canUpdateLoading, canUpdate] = useHasPermission('costCenters.update');
-  const [_canRemoveLoading, canRemove] = useHasPermission('costCenters.remove');
   const isLoading = useSubscribe(list);
   const costCenters = useFind(() => CostCentersCollection.find());
   const columns = useMemo<MrtColumnDef<CostCenter>[]>(
@@ -45,6 +46,17 @@ const CostCenterList = () => {
     [],
   );
   const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
+  // Verify Permissions
+  useEffect(() => {
+    if (isLoaded) return;
+    setIsLoaded(true);
+    hasPermission({ permission: 'costCenters.update' }).then((hasPermission) => {
+      setCanUpdate(hasPermission);
+    });
+    hasPermission({ permission: 'costCenters.remove' }).then((hasPermission) => {
+      setCanRemove(hasPermission);
+    });
+  }, []);
 
   return (
     <>

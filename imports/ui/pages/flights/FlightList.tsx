@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Container, Stack, Typography } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import dayjs from 'dayjs';
@@ -11,11 +11,14 @@ import { NpmModuleMongodb } from 'meteor/npm-mongo';
 import FlightForm from './FlightForm';
 import FlightRouteModal from './FlightRouteModal';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
-import useHasPermission from '../../shared/hooks/useHasPermission';
 import ReviewFlightForm from './ReviewFlightForm';
 import FlightDetails from './FlightDetails';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 const FlightList = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [canCancel, setCanCancel] = useState(false);
   const [formModalProps, setFormModalProps] = useState<{ open: boolean; flightId?: string }>({
     open: false,
     flightId: undefined,
@@ -33,9 +36,6 @@ const FlightList = () => {
       flightGroupId: undefined,
     },
   );
-  const [_canUpdateLoading, canUpdate] = useHasPermission('flights.update');
-  const [_canRemoveLoading, canCancel] = useHasPermission('flights.cancel');
-  const [_canReviewLoading] = useHasPermission('flights.review');
   const [andFilters, setAndFilters] = useState<
     NpmModuleMongodb.Filter<NpmModuleMongodb.WithId<Flight>>[]
   >([
@@ -46,6 +46,17 @@ const FlightList = () => {
       },
     },
   ]);
+  // Verify Permissions
+  useEffect(() => {
+    if (isLoaded) return;
+    setIsLoaded(true);
+    hasPermission({ permission: 'flights.update' }).then((hasPermission) => {
+      setCanUpdate(hasPermission);
+    });
+    hasPermission({ permission: 'flights.cancel' }).then((hasPermission) => {
+      setCanCancel(hasPermission);
+    });
+  }, []);
   const [options] = useState<Mongo.Options<Flight>>({
     sort: { scheduledDepartureDateTime: 1 },
   });

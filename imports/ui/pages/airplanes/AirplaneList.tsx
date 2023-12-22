@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   MaterialReactTable,
   type MRT_ColumnDef as MrtColumnDef,
@@ -26,19 +26,20 @@ import { Airplane, AirplanesCollection } from '/imports/api/airplanes/collection
 import AirplaneForm from './AirplaneForm';
 import { fetchPositions } from '/imports/api/airplanes/methods/fetchPositions';
 import AuthorizedComponent from '/imports/startup/client/router/AuthorizedComponent';
-import useHasPermission from '../../shared/hooks/useHasPermission';
 import { enable } from '/imports/api/airplanes/methods/enable';
 import { disable } from '/imports/api/airplanes/methods/disable';
 import { Meteor } from 'meteor/meteor';
+import { hasPermission } from '/imports/api/users/methods/hasPermission';
 
 const AirplaneList = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [canRemove, setCanRemove] = useState(false);
   const [modalProps, setModalProps] = useState<{ open: boolean; airplaneId?: string }>({
     open: false,
     airplaneId: undefined,
   });
-  const [_canUpdateLoading, canUpdate] = useHasPermission('airplanes.update');
-  const [_canRemoveLoading, canRemove] = useHasPermission('airplanes.remove');
   const isLoading = useSubscribe(list);
   const airplanes = useFind(() => AirplanesCollection.find());
   const columns = useMemo<MrtColumnDef<Airplane>[]>(
@@ -82,6 +83,17 @@ const AirplaneList = () => {
     [],
   );
   const lgUp = useMediaQuery<Theme>((theme) => theme.breakpoints.up('lg'));
+  // Verify Permissions
+  useEffect(() => {
+    if (isLoaded) return;
+    setIsLoaded(true);
+    hasPermission({ permission: 'airplanes.update' }).then((hasPermission) => {
+      setCanUpdate(hasPermission);
+    });
+    hasPermission({ permission: 'airplanes.remove' }).then((hasPermission) => {
+      setCanRemove(hasPermission);
+    });
+  }, []);
 
   return (
     <>
